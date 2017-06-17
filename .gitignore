@@ -1,0 +1,11 @@
+/bin/
+/build/
+/nbproject/private/
+/dist/
+/target/
+/logs/
+*.pyc
+*.class
+*.db4o
+nbactions.xml
+settings.properties

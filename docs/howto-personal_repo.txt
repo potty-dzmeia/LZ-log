@@ -1,0 +1,108 @@
+Deploy the jar libraries our repository 
+---------------------------------------------------------------    
+    mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=bloat \
+                           -Dversion=1.0 \
+                           -Dpackaging=jar \
+                           -Dfile=bloat-1.0.jar                            
+    
+    mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-bench.jara5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-bench.jar
+   
+   mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-core-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-core-java5.jar
+                           
+  mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-cs-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-cs-java5.jar
+                           
+  mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-cs.optional-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-cs.optional-java5.jar
+  
+   mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-db4ounit-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-db4ounit-java5.jar
+                           
+  mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-instrumentation-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-instrumentation-java5.jar
+                           
+  mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-nqopt-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-nqopt-java5.jar
+                           
+                           
+ mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-optional-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-optional-java5.jar
+                           
+  mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-optional-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-optional-java5.jar
+                           
+   mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-osgi-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-osgi-java5.jar
+                           
+    mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-osgi-test-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-osgi-test-java5.jar                      
+                           
+    mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-osgi-test-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-osgi-test-java5.jar  
+                           
+    mvn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-taj-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-taj-java5.jar                         
+ 
+  vn deploy:deploy-file -Durl=file:///home/potty/development/projects/jatu/local_mvn_repo/ \
+                           -DgroupId=com.db4o \
+                           -DartifactId=db4o-tools-java5 \
+                           -Dversion=8.0.276.16149 \
+                           -Dpackaging=jar \
+                           -Dfile=db4o-8.0.276.16149-tools-java5.jar                
+ 

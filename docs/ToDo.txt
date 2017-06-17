@@ -1,0 +1,14 @@
+- Option for continious CQ
+- enter send message to call CQ when callsign textfield is empty
+- Baud rate settings to be done from the App.
+
+
+After contest:
+- band map should be updated depending on the current freq and mode
+- there should be an option for entering worked frequency for people that do not use CAT
+- For some reason F10 is activating the Menu
+- add validation, so that we can't manually enter wrong data in the Log table(e.g. Snt 00300f)
+- when correcting callsign in the log the call is written with small letters
+- adjust row sizes depending on the font
+- mark CQ frequency on bandmap
+- new settings options should not break window organization
