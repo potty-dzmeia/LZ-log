@@ -240,12 +240,12 @@ public class MainWindow extends javax.swing.JFrame
   
   private DefaultComboBoxModel getBandmapColumnCountComboboxModel()
   {
-    return new DefaultComboBoxModel(new String[] { "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66" });
+    return new DefaultComboBoxModel(new String[] {"8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66", "68", "70", "72", "74", "76", "78", "80", "82", "84", "86", "88"});
   }
   
   private DefaultComboBoxModel getBandmapRowCountComboboxModel()
   {
-    return new DefaultComboBoxModel(new String[] { "4", "8", "12", "16", "20", "24", "28", "32","36","40", "44", "48","52", "56","60", "64", "68", "72", "76", "80", "84", "88"});
+    return new DefaultComboBoxModel(new String[] {"8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66", "68", "70", "72", "74", "76", "78", "80", "82", "84", "86", "88"});
   }
   
   
@@ -394,6 +394,7 @@ public class MainWindow extends javax.swing.JFrame
     jLabel14 = new javax.swing.JLabel();
     jLabel15 = new javax.swing.JLabel();
     jtextfieldFreqWidth = new javax.swing.JTextField();
+    jLabel11 = new javax.swing.JLabel();
     intframeLog = new javax.swing.JInternalFrame();
     jpanelCompleteLog = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
@@ -1073,12 +1074,23 @@ public class MainWindow extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 6;
+    gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.01;
     gridBagConstraints.weighty = 1.0;
     jPanel8.add(jtextfieldFreqWidth, gridBagConstraints);
+
+    jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+    jLabel11.setText("Width of freq columns");
+    jLabel11.setToolTipText("");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 6;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.01;
+    gridBagConstraints.weighty = 1.0;
+    jPanel8.add(jLabel11, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -1090,7 +1102,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 460, 481);
+    intframeBandmap.setBounds(500, 520, 460, 475);
 
     intframeLog.setIconifiable(true);
     intframeLog.setMaximizable(true);
@@ -3312,6 +3324,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JDialog jDialogSettings;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel10;
+  private javax.swing.JLabel jLabel11;
   private javax.swing.JLabel jLabel12;
   private javax.swing.JLabel jLabel13;
   private javax.swing.JLabel jLabel14;
