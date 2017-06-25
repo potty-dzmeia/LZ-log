@@ -31,7 +31,7 @@ import org.lz1aq.utils.TimeUtils;
  *
  * @author potty
  */
-public class IncomingQsoTableModel extends AbstractTableModel
+public class TimeToNextQsoTableModel extends AbstractTableModel
 {
   private final static int NUMBER_OF_COLUMNS = 4;
   
@@ -43,7 +43,7 @@ public class IncomingQsoTableModel extends AbstractTableModel
   
   
   
-  public IncomingQsoTableModel(Log log)
+  public TimeToNextQsoTableModel(Log log)
   {
     incomingQsoArrayList = new ArrayList<>(0);
     this.log = log;

@@ -40,14 +40,12 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -79,7 +77,7 @@ public class MainWindow extends javax.swing.JFrame
   
   private Log                           log;
   private LogTableModel                 jtablemodelLog;
-  private IncomingQsoTableModel         jtablemodelIncomingQso;
+  private TimeToNextQsoTableModel         jtablemodelIncomingQso;
   private BandmapTableModel             jtablemodelBandmap;
   private final ApplicationSettings     applicationSettings;
   private final RadioController         radioController;
@@ -143,7 +141,7 @@ public class MainWindow extends javax.swing.JFrame
     jtablemodelLog.setInvisible(4); // Hide myCall
     jtableLog.setModel(jtablemodelLog);
     
-    jtablemodelIncomingQso = new IncomingQsoTableModel(log);
+    jtablemodelIncomingQso = new TimeToNextQsoTableModel(log);
     jtableIncomingQso.setModel(jtablemodelIncomingQso);
     
     jtablemodelBandmap = new BandmapTableModel(log, 3500000, applicationSettings);
@@ -379,16 +377,16 @@ public class MainWindow extends javax.swing.JFrame
     jbuttonCreateNewLog = new javax.swing.JButton();
     jbuttonOpenExistingLog = new javax.swing.JButton();
     jDesktopPane1 = new javax.swing.JDesktopPane();
-    intframeIncomingQso = new javax.swing.JInternalFrame();
+    intframeTimeToNextQso = new javax.swing.JInternalFrame();
     jScrollPane2 = new javax.swing.JScrollPane();
     jtableIncomingQso = new javax.swing.JTable();
     intframeBandmap = new javax.swing.JInternalFrame();
     jScrollPane5 = new javax.swing.JScrollPane();
     jtableBandmap = new javax.swing.JTable();
     jPanel8 = new javax.swing.JPanel();
-    jcomboboxStepInHz = new javax.swing.JComboBox<>();
-    jcomboboxColumnCount = new javax.swing.JComboBox<>();
-    jcomboboxRowCount = new javax.swing.JComboBox<>();
+    jcomboboxStepInHz = new javax.swing.JComboBox<String>();
+    jcomboboxColumnCount = new javax.swing.JComboBox<String>();
+    jcomboboxRowCount = new javax.swing.JComboBox<String>();
     jlabelBandmapFreeSpace = new javax.swing.JLabel();
     jLabel13 = new javax.swing.JLabel();
     jLabel14 = new javax.swing.JLabel();
@@ -400,12 +398,12 @@ public class MainWindow extends javax.swing.JFrame
     jScrollPane1 = new javax.swing.JScrollPane();
     jtableLog = new javax.swing.JTable();
     jbuttonDeleteEntry = new javax.swing.JButton();
-    intframeRadio = new javax.swing.JInternalFrame();
-    jpanelVfoA = new javax.swing.JPanel();
+    intframeRadioConnection = new javax.swing.JInternalFrame();
+    jpanelRadioConnection = new javax.swing.JPanel();
     jtogglebuttonConnectToRadio = new javax.swing.JToggleButton();
     jtextfieldFrequency = new javax.swing.JTextField();
     jtextfieldMode = new javax.swing.JTextField();
-    intframeEntry = new javax.swing.JInternalFrame();
+    intframeEntryWindow = new javax.swing.JInternalFrame();
     jpanelCallsign = new javax.swing.JPanel();
     jtextfieldCallsign = new javax.swing.JTextField();
     jtextfieldSnt = new javax.swing.JTextField();
@@ -431,7 +429,9 @@ public class MainWindow extends javax.swing.JFrame
     jButton12 = new javax.swing.JButton();
     jPanelStatusBar = new javax.swing.JPanel();
     jlabelCallsignStatus = new javax.swing.JLabel();
-    intframeSettings = new javax.swing.JInternalFrame();
+    intframeMisc = new javax.swing.JInternalFrame();
+    jScrollPane3 = new javax.swing.JScrollPane();
+    jPanel11 = new javax.swing.JPanel();
     jpanelCqSettings = new javax.swing.JPanel();
     jbuttonJumpToCqFreq = new javax.swing.JButton();
     jcheckboxF1jumpsToCq = new javax.swing.JCheckBox();
@@ -450,10 +450,18 @@ public class MainWindow extends javax.swing.JFrame
     jMenu2 = new javax.swing.JMenu();
     jmenuSettings = new javax.swing.JMenuItem();
     jmenuFonts = new javax.swing.JMenuItem();
+    jmenuWindows = new javax.swing.JMenu();
+    jMenuItem1 = new javax.swing.JMenuItem();
+    jMenuItem2 = new javax.swing.JMenuItem();
+    jMenuItem3 = new javax.swing.JMenuItem();
+    jMenuItem4 = new javax.swing.JMenuItem();
+    jMenuItem5 = new javax.swing.JMenuItem();
+    jMenuItem6 = new javax.swing.JMenuItem();
 
     jDialogSettings.setTitle("Settings");
     jDialogSettings.setAlwaysOnTop(true);
     jDialogSettings.setModal(true);
+    jDialogSettings.setPreferredSize(new java.awt.Dimension(350, 500));
     jDialogSettings.setType(java.awt.Window.Type.UTILITY);
     jDialogSettings.addComponentListener(new java.awt.event.ComponentAdapter()
     {
@@ -856,6 +864,7 @@ public class MainWindow extends javax.swing.JFrame
 
     jdialogLogSelection.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     jdialogLogSelection.setTitle("Choose action");
+    jdialogLogSelection.setAlwaysOnTop(true);
     jdialogLogSelection.setMinimumSize(new java.awt.Dimension(200, 150));
     jdialogLogSelection.setModal(true);
     jdialogLogSelection.setResizable(false);
@@ -916,11 +925,11 @@ public class MainWindow extends javax.swing.JFrame
 
     jDesktopPane1.setMinimumSize(new java.awt.Dimension(600, 400));
 
-    intframeIncomingQso.setIconifiable(true);
-    intframeIncomingQso.setMaximizable(true);
-    intframeIncomingQso.setResizable(true);
-    intframeIncomingQso.setTitle("Time to next Qso");
-    intframeIncomingQso.setVisible(true);
+    intframeTimeToNextQso.setIconifiable(true);
+    intframeTimeToNextQso.setMaximizable(true);
+    intframeTimeToNextQso.setResizable(true);
+    intframeTimeToNextQso.setTitle("Time to next Qso");
+    intframeTimeToNextQso.setVisible(true);
 
     jtableIncomingQso.setFont(new java.awt.Font("Liberation Mono", 0, 18)); // NOI18N
     jtableIncomingQso.setRowHeight(30);
@@ -933,10 +942,10 @@ public class MainWindow extends javax.swing.JFrame
     });
     jScrollPane2.setViewportView(jtableIncomingQso);
 
-    intframeIncomingQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
+    intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
-    jDesktopPane1.add(intframeIncomingQso);
-    intframeIncomingQso.setBounds(490, 10, 460, 435);
+    jDesktopPane1.add(intframeTimeToNextQso);
+    intframeTimeToNextQso.setBounds(490, 10, 463, 435);
 
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setMaximizable(true);
@@ -1102,7 +1111,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 460, 475);
+    intframeBandmap.setBounds(500, 520, 500, 459);
 
     intframeLog.setIconifiable(true);
     intframeLog.setMaximizable(true);
@@ -1158,14 +1167,15 @@ public class MainWindow extends javax.swing.JFrame
     jDesktopPane1.add(intframeLog);
     intframeLog.setBounds(30, 130, 410, 590);
 
-    intframeRadio.setIconifiable(true);
-    intframeRadio.setMaximizable(true);
-    intframeRadio.setResizable(true);
-    intframeRadio.setTitle("Radio");
-    intframeRadio.setVisible(true);
+    intframeRadioConnection.setIconifiable(true);
+    intframeRadioConnection.setMaximizable(true);
+    intframeRadioConnection.setResizable(true);
+    intframeRadioConnection.setTitle("Radio connection");
+    intframeRadioConnection.setToolTipText("");
+    intframeRadioConnection.setVisible(true);
 
-    jpanelVfoA.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-    jpanelVfoA.setLayout(new java.awt.GridBagLayout());
+    jpanelRadioConnection.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+    jpanelRadioConnection.setLayout(new java.awt.GridBagLayout());
 
     jtogglebuttonConnectToRadio.setText("Connect");
     jtogglebuttonConnectToRadio.setToolTipText("");
@@ -1184,7 +1194,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weightx = 0.2;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 20, 5, 20);
-    jpanelVfoA.add(jtogglebuttonConnectToRadio, gridBagConstraints);
+    jpanelRadioConnection.add(jtogglebuttonConnectToRadio, gridBagConstraints);
 
     jtextfieldFrequency.setEditable(false);
     jtextfieldFrequency.setBackground(new java.awt.Color(0, 0, 0));
@@ -1199,7 +1209,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jpanelVfoA.add(jtextfieldFrequency, gridBagConstraints);
+    jpanelRadioConnection.add(jtextfieldFrequency, gridBagConstraints);
 
     jtextfieldMode.setEditable(false);
     jtextfieldMode.setBackground(new java.awt.Color(0, 0, 0));
@@ -1214,19 +1224,19 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.5;
     gridBagConstraints.weighty = 1.0;
-    jpanelVfoA.add(jtextfieldMode, gridBagConstraints);
+    jpanelRadioConnection.add(jtextfieldMode, gridBagConstraints);
 
-    intframeRadio.getContentPane().add(jpanelVfoA, java.awt.BorderLayout.CENTER);
+    intframeRadioConnection.getContentPane().add(jpanelRadioConnection, java.awt.BorderLayout.CENTER);
 
-    jDesktopPane1.add(intframeRadio);
-    intframeRadio.setBounds(30, 20, 249, 68);
+    jDesktopPane1.add(intframeRadioConnection);
+    intframeRadioConnection.setBounds(30, 20, 277, 69);
 
-    intframeEntry.setIconifiable(true);
-    intframeEntry.setMaximizable(true);
-    intframeEntry.setResizable(true);
-    intframeEntry.setTitle("Entry window");
-    intframeEntry.setVisible(true);
-    intframeEntry.getContentPane().setLayout(new java.awt.GridBagLayout());
+    intframeEntryWindow.setIconifiable(true);
+    intframeEntryWindow.setMaximizable(true);
+    intframeEntryWindow.setResizable(true);
+    intframeEntryWindow.setTitle("Entry window");
+    intframeEntryWindow.setVisible(true);
+    intframeEntryWindow.getContentPane().setLayout(new java.awt.GridBagLayout());
 
     jpanelCallsign.setFocusCycleRoot(true);
     jpanelCallsign.setLayout(new java.awt.GridLayout(1, 0));
@@ -1285,7 +1295,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    intframeEntry.getContentPane().add(jpanelCallsign, gridBagConstraints);
+    intframeEntryWindow.getContentPane().add(jpanelCallsign, gridBagConstraints);
 
     jpanelTypeOfWork.setMinimumSize(new java.awt.Dimension(0, 25));
     jpanelTypeOfWork.setLayout(new java.awt.GridBagLayout());
@@ -1358,7 +1368,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    intframeEntry.getContentPane().add(jpanelTypeOfWork, gridBagConstraints);
+    intframeEntryWindow.getContentPane().add(jpanelTypeOfWork, gridBagConstraints);
 
     jpanelFunctionKeys.setMinimumSize(new java.awt.Dimension(0, 80));
     jpanelFunctionKeys.setName(""); // NOI18N
@@ -1518,7 +1528,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 0.4;
-    intframeEntry.getContentPane().add(jpanelFunctionKeys, gridBagConstraints);
+    intframeEntryWindow.getContentPane().add(jpanelFunctionKeys, gridBagConstraints);
 
     jPanelStatusBar.setMinimumSize(new java.awt.Dimension(0, 22));
     jPanelStatusBar.setLayout(new java.awt.GridBagLayout());
@@ -1542,17 +1552,19 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 10, 0);
-    intframeEntry.getContentPane().add(jPanelStatusBar, gridBagConstraints);
+    intframeEntryWindow.getContentPane().add(jPanelStatusBar, gridBagConstraints);
 
-    jDesktopPane1.add(intframeEntry);
-    intframeEntry.setBounds(280, 20, 453, 230);
+    jDesktopPane1.add(intframeEntryWindow);
+    intframeEntryWindow.setBounds(280, 20, 453, 227);
 
-    intframeSettings.setIconifiable(true);
-    intframeSettings.setMaximizable(true);
-    intframeSettings.setResizable(true);
-    intframeSettings.setTitle("Settings");
-    intframeSettings.setVisible(true);
-    intframeSettings.getContentPane().setLayout(new java.awt.GridBagLayout());
+    intframeMisc.setIconifiable(true);
+    intframeMisc.setMaximizable(true);
+    intframeMisc.setResizable(true);
+    intframeMisc.setTitle("Misc");
+    intframeMisc.setVisible(true);
+    intframeMisc.getContentPane().setLayout(new java.awt.GridBagLayout());
+
+    jPanel11.setLayout(new java.awt.GridBagLayout());
 
     jpanelCqSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("CQ settings"));
     jpanelCqSettings.setLayout(new java.awt.GridBagLayout());
@@ -1656,11 +1668,13 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    intframeSettings.getContentPane().add(jpanelCqSettings, gridBagConstraints);
+    jPanel11.add(jpanelCqSettings, gridBagConstraints);
 
     jpanelKeyerSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("Keyer settings"));
+    jpanelKeyerSettings.setMinimumSize(new java.awt.Dimension(188, 70));
     jpanelKeyerSettings.setLayout(new java.awt.GridLayout(1, 0));
 
     jbuttonKeyerUP.setText("UP");
@@ -1693,12 +1707,21 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.1;
+    jPanel11.add(jpanelKeyerSettings, gridBagConstraints);
+
+    jScrollPane3.setViewportView(jPanel11);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    intframeSettings.getContentPane().add(jpanelKeyerSettings, gridBagConstraints);
+    intframeMisc.getContentPane().add(jScrollPane3, gridBagConstraints);
 
-    jDesktopPane1.add(intframeSettings);
-    intframeSettings.setBounds(400, 340, 230, 170);
+    jDesktopPane1.add(intframeMisc);
+    intframeMisc.setBounds(400, 340, 230, 170);
 
     getContentPane().add(jDesktopPane1, java.awt.BorderLayout.CENTER);
 
@@ -1740,6 +1763,71 @@ public class MainWindow extends javax.swing.JFrame
 
     jMenuBar1.add(jMenu2);
 
+    jmenuWindows.setText("Windows");
+
+    jMenuItem1.setText("Entry window");
+    jMenuItem1.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItem1ActionPerformed(evt);
+      }
+    });
+    jmenuWindows.add(jMenuItem1);
+
+    jMenuItem2.setText("Time to next QSO");
+    jMenuItem2.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItem2ActionPerformed(evt);
+      }
+    });
+    jmenuWindows.add(jMenuItem2);
+
+    jMenuItem3.setText("Bandmap");
+    jMenuItem3.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItem3ActionPerformed(evt);
+      }
+    });
+    jmenuWindows.add(jMenuItem3);
+
+    jMenuItem4.setText("Radio connection");
+    jMenuItem4.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItem4ActionPerformed(evt);
+      }
+    });
+    jmenuWindows.add(jMenuItem4);
+
+    jMenuItem5.setText("Misc");
+    jMenuItem5.setToolTipText("");
+    jMenuItem5.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItem5ActionPerformed(evt);
+      }
+    });
+    jmenuWindows.add(jMenuItem5);
+
+    jMenuItem6.setText("Log");
+    jMenuItem6.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItem6ActionPerformed(evt);
+      }
+    });
+    jmenuWindows.add(jMenuItem6);
+
+    jMenuBar1.add(jmenuWindows);
+
     setJMenuBar(jMenuBar1);
 
     pack();
@@ -1772,13 +1860,13 @@ public class MainWindow extends javax.swing.JFrame
   private void formWindowClosing(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowClosing
   {//GEN-HEADEREND:event_formWindowClosing
     // Read the dimensions of the different frames
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.ENTRY, intframeEntry.getBounds());
+    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.ENTRY, intframeEntryWindow.getBounds());
     applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP, intframeBandmap.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO, intframeIncomingQso.getBounds());
+    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO, intframeTimeToNextQso.getBounds());
     applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.JFRAME, this.getBounds());
     applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.LOG, intframeLog.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.RADIO, intframeRadio.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS, intframeSettings.getBounds());
+    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.RADIO, intframeRadioConnection.getBounds());
+    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS, intframeMisc.getBounds());
             
     // Store the fonts being in use
     applicationSettings.setFont(ApplicationSettings.FontIndex.BANDMAP, jtableBandmap.getFont());
@@ -2241,6 +2329,37 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jtextfieldFreqWidthActionPerformed
     resizeFreqColumnWidth(jtableBandmap, Integer.parseInt(jtextfieldFreqWidth.getText()));
   }//GEN-LAST:event_jtextfieldFreqWidthActionPerformed
+
+  private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem1ActionPerformed
+  {//GEN-HEADEREND:event_jMenuItem1ActionPerformed
+    intframeEntryWindow.toFront();
+  }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+  private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem2ActionPerformed
+  {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
+    intframeTimeToNextQso.toFront();
+  }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+  private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem3ActionPerformed
+  {//GEN-HEADEREND:event_jMenuItem3ActionPerformed
+    intframeBandmap.toFront();
+  }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+  private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
+  {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
+    intframeRadioConnection.moveToFront();
+    jpanelRadioConnection.requestFocus();
+  }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+  private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem5ActionPerformed
+  {//GEN-HEADEREND:event_jMenuItem5ActionPerformed
+    intframeMisc.toFront();
+  }//GEN-LAST:event_jMenuItem5ActionPerformed
+
+  private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem6ActionPerformed
+  {//GEN-HEADEREND:event_jMenuItem6ActionPerformed
+    intframeLog.toFront();
+  }//GEN-LAST:event_jMenuItem6ActionPerformed
   
   private void changeBandmapTableModelStructure()
   {
@@ -2582,11 +2701,11 @@ public class MainWindow extends javax.swing.JFrame
       // Restore the last used dimensions for the different frames
       this.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.JFRAME));
       intframeBandmap.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP));
-      intframeEntry.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.ENTRY));
-      intframeIncomingQso.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO));
+      intframeEntryWindow.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.ENTRY));
+      intframeTimeToNextQso.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO));
       intframeLog.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.LOG));
-      intframeRadio.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.RADIO));
-      intframeSettings.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS));
+      intframeRadioConnection.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.RADIO));
+      intframeMisc.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS));
 
       // Restore the bandmap settings
       jcomboboxStepInHz.setSelectedItem(Integer.toString(applicationSettings.getBandmapStepInHz()));
@@ -2769,12 +2888,29 @@ public class MainWindow extends javax.swing.JFrame
     // Continious CQ is enabled ...
     if(jcheckboxContinuousCq.isSelected())
     {
-      int period = Integer.parseInt(jtextfieldContinuousCqPeriod.getText());
+      int period = getCqDuration(text,keyerSpeed);
+      period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());
       timerContinuousCq = new Timer(period, timerContinuousCqListener);
       timerContinuousCq.setRepeats(true);
       timerContinuousCq.start();
     }
   }
+  
+  
+  /**
+   * Calculates the duration of the CQ depending on the morse code speed and the text that needs to be sent
+   * 
+   * @return Duration of the CQ in milliseconds
+   */
+  private int getCqDuration(String text, int speed)
+  {
+    int duration = 2000;
+    
+    
+    
+    return duration;
+  }
+  
   
   private void pressedF2()
   {
@@ -3292,11 +3428,11 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JCheckBox checkboxSendLeadingZeroAsT;
   private javax.swing.JCheckBox checkboxSettingsQuickMode;
   private javax.swing.JInternalFrame intframeBandmap;
-  private javax.swing.JInternalFrame intframeEntry;
-  private javax.swing.JInternalFrame intframeIncomingQso;
+  private javax.swing.JInternalFrame intframeEntryWindow;
   private javax.swing.JInternalFrame intframeLog;
-  private javax.swing.JInternalFrame intframeRadio;
-  private javax.swing.JInternalFrame intframeSettings;
+  private javax.swing.JInternalFrame intframeMisc;
+  private javax.swing.JInternalFrame intframeRadioConnection;
+  private javax.swing.JInternalFrame intframeTimeToNextQso;
   private javax.swing.JButton jButton1;
   private javax.swing.JButton jButton10;
   private javax.swing.JButton jButton11;
@@ -3341,8 +3477,15 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JMenu jMenu1;
   private javax.swing.JMenu jMenu2;
   private javax.swing.JMenuBar jMenuBar1;
+  private javax.swing.JMenuItem jMenuItem1;
+  private javax.swing.JMenuItem jMenuItem2;
+  private javax.swing.JMenuItem jMenuItem3;
+  private javax.swing.JMenuItem jMenuItem4;
+  private javax.swing.JMenuItem jMenuItem5;
+  private javax.swing.JMenuItem jMenuItem6;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel10;
+  private javax.swing.JPanel jPanel11;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JPanel jPanel4;
@@ -3354,6 +3497,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JPanel jPanelStatusBar;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JScrollPane jScrollPane2;
+  private javax.swing.JScrollPane jScrollPane3;
   private javax.swing.JScrollPane jScrollPane4;
   private javax.swing.JScrollPane jScrollPane5;
   private javax.swing.JTextField jTextField1;
@@ -3379,13 +3523,14 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JMenuItem jmenuFonts;
   private javax.swing.JMenuItem jmenuGenerateCabrillo;
   private javax.swing.JMenuItem jmenuSettings;
+  private javax.swing.JMenu jmenuWindows;
   private javax.swing.JPanel jpanelCallsign;
   private javax.swing.JPanel jpanelCompleteLog;
   private javax.swing.JPanel jpanelCqSettings;
   private javax.swing.JPanel jpanelFunctionKeys;
   private javax.swing.JPanel jpanelKeyerSettings;
+  private javax.swing.JPanel jpanelRadioConnection;
   private javax.swing.JPanel jpanelTypeOfWork;
-  private javax.swing.JPanel jpanelVfoA;
   private javax.swing.JRadioButton jradiobuttonCQ;
   private javax.swing.JRadioButton jradiobuttonSP;
   private javax.swing.JTable jtableBandmap;

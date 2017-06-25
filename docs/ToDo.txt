@@ -1,13 +1,6 @@
 - Option for continious CQ
-- enter send message to call CQ when callsign textfield is empty
-- Baud rate settings to be done from the App.
 - remember the size of the columns in the tables
-- Create menu for showing floating windows
-- reduce the size of the settings window
-- first dialog should be visible in the task bar
 - fix icom functionality
--
-
 
 After contest:
 - band map should be updated depending on the current freq and mode
@@ -18,3 +11,4 @@ After contest:
 - adjust row sizes depending on the font
 - mark CQ frequency on bandmap
 - new settings options should not break window organization
+- Baud rate settings to be done from the App.
