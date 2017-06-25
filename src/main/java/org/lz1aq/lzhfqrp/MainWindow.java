@@ -2307,7 +2307,7 @@ public class MainWindow extends javax.swing.JFrame
     boolean result = radioController.connect(applicationSettings.getComPort(), new LocalRadioControllerListener());
     if (!result)
     {
-      JOptionPane.showMessageDialog(null, "Coud not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
     }
     
     return result;

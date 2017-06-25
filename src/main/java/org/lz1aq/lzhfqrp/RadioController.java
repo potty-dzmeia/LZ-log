@@ -52,7 +52,7 @@ public class RadioController
   private int freqVfoB = 14000000; 
   private RadioModes modeVfoA = RadioModes.NONE;
   private RadioModes modeVfoB = RadioModes.NONE;
-  private RadioVfos activeVfo = RadioVfos.NONE;
+  private RadioVfos activeVfo = RadioVfos.A;
   private final CopyOnWriteArrayList<RadioControllerListener>  eventListeners;
   private Radio         radio;
   private I_Radio       radioParser;  

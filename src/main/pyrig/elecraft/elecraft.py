@@ -261,7 +261,7 @@ class Elecraft(Radio):
         """
 
         #result = "KY {0};".format('{: <24}'.format('@'))
-        result =   "KY @;KY  "#" I am sending an empty extra command so that the elektraft won't get stuck in transmit mode
+        result =   "KY @ ;"#" I am sending an empty extra command so that the elektraft won't get stuck in transmit mode
         logger.debug("returns: {0}".format(result))
         return list([EncodedTransaction(result)])
 

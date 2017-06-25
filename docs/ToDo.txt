@@ -1,6 +1,12 @@
 - Option for continious CQ
 - enter send message to call CQ when callsign textfield is empty
 - Baud rate settings to be done from the App.
+- remember the size of the columns in the tables
+- Create menu for showing floating windows
+- reduce the size of the settings window
+- first dialog should be visible in the task bar
+- fix icom functionality
+-
 
 
 After contest:

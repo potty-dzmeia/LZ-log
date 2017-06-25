@@ -229,7 +229,24 @@ class Icom(radio.Radio):
 
         return [tr1, tr2, tr3]
 
+    @classmethod
+    def encodeSendCW(cls, text):
+        return list()
 
+
+    @classmethod
+    def encodeSetKeyerSpeed(cls, keyerSpeed):
+        return list()
+
+
+    @classmethod
+    def encodeInterruptSendCW(cls):
+        return list()
+
+
+    @classmethod
+    def encodeGetActiveVfo(cls):
+        return list()
 
     #+--------------------------------------------------------------------------+
     #|  Decode methods below                                                    |

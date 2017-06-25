@@ -1,3 +1,3 @@
 #!/bin/sh
 
-java -classpath "jatu-1.0-SNAPSHOT.jar:./pyrig" org.lz1aq.lzhfqrp.MainWindow
+java -classpath "LZ-log-1.0.0.jar:./pyrig" org.lz1aq.lzhfqrp.MainWindow
