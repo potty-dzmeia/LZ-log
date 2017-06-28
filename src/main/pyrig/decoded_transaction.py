@@ -133,7 +133,7 @@ class DecodedTransaction(I_DecodedTransaction):
     @classmethod
     def insertActiveVfo(cls, dest, vfo):
         """
-        Inserts a decoded command comming from the radio into the supplied dictionary
+        Inserts a decoded command coming from the radio into the supplied dictionary
         :param dest: The dict to which the following item will be added: "active_vfo": {"vfo": "0"}
         :type dest: dict
         :param vfo: VFO that became active

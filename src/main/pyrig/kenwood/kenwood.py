@@ -262,6 +262,38 @@ class Kenwood(Radio):
         return list([EncodedTransaction(result)])
 
 
+    @classmethod
+    def encodePoll(cls):
+        """
+        Gets the command with which we can tell the radio to send us status information (e.g. freq, mode, vfo etc.)
+        :return:
+        """
+        result = "IF;"
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
+
+    @classmethod
+    def encodeDisableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio not to send any information automatically
+        :return:
+        """
+        result = "AI0;"
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
+
+    @classmethod
+    def encodeEnableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio to send back information automatically when something changes
+        :return:
+        """
+        result = "AI2;"
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
     #+--------------------------------------------------------------------------+
     #|  Decode methods below                                                    |
     #+--------------------------------------------------------------------------+
@@ -323,7 +355,7 @@ class Kenwood(Radio):
 
         result_json = DecodedTransaction.toJson(result_dic)
         #logger.debug(result_json.__str__())
-        #logger.debug("parsed result: {0}".format(result_json))
+        logger.debug("parsed result: {0}".format(result_json))
         return result_json
 
 
@@ -407,24 +439,15 @@ class Kenwood(Radio):
     @classmethod
     def __parse_info(cls, command):
         """
-        Extract the frequency and mode from the IF command.
+        Parse the IF command.
 
-        The format of the incoming command is the following:
-        IF[f]*****+yyyyrx*00tmvspbd1*; where the fields are defined as follows:
+        ###   command IF00003530220      019000000030000080;
+        ###   index   0123456789012345678901234567890
 
-        [f]     Operating frequency, excluding any RIT/XIT offset (11 digits; see FA command format)
-        *       represents a space (BLANK, or ASCII 0x20)
-        +       either "+" or "-" (sign of RIT/XIT offset)
-        yyyy    RIT/XIT offset in Hz (range is -9999 to +9999 Hz when computer-controlled)
-        r       1 if RIT is on, 0 if off
-        x       1 if XIT is on, 0 if off
-        t       1 if the K3 is in transmit mode, 0 if receive
-        m       operating mode (see MD command)
-        v       receive-mode VFO selection, 0 for VFO A, 1 for VFO B
-        s       1 if scan is in progress, 0 otherwise
-        p       1 if the transceiver is in split mode, 0 otherwise
-        b       Basic RSP format: always 0; K2 Extended RSP format (K22): 1 if present IF response is due to a band change; 0 otherwise
-        d       Basic RSP format: always 0; K3 Extended RSP format (K31): DATA sub-mode, if applicable (0=DATA A, 1=AFSK A, 2= FSK D, 3=PSK D)
+        [0-1] - IF
+        [3-13] - frequency
+        [31] - Operating mode (refer to the MD command)
+
 
         :param command: String containing the "IF" command
         :type command: str
@@ -432,13 +455,19 @@ class Kenwood(Radio):
         :rtype: dict
         """
         result = dict()
-        ###   command IF00000000000+yyyyrx*00tmvspbd1*;
-        ###   index   0123456789012345678901234567890
-        mode = cls.__mode_from_byte_to_string(int(command[24]))
-        vfo  = command[25]
+
+
+        mode = cls.__mode_from_byte_to_string(int(command[29]))
+        vfo  = command[30]
         freq = command[2:13]
         DecodedTransaction.insertFreq(result, freq.lstrip('0'), vfo)
         DecodedTransaction.insertMode(result, mode, vfo)
+
+        if command[30] == '0':
+            DecodedTransaction.insertActiveVfo(result, vfo=Radio.VFO_A)
+        else:
+            DecodedTransaction.insertActiveVfo(result, vfo=Radio.VFO_B)
+
         return result
 
 

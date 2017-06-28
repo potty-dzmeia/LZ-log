@@ -208,9 +208,11 @@ public class BandmapTableModel extends AbstractTableModel
   /**
    * Updates the content of the table.
    * @param appSettings
+   * @param startFreq
    */
-  public synchronized void refresh(ApplicationSettings appSettings)
+  public synchronized void refresh(ApplicationSettings appSettings, int startFreq)
   {
+    startFreqInHz = startFreq;
     this.appSettings = appSettings;
     
     lastSpQsos = log.getLastSpContacts();

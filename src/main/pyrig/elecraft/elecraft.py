@@ -35,7 +35,7 @@ class Elecraft(Radio):
 
 
     # The AI meta-command can be used to enable automatic responses from the K3 to a computer in response to K3 front panel control changes by the operator.
-    AUTO_INFO_MODE = "AI1;"  # Possible values are: "AI0;", "AI1;", "AI2;", "AI3;"
+    AUTO_INFO_MODE = "K31;AI2;"  # Possible values are: "AI0;", "AI1;", "AI2;", "AI3;"
 
 
 
@@ -276,6 +276,40 @@ class Elecraft(Radio):
         logger.debug("returns: {0}".format(result))
         return list([EncodedTransaction(result)])
 
+
+    @classmethod
+    def encodePoll(cls):
+        """
+        Gets the command with which we can tell the radio to send us status information (e.g. freq, mode, vfo etc.)
+        :return:
+        """
+        result = "IF;"
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
+
+    @classmethod
+    def encodeDisableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio not to send any information automatically
+        :return:
+        """
+        result = "AI0;"
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
+
+    @classmethod
+    def encodeEnableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio to send back information automatically when something changes
+        :return:
+        """
+        result = "AI2;"
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
+
     #+--------------------------------------------------------------------------+
     #|  Decode methods below                                                    |
     #+--------------------------------------------------------------------------+
@@ -434,10 +468,11 @@ class Elecraft(Radio):
     @classmethod
     def __parse_info(cls, command):
         """
-        Extract the frequency and mode from the IF command.
+        Parse the IF command.
 
         The format of the incoming command is the following:
         IF[f]*****+yyyyrx*00tmvspbd1*; where the fields are defined as follows:
+
 
         [f]     Operating frequency, excluding any RIT/XIT offset (11 digits; see FA command format)
         *       represents a space (BLANK, or ASCII 0x20)
@@ -466,6 +501,12 @@ class Elecraft(Radio):
         freq = command[2:13]
         DecodedTransaction.insertFreq(result, freq.lstrip('0'), vfo)
         DecodedTransaction.insertMode(result, mode, vfo)
+
+        if command[30] == '0':
+            DecodedTransaction.insertActiveVfo(result, vfo=Radio.VFO_A)
+        else:
+            DecodedTransaction.insertActiveVfo(result, vfo=Radio.VFO_B)
+
         return result
 
 

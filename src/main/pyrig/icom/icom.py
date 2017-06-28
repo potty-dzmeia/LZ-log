@@ -231,22 +231,63 @@ class Icom(radio.Radio):
 
     @classmethod
     def encodeSendCW(cls, text):
+        """
+        Gets the command(s) with which we can tell the radio to set the speed of the CW transmission.
+        :param text:
+        :return:
+        """
         return list()
 
 
     @classmethod
     def encodeSetKeyerSpeed(cls, keyerSpeed):
+
         return list()
 
 
     @classmethod
     def encodeInterruptSendCW(cls):
+        """
+        Gets the command with which we can tell the radio to stop sending morse code
+        :return:
+        """
         return list()
 
 
     @classmethod
     def encodeGetActiveVfo(cls):
+        """
+        Gets the command with which we can tell the radio to send us the active VFO
+        :return:
+        """
         return list()
+
+    @classmethod
+    def encodePoll(cls):
+        """
+        Gets the command with which we can tell the radio to send us status information (e.g. freq, mode, vfo etc.)
+        :return:
+        """
+        return list()
+
+
+    @classmethod
+    def encodeDisableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio not to send any information automatically
+        :return:
+        """
+        return list()
+
+
+    @classmethod
+    def encodeEnableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio to send back information automatically when something changes
+        :return:
+        """
+        return list()
+
 
     #+--------------------------------------------------------------------------+
     #|  Decode methods below                                                    |

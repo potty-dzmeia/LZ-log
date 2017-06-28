@@ -45,7 +45,8 @@ public class JsonMsgParser
   
   // A field wich can be found inside the FREQUENCY_MSG and MODE_MSG
   public static final String VFO_PAR            = "vfo";
-
+  public static final String FREQUENCY_PAR      = "frequency";
+  public static final String MODE_PAR           = "mode";
   
   private static final Logger logger = Logger.getLogger(JsonMsgParser.class.getName());
   
@@ -200,9 +201,9 @@ public class JsonMsgParser
   {
     String  freq = "0";
 
-    if(jso.has(FREQUENCY_MSG))
+    if(jso.has(FREQUENCY_PAR))
     {
-      freq = jso.getString(FREQUENCY_MSG);
+      freq = jso.getString(FREQUENCY_PAR);
     }
     else
     {
@@ -227,9 +228,9 @@ public class JsonMsgParser
   {
     RadioModes  mode = RadioModes.NONE;
     
-    if(jso.has(MODE_MSG))
+    if(jso.has(MODE_PAR))
     {    
-      mode = RadioModes.valueOf(jso.getString(MODE_MSG).toUpperCase());
+      mode = RadioModes.valueOf(jso.getString(MODE_PAR).toUpperCase());
     }
     else
     {

@@ -263,6 +263,35 @@ public class RadioController
   }
 
   
+  public void poll()
+  {
+    if (!isConnected())
+      return;
+    
+    try
+    {
+      radio.poll();
+    }
+    catch (Exception ex)
+    {
+      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }
+  
+  public void setAutomaticInfo(boolean isActive)
+  {
+    if (!isConnected())
+      return;
+    
+    try
+    {
+      radio.setAutomaticInfo(isActive);
+    }
+    catch (Exception ex)
+    {
+      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }
   
   public String getInfo()
   {

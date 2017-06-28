@@ -120,4 +120,32 @@ public interface I_Radio extends I_Rig
    * @return array of Transactions which are to be sent to the radio.
    */
   public I_EncodedTransaction[] encodeSetKeyerSpeed(int keyerSpeed);
+  
+  
+  /**
+   * Gets the command(s) with which we can tell the radio to send us status
+   * (usually this is frequency, mode and possibly more)
+   * 
+   * @return 
+   */
+  public I_EncodedTransaction[] encodePoll();
+  
+  
+  /**
+   * Gets the command(s) with which we can tell the radio not to send any 
+   * information automatically
+   * 
+   * @return 
+   */
+  public I_EncodedTransaction[] encodeDisableAutomaticInfo();
+  
+  
+  /**
+   * Gets the command(s) with which we can tell the radio to send back
+   * information automatically when something changes
+   * 
+   * @return 
+   */
+  public I_EncodedTransaction[] encodeEnableAutomaticInfo();
+  
 }

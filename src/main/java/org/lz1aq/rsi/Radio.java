@@ -246,6 +246,30 @@ public class Radio
   }
   
   
+  /**
+   * Tell the radio to send back status data(usually this is frequency, operating mode and possibly more)
+   * @throws Exception 
+   */
+  public void poll() throws Exception
+  {
+    this.queueTransactions(radioProtocolParser.encodePoll());
+  }
+  
+  
+  /**
+   * Tell the radio whether to send back status data(usually this is frequency, operating mode and possibly more)
+   * @param isActive - is 
+   * @throws Exception 
+   */
+  public void setAutomaticInfo(boolean isActive) throws Exception
+  {
+    if(isActive)
+      this.queueTransactions(radioProtocolParser.encodeEnableAutomaticInfo());
+    else
+      this.queueTransactions(radioProtocolParser.encodeDisableAutomaticInfo());
+  }
+  
+  
   
   public void addEventListener(RadioListener listener) throws Exception
   {

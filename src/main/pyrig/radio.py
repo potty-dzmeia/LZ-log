@@ -145,7 +145,39 @@ class Radio(I_Radio):
 
     @classmethod
     def encodeGetActiveVfo(cls):
+        """
+        Gets the command with which we can tell the radio to send us the active VFO
+        :return:
+        """
         raise NotImplementedError("encodeGetActiveVfo")
+
+
+    @classmethod
+    def encodePoll(cls):
+        """
+        Gets the command with which we can tell the radio to send us status information (e.g. freq, mode, vfo etc.)
+        :return:
+        """
+        raise NotImplementedError("encodePoll")
+
+
+    @classmethod
+    def encodeDisableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio not to send any information automatically
+        :return:
+        """
+        raise NotImplementedError("encodeDisableAutomaticInfo")
+
+
+    @classmethod
+    def encodeEnableAutomaticInfo(cls):
+        """
+        Gets the command(s) with which we can tell the radio to send back information automatically when something changes
+        :return:
+        """
+        raise NotImplementedError("encodeEnableAutomaticInfo")
+
 
     #Freq - frequency of the target VFO
     #rig_set_mode(RIG *rig, vfo_t vfo, rmode_t mode, pbwidth_t width)

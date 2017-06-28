@@ -38,6 +38,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -68,7 +69,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.0.0";
+  static final String PROGRAM_VERSION = "1.0.1";
   static final String PROGRAM_NAME    = "LZ-Log";
           
   static final String TYPE_OF_WORK_SP = "SP";
@@ -77,7 +78,7 @@ public class MainWindow extends javax.swing.JFrame
   
   private Log                           log;
   private LogTableModel                 jtablemodelLog;
-  private TimeToNextQsoTableModel         jtablemodelIncomingQso;
+  private TimeToNextQsoTableModel       jtablemodelIncomingQso;
   private BandmapTableModel             jtablemodelBandmap;
   private final ApplicationSettings     applicationSettings;
   private final RadioController         radioController;
@@ -86,10 +87,10 @@ public class MainWindow extends javax.swing.JFrame
   private final Timer                   timer1sec;
   private final Timer                   timer500ms;
   private Timer                         timerContinuousCq;
+  private Timer                         timerRadioPolling;
   private FontChooser                   fontchooser = new FontChooser();
   private String                        logDbFile;
   private String                        pathToWorkingDir; // where the jar file is located
-  private boolean                       isFreqColumnHidden = false;
           
   private DocumentFilter                callsignFilter = new UppercaseDocumentFilter();
   private DocumentFilter                serialNumberFilter = new SerialNumberDocumentFilter();
@@ -144,7 +145,7 @@ public class MainWindow extends javax.swing.JFrame
     jtablemodelIncomingQso = new TimeToNextQsoTableModel(log);
     jtableIncomingQso.setModel(jtablemodelIncomingQso);
     
-    jtablemodelBandmap = new BandmapTableModel(log, 3500000, applicationSettings);
+    jtablemodelBandmap = new BandmapTableModel(log, getBandmapStartFreq(), applicationSettings);
     jtableBandmap.setModel(jtablemodelBandmap);
     
     
@@ -271,7 +272,7 @@ public class MainWindow extends javax.swing.JFrame
       jtablemodelIncomingQso.refresh(applicationSettings.getQsoRepeatPeriod(), // How often we can repeat qso
               applicationSettings.getIncomingQsoHiderAfter()); // Hide qso after certain overtime
 
-      jtablemodelBandmap.refresh(applicationSettings);
+      jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
     }
   };
 
@@ -292,6 +293,16 @@ public class MainWindow extends javax.swing.JFrame
     public void actionPerformed(ActionEvent evt)
     {
       pressedF1();
+    }
+  };
+  
+  
+  private final ActionListener timerRadioPollingListener = new ActionListener()
+  {
+    @Override
+    public void actionPerformed(ActionEvent evt)
+    {
+      radioController.poll();
     }
   };
 
@@ -393,6 +404,8 @@ public class MainWindow extends javax.swing.JFrame
     jLabel15 = new javax.swing.JLabel();
     jtextfieldFreqWidth = new javax.swing.JTextField();
     jLabel11 = new javax.swing.JLabel();
+    jLabel18 = new javax.swing.JLabel();
+    jtextfieldBandmapStartFreq = new javax.swing.JTextField();
     intframeLog = new javax.swing.JInternalFrame();
     jpanelCompleteLog = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
@@ -403,6 +416,9 @@ public class MainWindow extends javax.swing.JFrame
     jtogglebuttonConnectToRadio = new javax.swing.JToggleButton();
     jtextfieldFrequency = new javax.swing.JTextField();
     jtextfieldMode = new javax.swing.JTextField();
+    jcheckboxRadioPolling = new javax.swing.JCheckBox();
+    jLabel17 = new javax.swing.JLabel();
+    jtextfieldPollingTime = new javax.swing.JTextField();
     intframeEntryWindow = new javax.swing.JInternalFrame();
     jpanelCallsign = new javax.swing.JPanel();
     jtextfieldCallsign = new javax.swing.JTextField();
@@ -461,7 +477,6 @@ public class MainWindow extends javax.swing.JFrame
     jDialogSettings.setTitle("Settings");
     jDialogSettings.setAlwaysOnTop(true);
     jDialogSettings.setModal(true);
-    jDialogSettings.setPreferredSize(new java.awt.Dimension(350, 500));
     jDialogSettings.setType(java.awt.Window.Type.UTILITY);
     jDialogSettings.addComponentListener(new java.awt.event.ComponentAdapter()
     {
@@ -913,13 +928,13 @@ public class MainWindow extends javax.swing.JFrame
     setTitle(PROGRAM_NAME+" by LZ1ABC");
     addWindowListener(new java.awt.event.WindowAdapter()
     {
-      public void windowClosing(java.awt.event.WindowEvent evt)
-      {
-        formWindowClosing(evt);
-      }
       public void windowOpened(java.awt.event.WindowEvent evt)
       {
         formWindowOpened(evt);
+      }
+      public void windowClosing(java.awt.event.WindowEvent evt)
+      {
+        formWindowClosing(evt);
       }
     });
 
@@ -982,7 +997,7 @@ public class MainWindow extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1000,7 +1015,7 @@ public class MainWindow extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1018,7 +1033,7 @@ public class MainWindow extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1029,7 +1044,7 @@ public class MainWindow extends javax.swing.JFrame
 
     jlabelBandmapFreeSpace.setText(" ");
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 8;
+    gridBagConstraints.gridx = 10;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1038,11 +1053,11 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jlabelBandmapFreeSpace, gridBagConstraints);
 
     jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-    jLabel13.setText("Step in Hz:");
+    jLabel13.setText("Step:");
     jLabel13.setToolTipText("Step in Hz");
     jLabel13.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1051,10 +1066,10 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jLabel13, gridBagConstraints);
 
     jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-    jLabel14.setText("Rows:");
+    jLabel14.setText("Row:");
     jLabel14.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridx = 6;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1063,10 +1078,10 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jLabel14, gridBagConstraints);
 
     jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-    jLabel15.setText("Columns:");
+    jLabel15.setText("Col:");
     jLabel15.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1083,7 +1098,7 @@ public class MainWindow extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridx = 9;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.01;
@@ -1091,15 +1106,33 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jtextfieldFreqWidth, gridBagConstraints);
 
     jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-    jLabel11.setText("Width of freq columns");
+    jLabel11.setText("Width of freq cols:");
     jLabel11.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 6;
+    gridBagConstraints.gridx = 8;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.01;
     gridBagConstraints.weighty = 1.0;
     jPanel8.add(jLabel11, gridBagConstraints);
+
+    jLabel18.setText("Start at [KHz]:");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.01;
+    gridBagConstraints.weighty = 1.0;
+    jPanel8.add(jLabel18, gridBagConstraints);
+
+    jtextfieldBandmapStartFreq.setText("3500");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.01;
+    gridBagConstraints.weighty = 1.0;
+    jPanel8.add(jtextfieldBandmapStartFreq, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -1111,7 +1144,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 500, 459);
+    intframeBandmap.setBounds(500, 520, 463, 478);
 
     intframeLog.setIconifiable(true);
     intframeLog.setMaximizable(true);
@@ -1172,6 +1205,8 @@ public class MainWindow extends javax.swing.JFrame
     intframeRadioConnection.setResizable(true);
     intframeRadioConnection.setTitle("Radio connection");
     intframeRadioConnection.setToolTipText("");
+    intframeRadioConnection.setMinimumSize(new java.awt.Dimension(130, 90));
+    intframeRadioConnection.setPreferredSize(new java.awt.Dimension(402, 150));
     intframeRadioConnection.setVisible(true);
 
     jpanelRadioConnection.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -1226,10 +1261,47 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jpanelRadioConnection.add(jtextfieldMode, gridBagConstraints);
 
+    jcheckboxRadioPolling.setText("Enable polling");
+    jcheckboxRadioPolling.setEnabled(false);
+    jcheckboxRadioPolling.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+    jcheckboxRadioPolling.addItemListener(new java.awt.event.ItemListener()
+    {
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
+      {
+        jcheckboxRadioPollingItemStateChanged(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jpanelRadioConnection.add(jcheckboxRadioPolling, gridBagConstraints);
+
+    jLabel17.setText("Every [msec]:");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jpanelRadioConnection.add(jLabel17, gridBagConstraints);
+
+    jtextfieldPollingTime.setEditable(false);
+    jtextfieldPollingTime.setText("200");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jpanelRadioConnection.add(jtextfieldPollingTime, gridBagConstraints);
+
     intframeRadioConnection.getContentPane().add(jpanelRadioConnection, java.awt.BorderLayout.CENTER);
 
     jDesktopPane1.add(intframeRadioConnection);
-    intframeRadioConnection.setBounds(30, 20, 277, 69);
+    intframeRadioConnection.setBounds(30, 20, 402, 150);
 
     intframeEntryWindow.setIconifiable(true);
     intframeEntryWindow.setMaximizable(true);
@@ -1997,12 +2069,16 @@ public class MainWindow extends javax.swing.JFrame
       jtogglebuttonConnectToRadio.setSelected(true);
       jcomboboxBand.setEnabled(false);
       jcomboboxMode.setEnabled(false);
+      jcheckboxRadioPolling.setEnabled(true);
+      jtextfieldPollingTime.setEditable(true);
     }
     else
     {
       jtogglebuttonConnectToRadio.setSelected(false);
       jcomboboxBand.setEnabled(true);
       jcomboboxMode.setEnabled(true);
+      jcheckboxRadioPolling.setEnabled(false);
+      jtextfieldPollingTime.setEditable(false);
     }
   }//GEN-LAST:event_jtogglebuttonConnectToRadioActionPerformed
 
@@ -2360,6 +2436,35 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jMenuItem6ActionPerformed
     intframeLog.toFront();
   }//GEN-LAST:event_jMenuItem6ActionPerformed
+
+  private void jcheckboxRadioPollingItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcheckboxRadioPollingItemStateChanged
+  {//GEN-HEADEREND:event_jcheckboxRadioPollingItemStateChanged
+    if(jcheckboxRadioPolling.isSelected())
+    {
+      try
+      {
+        int period = Integer.parseInt(jtextfieldPollingTime.getText());
+        timerRadioPolling = new Timer(period, timerRadioPollingListener);
+        timerRadioPolling.setRepeats(true);
+      }catch(Exception exc)
+      {
+        JOptionPane.showMessageDialog(null, "Enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+        jcheckboxRadioPolling.setSelected(false);
+        return;
+      } 
+      radioController.setAutomaticInfo(false); // polling is started - we don't need the auto info from the radio
+      timerRadioPolling.start();
+    }
+    else
+    {
+      if(timerRadioPolling!=null)
+      {
+        timerRadioPolling.stop();
+        radioController.setAutomaticInfo(true); // polling is stopped - enable auto info
+      }
+    }
+  }//GEN-LAST:event_jcheckboxRadioPollingItemStateChanged
+  
   
   private void changeBandmapTableModelStructure()
   {
@@ -2851,6 +2956,34 @@ public class MainWindow extends javax.swing.JFrame
     return true;
   }
 
+  
+  /**
+   * 
+   * @return  Frequency in Hz
+   */
+  private int getBandmapStartFreq()
+  {
+    int freq = 3500000;
+    
+    try
+    {
+      freq = Integer.parseInt(jtextfieldBandmapStartFreq.getText());
+      freq *= 1000;
+    }
+    catch(Exception exc)
+    {
+      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, exc);
+    }
+    
+    
+    if(freq<1800000)
+      return 1800000;
+    if(freq>28000000)
+      return 28000000;
+    
+    return freq;
+  }
+  
   
   private void pressedF1()
   {
@@ -3466,6 +3599,8 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel14;
   private javax.swing.JLabel jLabel15;
   private javax.swing.JLabel jLabel16;
+  private javax.swing.JLabel jLabel17;
+  private javax.swing.JLabel jLabel18;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
@@ -3510,6 +3645,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JButton jbuttonSetCqFreq;
   private javax.swing.JCheckBox jcheckboxContinuousCq;
   private javax.swing.JCheckBox jcheckboxF1jumpsToCq;
+  private javax.swing.JCheckBox jcheckboxRadioPolling;
   private javax.swing.JComboBox jcomboboxBand;
   private javax.swing.JComboBox<String> jcomboboxColumnCount;
   private javax.swing.JComboBox jcomboboxMode;
@@ -3536,11 +3672,13 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JTable jtableBandmap;
   private javax.swing.JTable jtableIncomingQso;
   private javax.swing.JTable jtableLog;
+  private javax.swing.JTextField jtextfieldBandmapStartFreq;
   private javax.swing.JTextField jtextfieldCallsign;
   private javax.swing.JTextField jtextfieldContinuousCqPeriod;
   private javax.swing.JTextField jtextfieldFreqWidth;
   private javax.swing.JTextField jtextfieldFrequency;
   private javax.swing.JTextField jtextfieldMode;
+  private javax.swing.JTextField jtextfieldPollingTime;
   private javax.swing.JTextField jtextfieldQsoRepeatPeriod;
   private javax.swing.JTextField jtextfieldRcv;
   private javax.swing.JTextField jtextfieldSnt;
