@@ -1,6 +1,16 @@
 - Option for continious CQ
 - remember the size of the columns in the tables
 - fix icom functionality
+- ;' - da rabotqt
+- alt+w - check if it works on windows
+- enter on callsign - to enter the QSO if serial number field is valid
+- put space between F-keys (e.g. f5 i f2)
+- enter frequency in callsign
+- delete callsign when moving away from freq and enter into bandmap
+- alt+k = 
+- note za wsqka vruzka 
+- vsichki nuli da sa T
+
 
 After contest:
 - band map should be updated depending on the current freq and mode
