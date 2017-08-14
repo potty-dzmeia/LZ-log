@@ -38,7 +38,6 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -92,7 +91,7 @@ public class MainWindow extends javax.swing.JFrame
   private String                        logDbFile;
   private String                        pathToWorkingDir; // where the jar file is located
           
-  private DocumentFilter                callsignFilter = new UppercaseDocumentFilter();
+  private DocumentFilter                callsignFilter = new CallsignDocumentFilter();
   private DocumentFilter                serialNumberFilter = new SerialNumberDocumentFilter();
   
   
@@ -149,14 +148,14 @@ public class MainWindow extends javax.swing.JFrame
     jtableBandmap.setModel(jtablemodelBandmap);
     
     
-    // renderer for the bandmap
+    // Renderer for the bandmap
     jtableBandmap.setDefaultRenderer(Object.class, new BandmapTableCellRender());
     jtableIncomingQso.setDefaultRenderer(Object.class, new IncomingQsoTableCellRender());
     
-    // For communicating with the radio
+    // Communicating with the radio
     radioController = new RadioController();
     
-    //This is used for catching global key presses (i.e. needed for F1-F12 presses)
+    // This is used for catching global key presses (i.e. needed for F1-F12 presses)
     KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
     manager.addKeyEventDispatcher(new MyDispatcher());
     
@@ -395,9 +394,9 @@ public class MainWindow extends javax.swing.JFrame
     jScrollPane5 = new javax.swing.JScrollPane();
     jtableBandmap = new javax.swing.JTable();
     jPanel8 = new javax.swing.JPanel();
-    jcomboboxStepInHz = new javax.swing.JComboBox<String>();
-    jcomboboxColumnCount = new javax.swing.JComboBox<String>();
-    jcomboboxRowCount = new javax.swing.JComboBox<String>();
+    jcomboboxStepInHz = new javax.swing.JComboBox<>();
+    jcomboboxColumnCount = new javax.swing.JComboBox<>();
+    jcomboboxRowCount = new javax.swing.JComboBox<>();
     jlabelBandmapFreeSpace = new javax.swing.JLabel();
     jLabel13 = new javax.swing.JLabel();
     jLabel14 = new javax.swing.JLabel();
@@ -928,13 +927,13 @@ public class MainWindow extends javax.swing.JFrame
     setTitle(PROGRAM_NAME+" by LZ1ABC");
     addWindowListener(new java.awt.event.WindowAdapter()
     {
-      public void windowOpened(java.awt.event.WindowEvent evt)
-      {
-        formWindowOpened(evt);
-      }
       public void windowClosing(java.awt.event.WindowEvent evt)
       {
         formWindowClosing(evt);
+      }
+      public void windowOpened(java.awt.event.WindowEvent evt)
+      {
+        formWindowOpened(evt);
       }
     });
 
@@ -960,7 +959,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
     jDesktopPane1.add(intframeTimeToNextQso);
-    intframeTimeToNextQso.setBounds(490, 10, 463, 435);
+    intframeTimeToNextQso.setBounds(490, 10, 460, 435);
 
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setMaximizable(true);
@@ -1144,7 +1143,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 463, 478);
+    intframeBandmap.setBounds(500, 520, 463, 459);
 
     intframeLog.setIconifiable(true);
     intframeLog.setMaximizable(true);
@@ -1321,13 +1320,13 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldCallsign.setPreferredSize(new java.awt.Dimension(30, 58));
     jtextfieldCallsign.addKeyListener(new java.awt.event.KeyAdapter()
     {
-      public void keyTyped(java.awt.event.KeyEvent evt)
-      {
-        jtextfieldCallsignKeyTyped(evt);
-      }
       public void keyReleased(java.awt.event.KeyEvent evt)
       {
         jtextfieldCallsignKeyReleased(evt);
+      }
+      public void keyTyped(java.awt.event.KeyEvent evt)
+      {
+        jtextfieldCallsignKeyTyped(evt);
       }
     });
     jpanelCallsign.add(jtextfieldCallsign);
@@ -1627,7 +1626,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeEntryWindow.getContentPane().add(jPanelStatusBar, gridBagConstraints);
 
     jDesktopPane1.add(intframeEntryWindow);
-    intframeEntryWindow.setBounds(280, 20, 453, 227);
+    intframeEntryWindow.setBounds(280, 20, 453, 230);
 
     intframeMisc.setIconifiable(true);
     intframeMisc.setMaximizable(true);
@@ -1983,6 +1982,10 @@ public class MainWindow extends javax.swing.JFrame
       initEntryFields();
       // Move focus to Callsign field
       jtextfieldCallsign.requestFocus();
+      
+      if(applicationSettings.isEms())
+        pressedF3();
+      
     }
   }//GEN-LAST:event_jtextfieldRcvActionPerformed
 
@@ -2009,6 +2012,10 @@ public class MainWindow extends javax.swing.JFrame
           {
              jtextfieldRcv.requestFocus();
           }
+        }
+        else
+        {
+          jtextfieldRcv.requestFocus();
         }
         evt.consume();     
         break;
@@ -3012,7 +3019,7 @@ public class MainWindow extends javax.swing.JFrame
     
     String text = applicationSettings.getFunctionKeyMessage(0);  // Get the text for the F1 key
     text = text.replaceAll("\\{mycall\\}", applicationSettings.getMyCallsign()); // Substitute {mycall} with my callsign
-    radioController.sendMorse(text);                          // Send to radio
+    radioController.sendMorse(text+" ");                          // Send to radio
    
     // Select the CQ radio button
     jradiobuttonCQ.setSelected(true);
@@ -3052,42 +3059,42 @@ public class MainWindow extends javax.swing.JFrame
   
   private void pressedF3()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(2));
+    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(2)+" ");
   }
   
   private void pressedF4()
   {
-    radioController.sendMorse(applicationSettings.getMyCallsign());
+    radioController.sendMorse(applicationSettings.getMyCallsign()+" ");
   }
   
   private void pressedF5()
   {
-    radioController.sendMorse(getCallsignFromTextField());
+    radioController.sendMorse(getCallsignFromTextField()+" ");
   }
   
   private void pressedF6()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(5));
+    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(5)+" ");
   }
   
   private void pressedF7()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(6));
+    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(6)+" ");
   }
   
   private void pressedF8()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(7));
+    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(7)+" ");
   }
   
   private void pressedF9()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(8));
+    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(8)+" ");
   }
   
   private void pressedF10()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(9));
+    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(9)+" ");
   }
   
   private void pressedF11()
@@ -3134,7 +3141,7 @@ public class MainWindow extends javax.swing.JFrame
       serial = Misc.leadingZerosToT(serial);
     }
    
-    radioController.sendMorse(serial.substring(0, 3)+ " " +serial.substring(3, 6));
+    radioController.sendMorse(serial.substring(0, 3)+ " " +serial.substring(3, 6)+" ");
     
     
   }
@@ -3169,6 +3176,7 @@ public class MainWindow extends javax.swing.JFrame
     }
     
    
+    
     @Override
     public void mode()
     {
@@ -3339,16 +3347,25 @@ public class MainWindow extends javax.swing.JFrame
   
   private class MyDispatcher implements KeyEventDispatcher
   {
-
+    long lastCtrlAltPressed = 0;
+    
     @Override
     public boolean dispatchKeyEvent(KeyEvent evt)
     {
       if (evt.getID() != KeyEvent.KEY_RELEASED) 
+      {
         return false;
+      }
+        
       
       // Function keys events
       switch (evt.getKeyCode())
       {
+        case KeyEvent.VK_CONTROL:   
+        case KeyEvent.VK_ALT:
+          lastCtrlAltPressed = System.currentTimeMillis();          
+          break;
+          
         case KeyEvent.VK_F1:
           pressedF1();
           evt.consume();
@@ -3394,6 +3411,22 @@ public class MainWindow extends javax.swing.JFrame
           evt.consume();
           break;
           
+        case KeyEvent.VK_QUOTE: // ' = Send TU message and enter in log
+          if(addEntryToLog())
+            {
+              initEntryFields();   
+              jtextfieldCallsign.requestFocus(); // Move focus to Callsign field
+              pressedF3();
+            } 
+          evt.consume();
+          break;
+          
+        case KeyEvent.VK_SEMICOLON: // ;  = Send call and exchange
+          pressedF5();
+          pressedF2();
+          evt.consume();
+          break;
+          
 //        case KeyEvent.VK_F10:
 //          pressedF10();
 //          evt.consume();
@@ -3405,13 +3438,14 @@ public class MainWindow extends javax.swing.JFrame
           break;
           
         case KeyEvent.VK_W:
-          if(evt.isControlDown() || evt.isAltDown())
+          if(evt.isControlDown() || evt.isAltDown() || 
+             System.currentTimeMillis() - lastCtrlAltPressed < 100)  // sometimes people release the Alt key earlier
           {
             pressedF12();
             evt.consume();
             break;
           }
-          break;
+          break; 
           
         case KeyEvent.VK_F12:
           pressedF12();
@@ -3481,6 +3515,11 @@ public class MainWindow extends javax.swing.JFrame
       {
         setBackground(Color.LIGHT_GRAY);
       }
+      // Show CQ freq in green
+      else if(jtablemodelBandmap.isCurrentFreqInThisCell(row, column, cqFrequency))
+      {
+        setBackground(Color.GREEN);
+      }
       else
       {
         setBackground(Color.white);    
@@ -3502,23 +3541,19 @@ public class MainWindow extends javax.swing.JFrame
   
   
   
-  class UppercaseDocumentFilter extends DocumentFilter
+  class CallsignDocumentFilter extends DocumentFilter
   {
 
     @Override
-    public void insertString(DocumentFilter.FilterBypass fb, int offset,
-            String text, AttributeSet attr) throws BadLocationException
+    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
     {
-
-      fb.insertString(offset, text.toUpperCase(), attr);
+      fb.insertString(offset, text.toUpperCase().replaceAll("[^A-Z0-9/]*$", ""), attrs);
     }
 
     @Override
-    public void replace(DocumentFilter.FilterBypass fb, int offset, int length,
-            String text, AttributeSet attrs) throws BadLocationException
+    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
     {
-
-      fb.replace(offset, length, text.toUpperCase(), attrs);
+      fb.replace(offset, length, text.toUpperCase().replaceAll("[^A-Z0-9/]*$", ""), attrs);
     }
   }
   
@@ -3527,9 +3562,9 @@ public class MainWindow extends javax.swing.JFrame
   {
    
     @Override
-    public void insertString(DocumentFilter.FilterBypass fb, int offset,
-            String text, AttributeSet attr) throws BadLocationException
+    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException
     {
+      text = text.replaceAll("[^0-9]*$", "");
       int overlimit = fb.getDocument().getLength()+text.length() - SERIAL_NUMBER_LENGTH;
       if(overlimit > 0)
       {
@@ -3539,8 +3574,7 @@ public class MainWindow extends javax.swing.JFrame
     }
 
     @Override
-    public void replace(DocumentFilter.FilterBypass fb, int offset, int length,
-            String text, AttributeSet attrs) throws BadLocationException
+    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
     {
       int currentLength = fb.getDocument().getLength();
       int overLimit = (currentLength + text.length()) - SERIAL_NUMBER_LENGTH - length;
@@ -3549,8 +3583,8 @@ public class MainWindow extends javax.swing.JFrame
         text = text.substring(0, text.length() - overLimit);
       }
       
-      super.replace(fb, offset, length, text, attrs);
-     
+      text = text.replaceAll("[^0-9]*$", "");
+      fb.replace(offset, length, text, attrs);
     }
   }
   

@@ -1,15 +1,9 @@
 - Option for continious CQ
-- remember the size of the columns in the tables
-- fix icom functionality
-- ;' - da rabotqt
-- alt+w - check if it works on windows
-- enter on callsign - to enter the QSO if serial number field is valid
-- put space between F-keys (e.g. f5 i f2)
-- enter frequency in callsign
-- delete callsign when moving away from freq and enter into bandmap
-- alt+k = 
-- note za wsqka vruzka 
-- vsichki nuli da sa T
+- show my cq freq on the bandmap
+ 	
+
+
+
 
 
 After contest:
@@ -22,3 +16,16 @@ After contest:
 - mark CQ frequency on bandmap
 - new settings options should not break window organization
 - Baud rate settings to be done from the App.
+- fix icom functionality
+- enter frequency in callsign
+- delete callsign when moving away from freq and enter into bandmap
+- note za wsqka vruzka 
+- vsichki nuli da sa T
+- remember the size of the columns in the tables
+- alt+k = 
+- first part of sent serial number is not updated (e.g. when changing the serial number from the table)
+
+
+Solved:
+- For Elekraft when sending CW put space between F-keys (e.g. f5 i f2)
+- ;' - da rabotqt
