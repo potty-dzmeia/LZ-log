@@ -311,7 +311,9 @@ public class Radio
         byte b[] = serialPort.readBytes();
         if(b==null)
           return;
-        logger.log(Level.INFO, "Incoming bytes ("+b.length+") <------ " + Misc.toHexString(b) );
+        
+        //logger.log(Level.INFO, "Incoming bytes ("+b.length+") <------ " + Misc.toHexString(b) );
+        
         // Read all there is and add it to our receive buffer
         receiveBuffer.write(b);
        

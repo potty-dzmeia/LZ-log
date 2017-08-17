@@ -1991,7 +1991,7 @@ public class MainWindow extends javax.swing.JFrame
       // Move focus to Callsign field
       jtextfieldCallsign.requestFocus();
       
-      if(applicationSettings.isEms())
+      if(applicationSettings.isEms() && jradiobuttonCQ.isSelected())
         pressedF3();
       
     }
