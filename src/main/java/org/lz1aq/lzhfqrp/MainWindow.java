@@ -68,7 +68,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.0.1";
+  static final String PROGRAM_VERSION = "1.1";
   static final String PROGRAM_NAME    = "LZ-Log";
           
   static final String TYPE_OF_WORK_SP = "SP";
@@ -95,12 +95,52 @@ public class MainWindow extends javax.swing.JFrame
   private DocumentFilter                serialNumberFilter = new SerialNumberDocumentFilter();
   
   
-  
   private static final Logger logger = Logger.getLogger(Radio.class.getName());
-  /**
-   * Creates new form MainWindow
-   */
   
+  
+  private final ActionListener timer1secListener = new ActionListener()
+  {
+    @Override
+    public void actionPerformed(ActionEvent evt)
+    {
+      jtablemodelIncomingQso.refresh(applicationSettings.getQsoRepeatPeriod(), // How often we can repeat qso
+              applicationSettings.getIncomingQsoHiderAfter()); // Hide qso after certain overtime
+
+      jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
+    }
+  };
+
+  private final ActionListener timer500msListener = new ActionListener()
+  {
+    @Override
+    public void actionPerformed(ActionEvent evt)
+    {
+      // On every second update the callsign status
+      String status = getCallsignStatusText(getCallsignFromTextField());
+      jlabelCallsignStatus.setText(status);
+    }
+  };
+  
+  private final ActionListener timerContinuousCqListener = new ActionListener()
+  {
+    @Override
+    public void actionPerformed(ActionEvent evt)
+    {
+      pressedF1();
+    }
+  };
+  
+  
+  private final ActionListener timerRadioPollingListener = new ActionListener()
+  {
+    @Override
+    public void actionPerformed(ActionEvent evt)
+    {
+      radioController.poll();
+    }
+  };
+  
+
 
   public MainWindow()
   { 
@@ -194,6 +234,10 @@ public class MainWindow extends javax.swing.JFrame
     timer500ms = new Timer(300, timer500msListener);
     timer500ms.setRepeats(true);
     timer500ms.start();
+    
+    //
+    timerContinuousCq = new Timer(6000, timerContinuousCqListener);
+    timerContinuousCq.setRepeats(false);
   }
 
   
@@ -260,50 +304,7 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   
-  /**
-   * this is called every second
-   */
-  private final ActionListener timer1secListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
-    {
-      jtablemodelIncomingQso.refresh(applicationSettings.getQsoRepeatPeriod(), // How often we can repeat qso
-              applicationSettings.getIncomingQsoHiderAfter()); // Hide qso after certain overtime
-
-      jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
-    }
-  };
-
-  private final ActionListener timer500msListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
-    {
-      // On every second update the callsign status
-      String status = getCallsignStatusText(getCallsignFromTextField());
-      jlabelCallsignStatus.setText(status);
-    }
-  };
   
-  private final ActionListener timerContinuousCqListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
-    {
-      pressedF1();
-    }
-  };
-  
-  
-  private final ActionListener timerRadioPollingListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
-    {
-      radioController.poll();
-    }
-  };
 
     
   FocusListener highlighter = new FocusListener()
@@ -681,6 +682,13 @@ public class MainWindow extends javax.swing.JFrame
 
     jtextfieldQsoRepeatPeriod.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
     jtextfieldQsoRepeatPeriod.setText("1800");
+    jtextfieldQsoRepeatPeriod.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jtextfieldQsoRepeatPeriodActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -1998,6 +2006,9 @@ public class MainWindow extends javax.swing.JFrame
 
   private void jtextfieldCallsignKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jtextfieldCallsignKeyTyped
   {//GEN-HEADEREND:event_jtextfieldCallsignKeyTyped
+    if(timerContinuousCq.isRunning()) // Any key press stops the automatic CQ
+      timerContinuousCq.stop();
+    
     switch(evt.getKeyChar())
     {
       case KeyEvent.VK_SPACE: // Move to Rcv field    
@@ -2471,6 +2482,11 @@ public class MainWindow extends javax.swing.JFrame
       }
     }
   }//GEN-LAST:event_jcheckboxRadioPollingItemStateChanged
+
+  private void jtextfieldQsoRepeatPeriodActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtextfieldQsoRepeatPeriodActionPerformed
+  {//GEN-HEADEREND:event_jtextfieldQsoRepeatPeriodActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_jtextfieldQsoRepeatPeriodActionPerformed
   
   
   private void changeBandmapTableModelStructure()
@@ -3030,8 +3046,12 @@ public class MainWindow extends javax.swing.JFrame
     {
       int period = getCqDuration(text,keyerSpeed);
       period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());
-      timerContinuousCq = new Timer(period, timerContinuousCqListener);
-      timerContinuousCq.setRepeats(true);
+      
+      if(timerContinuousCq.isRunning())
+      {
+        timerContinuousCq.stop();
+      }
+      timerContinuousCq.setInitialDelay(period);
       timerContinuousCq.start();
     }
   }
@@ -3044,7 +3064,7 @@ public class MainWindow extends javax.swing.JFrame
    */
   private int getCqDuration(String text, int speed)
   {
-    int duration = 2000;
+    int duration = 0;
     
     
     
@@ -3107,6 +3127,8 @@ public class MainWindow extends javax.swing.JFrame
   private void pressedEsc()
   {
     radioController.interruptMorseSending();
+    if(timerContinuousCq.isRunning())
+      timerContinuousCq.stop();
   }
   
   private void pressedF12()

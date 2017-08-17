@@ -1,5 +1,5 @@
 - Option for continious CQ
-- show my cq freq on the bandmap
+
  	
 
 
@@ -29,3 +29,4 @@ After contest:
 Solved:
 - For Elekraft when sending CW put space between F-keys (e.g. f5 i f2)
 - ;' - da rabotqt
+- show my cq freq on the bandmap

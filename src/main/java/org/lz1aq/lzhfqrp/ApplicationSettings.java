@@ -600,8 +600,8 @@ public final class ApplicationSettings
     functionKeyTexts[10] = "not defined by user";
     functionKeyTexts[11] = "not defined by user";
 
-    incomingQsoHiderAfter = -360; // If overtime is 6 minutes don't show the entry
-    incomingQsoMaxEntries = 10;  // Number of entries visible on the Incoming Qso panel
+    incomingQsoHiderAfter = -14400; // If overtime is 4 hours don't show the entry
+    incomingQsoMaxEntries = 20;  // Number of entries visible on the Incoming Qso panel
     
     // Default positions for the different frames
     if(framesDimensions[FrameIndex.JFRAME.toInt()] == null) // Initialize is it was not....

@@ -4,7 +4,7 @@
   <groupId>org.lz1aq.lzlog</groupId>
   <artifactId>LZ-log</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.1</version>
+  <version>1.1</version>
   <name>LZ-log</name>
   <url>http://maven.apache.org</url>
   
