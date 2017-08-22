@@ -227,13 +227,11 @@ public class BandmapTableModel extends AbstractTableModel
       }
     }
     
-    
     this.fireTableDataChanged();
-    //this.fireTableStructureChanged();
   }
   
   /**
-   * Checks if there is a manual spot on the same frequency (+-500KHz)
+   * Checks if there is a manual spot on the same frequency (+-100KHz)
    * @param qso
    * @return 
    */
@@ -242,7 +240,7 @@ public class BandmapTableModel extends AbstractTableModel
     for(int i=0; i<manualSpots.size(); i++)
     {
       if(manualSpots.get(i).getCallsign().equals(qso.getHisCallsign()) && // if same callsign
-         Math.abs(manualSpots.get(i).getFreq() - qso.getFrequencyInt()) < 500 ) // if same freq (+-2KHz)
+         Math.abs(manualSpots.get(i).getFreq() - qso.getFrequencyInt()) < 100 ) // if same freq (+-100Hz)
       {
         manualSpots.remove(i);
       }

@@ -364,7 +364,6 @@ public class MainWindow extends javax.swing.JFrame
     checkboxSettingsQuickMode = new javax.swing.JCheckBox();
     textfieldSettingsDefaultPrefix = new javax.swing.JTextField();
     checkboxSendLeadingZeroAsT = new javax.swing.JCheckBox();
-    checkboxF1JumpsToCq = new javax.swing.JCheckBox();
     checkboxESM = new javax.swing.JCheckBox();
     jPanel2 = new javax.swing.JPanel();
     jtextfieldQsoRepeatPeriod = new javax.swing.JTextField();
@@ -646,16 +645,6 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanel6.add(checkboxSendLeadingZeroAsT, gridBagConstraints);
-
-    checkboxF1JumpsToCq.setText("F1 jumps to last CQ freq");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel6.add(checkboxF1JumpsToCq, gridBagConstraints);
 
     checkboxESM.setText("\"Enter\" sends message");
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -977,6 +966,9 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().setLayout(new java.awt.GridBagLayout());
 
     jtableBandmap.setCellSelectionEnabled(true);
+    jtableBandmap.setIntercellSpacing(new java.awt.Dimension(0, 0));
+    jtableBandmap.setShowHorizontalLines(false);
+    jtableBandmap.setShowVerticalLines(false);
     jtableBandmap.addMouseListener(new java.awt.event.MouseAdapter()
     {
       public void mouseClicked(java.awt.event.MouseEvent evt)
@@ -2208,11 +2200,16 @@ public class MainWindow extends javax.swing.JFrame
           int freq = jtablemodelBandmap.cellToFreq(row, col);
           radioController.setFrequency(freq);
           initEntryFields();
+          logger.log(Level.INFO, "new freq set -----------");
         }
         catch (Exception ex)
         {
           Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
+      }
+      else
+      {
+        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, "Invalid row or col");
       }
     //}
 
@@ -2877,7 +2874,7 @@ public class MainWindow extends javax.swing.JFrame
     // Misc 
     checkboxSettingsQuickMode.setSelected(applicationSettings.isQuickCallsignModeEnabled());
     checkboxESM.setSelected(applicationSettings.isEms());
-    checkboxF1JumpsToCq.setSelected(applicationSettings.isAutoCqJump());
+    //TODO checkboxF1JumpsToCq.setSelected(applicationSettings.isAutoCqJump());
     checkboxSendLeadingZeroAsT.setSelected(applicationSettings.isSendZeroAsT());
     
     // Set the text for the function keys
@@ -2939,7 +2936,7 @@ public class MainWindow extends javax.swing.JFrame
    
     // Misc settings
     applicationSettings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
-    applicationSettings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
+    //TODO applicationSettings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
     applicationSettings.setEms(checkboxESM.isSelected());
     applicationSettings.setSendZeroAsT(checkboxSendLeadingZeroAsT.isSelected());
     
@@ -3613,7 +3610,6 @@ public class MainWindow extends javax.swing.JFrame
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroupTypeOfWork;
   private javax.swing.JCheckBox checkboxESM;
-  private javax.swing.JCheckBox checkboxF1JumpsToCq;
   private javax.swing.JCheckBox checkboxSendLeadingZeroAsT;
   private javax.swing.JCheckBox checkboxSettingsQuickMode;
   private javax.swing.JInternalFrame intframeBandmap;
