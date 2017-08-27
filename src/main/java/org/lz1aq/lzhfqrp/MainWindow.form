@@ -711,7 +711,7 @@
                     <Property name="rowHeight" type="int" value="30"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jtableIncomingQsoMouseClicked"/>
+                    <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jtableIncomingQsoMousePressed"/>
                   </Events>
                 </Component>
               </SubComponents>
@@ -759,7 +759,7 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jtableBandmapMouseClicked"/>
+                    <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jtableBandmapMousePressed"/>
                   </Events>
                 </Component>
               </SubComponents>

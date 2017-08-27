@@ -1,32 +1,29 @@
-- Option for continious CQ
-- serial comm needs to work fast. There were some problems with responsivnes during the contest
+- continious CQ interval should work 
+- serial comm - needs to work fast. There were some problems with responsivnes during the contest
 - when generating cabrilo check for obvious mistakes
-- on the bandmap blue entries were actually dupes
-- mouse press on bandmap should always work - get rid of the table borders if possible
 - Try to catch all keyboard presses (f4 should not close HDSDR)
 - the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
-- quitting the program (crash) should not delete the bandmap and all the other important settings
-- all user settings and preferences should be saved
-- hide the freq columns
-- add reset button to the bandmap
-- comm port should be "undefined" (or somthing similar) if the one selected is not active.
-- if the freq columns are removed from the bandmap try horizontal organization 
-- when hovering over the cell it should show the current freq
-
+- all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings 
+- bandmap - hide the freq columns
+- bandmap - add reset button
+- serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
+- bandmap - if the freq columns are removed try horizontal organization 
+- bandmap - when hovering over the cell it should show the current freq
 
 
 
 After contest:
+- "do not show after" to be 4 hours
+- show qso rate
 - band map should be updated depending on the current freq and mode
 - there should be an option for entering worked frequency for people that do not use CAT
 - For some reason F10 is activating the Menu
-- add validation, so that we can't manually enter wrong data in the Log table(e.g. Snt 00300f)
 - when correcting callsign in the log the call is written with small letters
 - adjust row sizes depending on the font
 - delete callsign when moving away from freq and enter into bandmap
 - new settings options should not break window organization
 - Baud rate settings to be done from the App.
-- fix icom functionality
+- support Icom CAT
 - enter frequency in callsign
 - note za wsqka vruzka 
 - opciq vsichki nuli da sa T
@@ -41,3 +38,5 @@ Solved:
 - mark CQ frequency on bandmap
 - show my cq freq on the bandmap
 - new bandmap spot should not be prevented if there is a same spot close to this frequency (was 500Hz now is 100Hz)
+- mouse press on bandmap should always work - get rid of the table borders if possible (events handled on mouse pressed)
+- bandmap - blue S&P entries were actually dupes (bug)

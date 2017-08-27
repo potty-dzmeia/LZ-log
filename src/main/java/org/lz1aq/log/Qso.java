@@ -31,6 +31,9 @@ import org.lz1aq.utils.TimeUtils;
 public class Qso
 {
 
+  static public final String TYPE_OF_WORK_SP = "SP";
+  static public final String TYPE_OF_WORK_CQ = "CQ";
+  
   /**
    * Used for accessing Date parameter - the Date parameter has the format yyyy-mm-dd
    */

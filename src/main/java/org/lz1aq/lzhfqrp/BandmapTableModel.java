@@ -68,7 +68,7 @@ public class BandmapTableModel extends AbstractTableModel
   @Override
   public Object getValueAt(int rowIndex, int columnIndex)
   {
-    CellBuilder cellBuilder = new CellBuilder();
+    CellStringBuilder cellBuilder = new CellStringBuilder();
 
    
     // If frequency cell ...
@@ -103,7 +103,10 @@ public class BandmapTableModel extends AbstractTableModel
   }
   
   
-  private class CellBuilder
+  /**
+   *  Helper class for creating a string that will be inserted in the cell inside the bandmap
+   */
+  private class CellStringBuilder
   {
     StringBuilder cellText = new StringBuilder();
     boolean isIsHtml = false;
@@ -162,7 +165,7 @@ public class BandmapTableModel extends AbstractTableModel
       }
       
       // If not a Dupe the callsign must be in BLUE
-      if(!qso.isDupe(appSettings.getQsoRepeatPeriod()))
+      if(!log.isDupe(qso.getHisCallsign(), appSettings.getQsoRepeatPeriod()))
       {
         isIsHtml = true; // If we add one blue callsign the whole cell must be HTML formatted
         cellText.append("<b><font color=blue>");
@@ -194,7 +197,7 @@ public class BandmapTableModel extends AbstractTableModel
      
     for(BandmapSpot spot : manualSpots)
     {
-      // If a manual sport is available update the frequency
+      // If a manual spot is available update the frequency
       if(spot.getCallsign().equals(callsign))
       {
         spot.setFreq(freq);

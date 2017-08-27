@@ -118,6 +118,11 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     return incomingQsoArrayList.get(row).hisCall;
   }
   
+  public boolean  isSpQso(int row) throws Exception
+  {
+    return incomingQsoArrayList.get(row).getTypeOfWork().equalsIgnoreCase(Qso.TYPE_OF_WORK_SP);
+  }
+  
   
   /**
    * If we should go and work the callsign contained in this cell.

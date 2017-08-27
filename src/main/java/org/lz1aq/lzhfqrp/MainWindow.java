@@ -21,6 +21,7 @@ package org.lz1aq.lzhfqrp;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
@@ -71,8 +72,6 @@ public class MainWindow extends javax.swing.JFrame
   static final String PROGRAM_VERSION = "1.1";
   static final String PROGRAM_NAME    = "LZ-Log";
           
-  static final String TYPE_OF_WORK_SP = "SP";
-  static final String TYPE_OF_WORK_CQ = "CQ";
   static final int    SERIAL_NUMBER_LENGTH = 6;
   
   private Log                           log;
@@ -394,9 +393,9 @@ public class MainWindow extends javax.swing.JFrame
     jScrollPane5 = new javax.swing.JScrollPane();
     jtableBandmap = new javax.swing.JTable();
     jPanel8 = new javax.swing.JPanel();
-    jcomboboxStepInHz = new javax.swing.JComboBox<>();
-    jcomboboxColumnCount = new javax.swing.JComboBox<>();
-    jcomboboxRowCount = new javax.swing.JComboBox<>();
+    jcomboboxStepInHz = new javax.swing.JComboBox<String>();
+    jcomboboxColumnCount = new javax.swing.JComboBox<String>();
+    jcomboboxRowCount = new javax.swing.JComboBox<String>();
     jlabelBandmapFreeSpace = new javax.swing.JLabel();
     jLabel13 = new javax.swing.JLabel();
     jLabel14 = new javax.swing.JLabel();
@@ -946,9 +945,9 @@ public class MainWindow extends javax.swing.JFrame
     jtableIncomingQso.setRowHeight(30);
     jtableIncomingQso.addMouseListener(new java.awt.event.MouseAdapter()
     {
-      public void mouseClicked(java.awt.event.MouseEvent evt)
+      public void mousePressed(java.awt.event.MouseEvent evt)
       {
-        jtableIncomingQsoMouseClicked(evt);
+        jtableIncomingQsoMousePressed(evt);
       }
     });
     jScrollPane2.setViewportView(jtableIncomingQso);
@@ -956,7 +955,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
     jDesktopPane1.add(intframeTimeToNextQso);
-    intframeTimeToNextQso.setBounds(490, 10, 460, 435);
+    intframeTimeToNextQso.setBounds(490, 10, 463, 435);
 
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setMaximizable(true);
@@ -971,9 +970,9 @@ public class MainWindow extends javax.swing.JFrame
     jtableBandmap.setShowVerticalLines(false);
     jtableBandmap.addMouseListener(new java.awt.event.MouseAdapter()
     {
-      public void mouseClicked(java.awt.event.MouseEvent evt)
+      public void mousePressed(java.awt.event.MouseEvent evt)
       {
-        jtableBandmapMouseClicked(evt);
+        jtableBandmapMousePressed(evt);
       }
     });
     jScrollPane5.setViewportView(jtableBandmap);
@@ -1143,7 +1142,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 463, 459);
+    intframeBandmap.setBounds(500, 520, 527, 459);
 
     intframeLog.setIconifiable(true);
     intframeLog.setMaximizable(true);
@@ -1626,7 +1625,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeEntryWindow.getContentPane().add(jPanelStatusBar, gridBagConstraints);
 
     jDesktopPane1.add(intframeEntryWindow);
-    intframeEntryWindow.setBounds(280, 20, 453, 230);
+    intframeEntryWindow.setBounds(280, 20, 453, 227);
 
     intframeMisc.setIconifiable(true);
     intframeMisc.setMaximizable(true);
@@ -2147,76 +2146,6 @@ public class MainWindow extends javax.swing.JFrame
 
   }//GEN-LAST:event_jradiobuttonCQItemStateChanged
 
-  private void jtableIncomingQsoMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableIncomingQsoMouseClicked
-  {//GEN-HEADEREND:event_jtableIncomingQsoMouseClicked
-    //if (evt.getClickCount() == 2)
-    //{
-      JTable target = (JTable) evt.getSource();
-      int row = target.getSelectedRow();
-      String callsign;
-      
-      try
-      {
-        
-        // Jump to freq
-        radioController.setFrequency(jtablemodelIncomingQso.getFrequency(row)); // jump to freq
-        
-        // Add the callsign into the Entry field
-        initEntryFields();  // clear the fields
-        if(applicationSettings.isQuickCallsignModeEnabled()) // If quick mode is enabled add only the suffix
-        {
-          callsign = Misc.toShortCallsign(jtablemodelIncomingQso.getCallsign(row), applicationSettings.getDefaultPrefix());
-        }
-        else
-        {
-          callsign = jtablemodelIncomingQso.getCallsign(row);
-        }
-  
-        jtextfieldCallsign.setText(callsign);// set the callsign inside the callsign field
-      
-      }
-      catch (Exception ex)
-      {
-        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-      }
-    //}
-    
-    // Return focus to callsign field
-    jtextfieldCallsign.requestFocus();
-  }//GEN-LAST:event_jtableIncomingQsoMouseClicked
-
-  private void jtableBandmapMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableBandmapMouseClicked
-  {//GEN-HEADEREND:event_jtableBandmapMouseClicked
-    //if (evt.getClickCount() == 2)
-    //{
-      JTable target = (JTable) evt.getSource();
-      int row = target.getSelectedRow();
-      int col = target.getSelectedColumn();
-      
-      if(row>-1 && col>-1)
-      { 
-        try
-        {
-          int freq = jtablemodelBandmap.cellToFreq(row, col);
-          radioController.setFrequency(freq);
-          initEntryFields();
-          logger.log(Level.INFO, "new freq set -----------");
-        }
-        catch (Exception ex)
-        {
-          Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-      }
-      else
-      {
-        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, "Invalid row or col");
-      }
-    //}
-
-    // Return focus to callsign field
-    jtextfieldCallsign.requestFocus();
-  }//GEN-LAST:event_jtableBandmapMouseClicked
-
   private void jcomboboxColumnCountItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcomboboxColumnCountItemStateChanged
   {//GEN-HEADEREND:event_jcomboboxColumnCountItemStateChanged
      if (evt.getStateChange() == ItemEvent.SELECTED) 
@@ -2484,6 +2413,72 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jtextfieldQsoRepeatPeriodActionPerformed
     // TODO add your handling code here:
   }//GEN-LAST:event_jtextfieldQsoRepeatPeriodActionPerformed
+
+  private void jtableBandmapMousePressed(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableBandmapMousePressed
+  {//GEN-HEADEREND:event_jtableBandmapMousePressed
+    JTable target = (JTable) evt.getSource();
+    int row = target.getSelectedRow();
+    int col = target.getSelectedColumn();
+
+    if (row > -1 && col > -1)
+    {
+      try
+      {
+        int freq = jtablemodelBandmap.cellToFreq(row, col);
+        radioController.setFrequency(freq);
+        initEntryFields();
+        logger.log(Level.INFO, "new freq set -----------");
+      }
+      catch (Exception ex)
+      {
+        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
+    else
+    {
+      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, "Invalid row or col");
+    }
+
+    // Return focus to callsign field
+    jtextfieldCallsign.requestFocus();
+  }//GEN-LAST:event_jtableBandmapMousePressed
+
+  private void jtableIncomingQsoMousePressed(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableIncomingQsoMousePressed
+  {//GEN-HEADEREND:event_jtableIncomingQsoMousePressed
+    JTable target = (JTable) evt.getSource();
+    int row = target.getSelectedRow();
+    
+
+    try
+    {
+      radioController.setFrequency(jtablemodelIncomingQso.getFrequency(row)); // jump to freq
+      initEntryFields();  // clear the fields
+      
+      // Add the callsign into the Entry field if this is a S&P contact
+      if(jtablemodelIncomingQso.isSpQso(row))
+      {
+        String callsign;
+        if (applicationSettings.isQuickCallsignModeEnabled()) // If quick mode is enabled add only the suffix
+        {
+          callsign = Misc.toShortCallsign(jtablemodelIncomingQso.getCallsign(row), applicationSettings.getDefaultPrefix());
+        }
+        else
+        {
+          callsign = jtablemodelIncomingQso.getCallsign(row);
+        }
+
+        jtextfieldCallsign.setText(callsign);// set the callsign inside the callsign field
+      }
+
+    }
+    catch (Exception ex)
+    {
+      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    // Return focus to callsign field
+    jtextfieldCallsign.requestFocus();
+  }//GEN-LAST:event_jtableIncomingQsoMousePressed
   
   
   private void changeBandmapTableModelStructure()
@@ -2521,7 +2516,7 @@ public class MainWindow extends javax.swing.JFrame
   private boolean sendEnterSendsMessage()
   {
     // CQ mode
-    if(getTypeOfWork().equalsIgnoreCase(TYPE_OF_WORK_CQ))
+    if(getTypeOfWork().equalsIgnoreCase(Qso.TYPE_OF_WORK_CQ))
     {
       if(jtextfieldCallsign.getText().isEmpty())
       {
@@ -2671,9 +2666,9 @@ public class MainWindow extends javax.swing.JFrame
   private String getTypeOfWork()
   {
     if(jradiobuttonSP.isSelected())
-      return TYPE_OF_WORK_SP;
+      return Qso.TYPE_OF_WORK_SP;
     else
-      return TYPE_OF_WORK_CQ;
+      return Qso.TYPE_OF_WORK_CQ;
   }
   
   
