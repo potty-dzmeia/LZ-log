@@ -73,7 +73,7 @@ public class BandmapTableModel extends AbstractTableModel
    
     // If frequency cell ...
     // ---------------------
-    if(columnIndex%2 == 0)
+    if(appSettings.isShowBandmapFreqColumns()&& columnIndex%2 == 0)
       return Misc.toBandmapFreq(cellToFreq(rowIndex, columnIndex));
     
     
@@ -101,6 +101,130 @@ public class BandmapTableModel extends AbstractTableModel
      
     return cellBuilder.getResult();
   }
+  
+ 
+  public void addSpot(String callsign, int freq)
+  {
+     
+    for(BandmapSpot spot : manualSpots)
+    {
+      // If a manual spot is available update the frequency
+      if(spot.getCallsign().equals(callsign))
+      {
+        spot.setFreq(freq);
+        return;
+      }   
+    }
+    
+    manualSpots.add(new BandmapSpot(callsign, freq));
+  }
+  
+  
+  /**
+   * Updates the content of the table.
+   * @param appSettings
+   * @param startFreq
+   */
+  public synchronized void refresh(ApplicationSettings appSettings, int startFreq)
+  {
+    startFreqInHz = startFreq;
+    this.appSettings = appSettings;
+    
+    lastSpQsos = log.getLastSpContacts();
+    
+    // Check if an SP contact is also in the manualSpots. 
+    // If yes and frequency is within 1Khz remove the manual spot
+    for(Qso spQso : lastSpQsos)
+    {
+      if(isManuallySpotOnSameFreq(spQso))
+      {
+        manualSpots.remove(new BandmapSpot(spQso.getHisCallsign()));
+      }
+    }
+    
+    this.fireTableDataChanged();
+  }
+  
+  /**
+   * Checks if there is a manual spot on the same frequency (+-100KHz)
+   * @param qso
+   * @return 
+   */
+  private boolean isManuallySpotOnSameFreq(Qso qso)
+  {  
+    for(int i=0; i<manualSpots.size(); i++)
+    {
+      if(manualSpots.get(i).getCallsign().equals(qso.getHisCallsign()) && // if same callsign
+         Math.abs(manualSpots.get(i).getFreq() - qso.getFrequencyInt()) < 100 ) // if same freq (+-100Hz)
+      {
+        manualSpots.remove(i);
+      }
+    }    
+    return false;
+  }
+  
+  /**
+   * Used for getting the frequency represented by the cell. Could be e frequency cell or a callsign
+   * cell.
+   * 
+   * @param row
+   * @param column
+   * @return - frequency in Hz
+   */
+  public int cellToFreq(int row, int column)
+  {
+    
+    if(appSettings.isShowBandmapFreqColumns())
+    {
+      // An Odd column - means a callsign is hold in the cell
+      if(column%2 == 1)
+      {
+        return startFreqInHz+((row)*appSettings.getBandmapStepInHz())+((appSettings.getBandmapRowCount()/2)*(column-1)*appSettings.getBandmapStepInHz());
+      }
+      // Frequency is hold in this cell
+      else
+      {
+        return startFreqInHz+((row)*appSettings.getBandmapStepInHz())+((appSettings.getBandmapRowCount()/2)*column*appSettings.getBandmapStepInHz());
+      }
+    }
+    // Do not show frequency columns
+    else
+    {
+      return startFreqInHz+((row)*appSettings.getBandmapStepInHz())+(appSettings.getBandmapRowCount()*column*appSettings.getBandmapStepInHz());
+    }
+  }
+ 
+  
+  /**
+   * Checks if the supplied "freq" fits the cell frequency
+   * @param row - cell row
+   * @param col - cell column
+   * @param freq - the frequency that we want to check if it is within the cell frequency
+   * @return 
+   */
+  public boolean isCurrentFreqInThisCell(int row, int col, int freq)
+  {
+    int cellFreq = cellToFreq(row, col);
+    int lowRange = cellFreq - (appSettings.getBandmapStepInHz()/2);
+    int highTange = cellFreq + (appSettings.getBandmapStepInHz()/2);
+    
+    return freq >= lowRange && freq < highTange;
+  }
+  
+  
+  /**
+   * Check is the frequency of the Qso fits the cell frequency
+   * 
+   * @param row
+   * @param col
+   * @param qso
+   * @return 
+   */
+  private boolean isQsoInThisCell(int row, int col, Qso qso)
+  {
+    return isCurrentFreqInThisCell(row, col, qso.getFrequencyInt());
+  }
+  
   
   
   /**
@@ -189,118 +313,5 @@ public class BandmapTableModel extends AbstractTableModel
       }
       return cellText.toString();
     }         
-  }
-  
-  
-  public void addSpot(String callsign, int freq)
-  {
-     
-    for(BandmapSpot spot : manualSpots)
-    {
-      // If a manual spot is available update the frequency
-      if(spot.getCallsign().equals(callsign))
-      {
-        spot.setFreq(freq);
-        return;
-      }   
-    }
-    
-    manualSpots.add(new BandmapSpot(callsign, freq));
-  }
-  
-  /**
-   * Updates the content of the table.
-   * @param appSettings
-   * @param startFreq
-   */
-  public synchronized void refresh(ApplicationSettings appSettings, int startFreq)
-  {
-    startFreqInHz = startFreq;
-    this.appSettings = appSettings;
-    
-    lastSpQsos = log.getLastSpContacts();
-    
-    // Check if an SP contact is also in the manualSpots. 
-    // If yes and frequency is within 1Khz remove the manual spot
-    for(Qso spQso : lastSpQsos)
-    {
-      if(isManuallySpotOnSameFreq(spQso))
-      {
-        manualSpots.remove(new BandmapSpot(spQso.getHisCallsign(),3500000));
-      }
-    }
-    
-    this.fireTableDataChanged();
-  }
-  
-  /**
-   * Checks if there is a manual spot on the same frequency (+-100KHz)
-   * @param qso
-   * @return 
-   */
-  private boolean isManuallySpotOnSameFreq(Qso qso)
-  {  
-    for(int i=0; i<manualSpots.size(); i++)
-    {
-      if(manualSpots.get(i).getCallsign().equals(qso.getHisCallsign()) && // if same callsign
-         Math.abs(manualSpots.get(i).getFreq() - qso.getFrequencyInt()) < 100 ) // if same freq (+-100Hz)
-      {
-        manualSpots.remove(i);
-      }
-    }    
-    return false;
-  }
-  
-  /**
-   * Used for getting the frequency represented by the cell. Could be e frequency cell or a callsign
-   * cell.
-   * 
-   * @param row
-   * @param column
-   * @return - frequency in Hz
-   */
-  public int cellToFreq(int row, int column)
-  {
-    // Odd column - means a callsign is hold in the cell
-    if(column%2 == 1)
-    {
-      return startFreqInHz+((row)*appSettings.getBandmapStepInHz())+((appSettings.getBandmapRowCount()/2)*(column-1)*appSettings.getBandmapStepInHz());
-    }
-    // Even - a frequency is hold in this cell
-    else
-    {
-      return startFreqInHz+((row)*appSettings.getBandmapStepInHz())+((appSettings.getBandmapRowCount()/2)*column*appSettings.getBandmapStepInHz());
-    }
-  }
- 
-  
-  /**
-   * Checks if the supplied "freq" fits the cell frequency
-   * @param row - cell row
-   * @param col - cell column
-   * @param freq - the frequency that we want to check if it is within the cell frequency
-   * @return 
-   */
-  public boolean isCurrentFreqInThisCell(int row, int col, int freq)
-  {
-    int cellFreq = cellToFreq(row, col);
-    int lowRange = cellFreq - (appSettings.getBandmapStepInHz()/2);
-    int highTange = cellFreq + (appSettings.getBandmapStepInHz()/2);
-    
-    return freq >= lowRange && freq < highTange;
-  }
-  
-  
-  /**
-   * Check is the frequency of the Qso fits the cell frequency
-   * 
-   * @param row
-   * @param col
-   * @param qso
-   * @return 
-   */
-  private boolean isQsoInThisCell(int row, int col, Qso qso)
-  {
-    return isCurrentFreqInThisCell(row, col, qso.getFrequencyInt());
   }
 }

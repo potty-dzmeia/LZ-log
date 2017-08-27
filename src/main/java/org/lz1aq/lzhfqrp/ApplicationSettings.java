@@ -53,6 +53,7 @@ public final class ApplicationSettings
   static final String PROPERTY_ESM = "ems"; // enter sends message
   static final String PROPERTY_SEND_ZERO_AS_T = "zero_as_t";
   static final String PROPERTY_AUTO_CQ_FREQ_JUMP = "auto_cq_freq_jump";
+  static final String PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS = "bandmap_show_freq_columns";
   
   public static final int FUNCTION_KEYS_COUNT = 12; // The number of function keys
  
@@ -90,9 +91,9 @@ public final class ApplicationSettings
   private String comPort;
   private String myCallsign;
   private boolean isQuickCallsignModeEnabled;
-  private boolean isEms;
-  private boolean isAutoCqJump;
-  private boolean isSendZeroAsT;
+  private boolean emsEnabled;
+  private boolean autoCqJumpEnabled;
+  private boolean sendZeroAsT_Enabled;
   private String defaultPrefix;
   private int qsoRepeatPeriodInSeconds;
   private final Rectangle[] framesDimensions; // Postition and size of all frames used by the program
@@ -103,6 +104,7 @@ public final class ApplicationSettings
   private int bandmapStepInHz;
   private int bandmapRowCount;
   private int bandmapColumnCount;
+  private boolean showBandmapFreqColumnsEnabled;
   
   private final Properties prop;
 
@@ -171,6 +173,16 @@ public final class ApplicationSettings
     return bandmapColumnCount;
   }
   
+  public boolean isShowBandmapFreqColumns()
+  {
+    return showBandmapFreqColumnsEnabled;
+  }
+  
+  public void setShowBandmapFreqColumns(boolean isEnabled)
+  {
+    showBandmapFreqColumnsEnabled = isEnabled;
+  }
+  
   public String getComPort()
   {
     return comPort;
@@ -192,34 +204,34 @@ public final class ApplicationSettings
   }
 
   
-  public void setEms(boolean isEnabled)
+  public void setEmsEnabled(boolean isEnabled)
   {
-    this.isEms = isEnabled;
+    this.emsEnabled = isEnabled;
   }
   
-  public boolean isEms()
+  public boolean isEmsEnabled()
   {
-    return this.isEms;
+    return this.emsEnabled;
   }
   
-  public void setAutoCqJump(boolean isEnabled)
+  public void setAutoCqJumpEnabled(boolean isEnabled)
   {
-    this.isAutoCqJump = isEnabled;
+    this.autoCqJumpEnabled = isEnabled;
   }
   
-  public boolean isAutoCqJump()
+  public boolean isAutoCqJumpEnabled()
   {
-    return this.isAutoCqJump;
+    return this.autoCqJumpEnabled;
   }
   
-  public void setSendZeroAsT(boolean isEnabled)
+  public void setSendZeroAsT_Enabled(boolean isEnabled)
   {
-    this.isSendZeroAsT = isEnabled;
+    this.sendZeroAsT_Enabled = isEnabled;
   }
   
-  public boolean isSendZeroAsT()
+  public boolean isSendZeroAsT_Enabled()
   {
-    return this.isSendZeroAsT;
+    return this.sendZeroAsT_Enabled;
   }
           
   /**
@@ -418,9 +430,9 @@ public final class ApplicationSettings
     prop.setProperty(PROPERTY_COMPORT, comPort);
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
     prop.setProperty(PROPERTY_QUICK_CALLSIGN_MODE, Boolean.toString(isQuickCallsignModeEnabled));
-    prop.setProperty(PROPERTY_AUTO_CQ_FREQ_JUMP, Boolean.toString(isAutoCqJump));
-    prop.setProperty(PROPERTY_ESM, Boolean.toString(isEms));
-    prop.setProperty(PROPERTY_SEND_ZERO_AS_T, Boolean.toString(isSendZeroAsT));
+    prop.setProperty(PROPERTY_AUTO_CQ_FREQ_JUMP, Boolean.toString(autoCqJumpEnabled));
+    prop.setProperty(PROPERTY_ESM, Boolean.toString(emsEnabled));
+    prop.setProperty(PROPERTY_SEND_ZERO_AS_T, Boolean.toString(sendZeroAsT_Enabled));
     prop.setProperty(PROPERTY_DEFAULT_PREFIX, defaultPrefix);
     prop.setProperty(PROPERTY_QSO_REPEAT_PERIOD_SEC, Integer.toString(qsoRepeatPeriodInSeconds));
 
@@ -429,7 +441,8 @@ public final class ApplicationSettings
 
     prop.setProperty(PROPERTY_INCOMING_QSO_HIDE_AFTER, Integer.toString(incomingQsoHiderAfter));
     prop.setProperty(PROPERTY_INCOMING_QSO_MAX_ENTRIES, Integer.toString(incomingQsoMaxEntries));
-
+    
+    
     // Save the dimensions for the different frames
     setPropertiesFramesSizes();
     
@@ -440,7 +453,7 @@ public final class ApplicationSettings
     prop.setProperty(PROPERTY_BANDMAP_COLUMN_COUNT, Integer.toString(bandmapColumnCount));
     prop.setProperty(PROPERTY_BANDMAP_ROW_COUNT, Integer.toString(bandmapRowCount));
     prop.setProperty(PROPERTY_BANDMAP_STEP, Integer.toString(bandmapStepInHz));
-
+    prop.setProperty(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS, Boolean.toString(showBandmapFreqColumnsEnabled));
 
     try
     {
@@ -498,17 +511,17 @@ public final class ApplicationSettings
       temp = prop.getProperty(PROPERTY_AUTO_CQ_FREQ_JUMP);
       if (temp == null)
         throwMissingPropertyException(PROPERTY_AUTO_CQ_FREQ_JUMP);
-      isAutoCqJump = Boolean.parseBoolean(temp);
+      autoCqJumpEnabled = Boolean.parseBoolean(temp);
       
       temp = prop.getProperty(PROPERTY_ESM);
       if (temp == null)
         throwMissingPropertyException(PROPERTY_ESM);
-      isEms = Boolean.parseBoolean(temp);
+      emsEnabled = Boolean.parseBoolean(temp);
       
       temp = prop.getProperty(PROPERTY_SEND_ZERO_AS_T);
       if (temp == null)
         throwMissingPropertyException(PROPERTY_SEND_ZERO_AS_T);
-      isSendZeroAsT = Boolean.parseBoolean(temp);
+      sendZeroAsT_Enabled = Boolean.parseBoolean(temp);
 
       
       // Default prefix
@@ -553,6 +566,17 @@ public final class ApplicationSettings
         throwMissingPropertyException(PROPERTY_BANDMAP_STEP);
       }
       bandmapStepInHz = Integer.parseInt(temp);
+      
+      temp = prop.getProperty(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS);
+      if(temp == null)
+      {
+        showBandmapFreqColumnsEnabled = true;
+      }
+      else
+      {
+        showBandmapFreqColumnsEnabled = Boolean.parseBoolean(temp);
+      }
+      
     }
     catch (IOException ex)
     {
@@ -581,9 +605,9 @@ public final class ApplicationSettings
     myCallsign = "LZ1ABC";
     isQuickCallsignModeEnabled = false;
     defaultPrefix = "LZ0";
-    isAutoCqJump = false;
-    isEms = false;
-    isSendZeroAsT = false; 
+    autoCqJumpEnabled = false;
+    emsEnabled = false;
+    sendZeroAsT_Enabled = false; 
     qsoRepeatPeriodInSeconds = 1800;
 
     // Set texts for the direction buttons
@@ -636,6 +660,7 @@ public final class ApplicationSettings
     bandmapColumnCount = 16;
     bandmapRowCount = 15;
     bandmapStepInHz = 200;
+    showBandmapFreqColumnsEnabled = true;
   }
 
   void throwMissingPropertyException(String propertyName) throws Exception

@@ -29,14 +29,20 @@ public class BandmapSpot
 {
 
   private final String callsign;
-  private int freq;
+  private int freq = 3500000;
 
+  
+  public BandmapSpot(String callsign)
+  {
+    this.callsign = callsign;
+  }
   
   public BandmapSpot(String callsign, int freq)
   {
     this.callsign = callsign;
     this.freq = freq;
   }
+  
 
   @Override
   public boolean equals(Object obj)
