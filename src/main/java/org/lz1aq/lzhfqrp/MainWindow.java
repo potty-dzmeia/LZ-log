@@ -69,7 +69,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.1";
+  static final String PROGRAM_VERSION = "1.1.1";
   static final String PROGRAM_NAME    = "LZ-Log";
           
   static final int    SERIAL_NUMBER_LENGTH = 6;
@@ -1128,8 +1128,6 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weightx = 0.01;
     gridBagConstraints.weighty = 1.0;
     jPanel8.add(jtextfieldBandmapStartFreq, gridBagConstraints);
-
-    jlabelBandmapFreeSpace.setText("jLabel19");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 12;
     gridBagConstraints.gridy = 2;
@@ -1166,7 +1164,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 595, 483);
+    intframeBandmap.setBounds(500, 520, 637, 459);
 
     intframeLog.setIconifiable(true);
     intframeLog.setMaximizable(true);
@@ -1446,6 +1444,8 @@ public class MainWindow extends javax.swing.JFrame
     jpanelTypeOfWork.add(jcomboboxMode, gridBagConstraints);
 
     jcomboboxBand.setModel(getBandsComboboxModel());
+    jcomboboxBand.setSelectedItem(getBandsComboboxModel().getElementAt(1)
+    );
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
