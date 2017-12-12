@@ -21,7 +21,6 @@ package org.lz1aq.lzhfqrp;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
@@ -225,12 +224,12 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldSnt.addFocusListener(highlighter);
     jtextfieldRcv.addFocusListener(highlighter);
 
-    // Start a 1sec timer
+    // Timer for refreshing Bandmap and TimeToNextQso windows
     timer1sec = new Timer(1000, timer1secListener);
     timer1sec.setRepeats(true);
     timer1sec.start();
     
-    // Start a 500ms second timer
+    // Timer for updating the status of the callsign (Dupe, new etc..)
     timer500ms = new Timer(300, timer500msListener);
     timer500ms.setRepeats(true);
     timer500ms.start();
@@ -416,6 +415,10 @@ public class MainWindow extends javax.swing.JFrame
     jcheckboxRadioPolling = new javax.swing.JCheckBox();
     jLabel17 = new javax.swing.JLabel();
     jtextfieldPollingTime = new javax.swing.JTextField();
+    jtextfieldRadioCommPortInUse = new javax.swing.JTextField();
+    jpanelKeyerConnection = new javax.swing.JPanel();
+    jToggleButton1 = new javax.swing.JToggleButton();
+    jtextfieldKeyerCommPortInUse = new javax.swing.JTextField();
     intframeEntryWindow = new javax.swing.JInternalFrame();
     jpanelCallsign = new javax.swing.JPanel();
     jtextfieldCallsign = new javax.swing.JTextField();
@@ -499,7 +502,8 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     jPanel4.add(jComboBoxComPort, gridBagConstraints);
 
-    jLabel12.setText("CommPort");
+    jLabel12.setText("Radio CommPort");
+    jLabel12.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -922,13 +926,13 @@ public class MainWindow extends javax.swing.JFrame
     setTitle(PROGRAM_NAME+" by LZ1ABC");
     addWindowListener(new java.awt.event.WindowAdapter()
     {
-      public void windowClosing(java.awt.event.WindowEvent evt)
-      {
-        formWindowClosing(evt);
-      }
       public void windowOpened(java.awt.event.WindowEvent evt)
       {
         formWindowOpened(evt);
+      }
+      public void windowClosing(java.awt.event.WindowEvent evt)
+      {
+        formWindowClosing(evt);
       }
     });
 
@@ -1223,13 +1227,14 @@ public class MainWindow extends javax.swing.JFrame
     intframeRadioConnection.setIconifiable(true);
     intframeRadioConnection.setMaximizable(true);
     intframeRadioConnection.setResizable(true);
-    intframeRadioConnection.setTitle("Radio connection");
+    intframeRadioConnection.setTitle("Radio/Keyer connection");
     intframeRadioConnection.setToolTipText("");
     intframeRadioConnection.setMinimumSize(new java.awt.Dimension(130, 90));
     intframeRadioConnection.setPreferredSize(new java.awt.Dimension(402, 150));
     intframeRadioConnection.setVisible(true);
+    intframeRadioConnection.getContentPane().setLayout(new java.awt.GridBagLayout());
 
-    jpanelRadioConnection.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+    jpanelRadioConnection.setBorder(javax.swing.BorderFactory.createTitledBorder("Radio"));
     jpanelRadioConnection.setLayout(new java.awt.GridBagLayout());
 
     jtogglebuttonConnectToRadio.setText("Connect");
@@ -1258,7 +1263,7 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldFrequency.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
     jtextfieldFrequency.setText("frequency");
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1273,7 +1278,7 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldMode.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
     jtextfieldMode.setText("mode");
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -1318,7 +1323,56 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jpanelRadioConnection.add(jtextfieldPollingTime, gridBagConstraints);
 
-    intframeRadioConnection.getContentPane().add(jpanelRadioConnection, java.awt.BorderLayout.CENTER);
+    jtextfieldRadioCommPortInUse.setBackground(new java.awt.Color(0, 0, 0));
+    jtextfieldRadioCommPortInUse.setForeground(new java.awt.Color(255, 255, 255));
+    jtextfieldRadioCommPortInUse.setText("jTextField2");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jpanelRadioConnection.add(jtextfieldRadioCommPortInUse, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    intframeRadioConnection.getContentPane().add(jpanelRadioConnection, gridBagConstraints);
+
+    jpanelKeyerConnection.setBorder(javax.swing.BorderFactory.createTitledBorder("Keyer"));
+    jpanelKeyerConnection.setMinimumSize(new java.awt.Dimension(243, 87));
+    jpanelKeyerConnection.setName(""); // NOI18N
+    jpanelKeyerConnection.setPreferredSize(new java.awt.Dimension(353, 87));
+    jpanelKeyerConnection.setLayout(new java.awt.GridBagLayout());
+
+    jToggleButton1.setText("Connect");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.2;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 20, 5, 20);
+    jpanelKeyerConnection.add(jToggleButton1, gridBagConstraints);
+
+    jtextfieldKeyerCommPortInUse.setBackground(new java.awt.Color(0, 0, 0));
+    jtextfieldKeyerCommPortInUse.setForeground(new java.awt.Color(255, 255, 255));
+    jtextfieldKeyerCommPortInUse.setText("jTextField2");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 20, 5, 20);
+    jpanelKeyerConnection.add(jtextfieldKeyerCommPortInUse, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.2;
+    intframeRadioConnection.getContentPane().add(jpanelKeyerConnection, gridBagConstraints);
 
     jDesktopPane1.add(intframeRadioConnection);
     intframeRadioConnection.setBounds(30, 20, 402, 150);
@@ -2003,12 +2057,9 @@ public class MainWindow extends javax.swing.JFrame
     if(addEntryToLog())
     {
       initEntryFields();
-      // Move focus to Callsign field
-      jtextfieldCallsign.requestFocus();
       
       if(applicationSettings.isEmsEnabled() && jradiobuttonCQ.isSelected())
-        pressedF3();
-      
+        pressedF3(); 
     }
   }//GEN-LAST:event_jtextfieldRcvActionPerformed
 
@@ -2027,7 +2078,7 @@ public class MainWindow extends javax.swing.JFrame
     switch(evt.getKeyChar())
     {
       case KeyEvent.VK_SPACE: // Move to Rcv field    
-        jtextfieldRcv.requestFocus();
+        jtextfieldRcv.requestFocusInWindow();
         evt.consume();
         break;
 
@@ -2036,12 +2087,12 @@ public class MainWindow extends javax.swing.JFrame
         {
           if(sendEnterSendsMessage())
           {
-             jtextfieldRcv.requestFocus();
+             jtextfieldRcv.requestFocusInWindow();
           }
         }
         else
         {
-          jtextfieldRcv.requestFocus();
+          jtextfieldRcv.requestFocusInWindow();
         }
         evt.consume();     
         break;
@@ -2253,7 +2304,7 @@ public class MainWindow extends javax.swing.JFrame
     switch(evt.getKeyChar())
     {
       case KeyEvent.VK_SPACE: // Move to Rcv field    
-        jtextfieldCallsign.requestFocus();
+        jtextfieldCallsign.requestFocusInWindow();
         evt.consume();
         break;
     }
@@ -2392,7 +2443,7 @@ public class MainWindow extends javax.swing.JFrame
   private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
     intframeRadioConnection.moveToFront();
-    jpanelRadioConnection.requestFocus();
+    jpanelRadioConnection.requestFocusInWindow();
   }//GEN-LAST:event_jMenuItem4ActionPerformed
 
   private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem5ActionPerformed
@@ -2464,7 +2515,7 @@ public class MainWindow extends javax.swing.JFrame
     }
 
     // Return focus to callsign field
-    jtextfieldCallsign.requestFocus();
+    jtextfieldCallsign.requestFocusInWindow();
   }//GEN-LAST:event_jtableBandmapMousePressed
 
   private void jtableIncomingQsoMousePressed(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableIncomingQsoMousePressed
@@ -2501,7 +2552,7 @@ public class MainWindow extends javax.swing.JFrame
     }
 
     // Return focus to callsign field
-    jtextfieldCallsign.requestFocus();
+    jtextfieldCallsign.requestFocusInWindow();
   }//GEN-LAST:event_jtableIncomingQsoMousePressed
 
   private void jcomboboxShowFreqColumnsItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcomboboxShowFreqColumnsItemStateChanged
@@ -2584,7 +2635,7 @@ public class MainWindow extends javax.swing.JFrame
   
   private boolean connectToRadio()
   {
-    boolean result = radioController.connect(applicationSettings.getComPort(), new LocalRadioControllerListener());
+    boolean result = radioController.connect(applicationSettings.getRadioComPort(), new LocalRadioControllerListener());
     if (!result)
     {
       JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
@@ -2657,21 +2708,21 @@ public class MainWindow extends javax.swing.JFrame
     if(jtextfieldCallsign.getText().isEmpty() || !Qso.isValidCallsign(getCallsignFromTextField()))
     {
       JOptionPane.showMessageDialog(null, "Invalid callsign!");
-      jtextfieldCallsign.requestFocus();
+      jtextfieldCallsign.requestFocusInWindow();
       return false;
     }
 
     if(!Qso.isValidSerial(jtextfieldSnt.getText()))
     {
       JOptionPane.showMessageDialog(null, "Invalid Snt!");
-      jtextfieldSnt.requestFocus();
+      jtextfieldSnt.requestFocusInWindow();
       return false;
     }
     
     if(!Qso.isValidSerial(jtextfieldRcv.getText()))
     {
       JOptionPane.showMessageDialog(null, "Invalid Rcv!");
-      jtextfieldRcv.requestFocus();
+      jtextfieldRcv.requestFocusInWindow();
       return false;
     }
       
@@ -2838,7 +2889,7 @@ public class MainWindow extends javax.swing.JFrame
     // Clean the callsign status
     jlabelCallsignStatus.setText("NEW");
     // Set focus to callsign field
-    jtextfieldCallsign.requestFocus();
+    jtextfieldCallsign.requestFocusInWindow();
   }
   
 
@@ -2893,6 +2944,12 @@ public class MainWindow extends javax.swing.JFrame
     
     // Set the CQ frequency
     jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
+    
+    // Set the CommPort info
+    jtextfieldRadioCommPortInUse.setText(applicationSettings.getRadioComPort()+" at "+" 19600");
+    jtextfieldKeyerCommPortInUse.setText(applicationSettings.getKeyerComPort()+" at "+" 19600");
+ 
+    
   }
     
     
@@ -2902,7 +2959,7 @@ public class MainWindow extends javax.swing.JFrame
   private void initSettingsDialog()
   {
     // Comport selection
-    jComboBoxComPort.setSelectedItem(applicationSettings.getComPort());
+    jComboBoxComPort.setSelectedItem(applicationSettings.getRadioComPort());
   
     // my callsing texts
     textfieldSettingsMyCallsign.setText(applicationSettings.getMyCallsign());
@@ -2949,7 +3006,7 @@ public class MainWindow extends javax.swing.JFrame
     // Commport
     if (jComboBoxComPort.getSelectedItem() != null)
     {
-      applicationSettings.setComPort(jComboBoxComPort.getSelectedItem().toString());
+      applicationSettings.setRadioComPort(jComboBoxComPort.getSelectedItem().toString());
     }
     
     // Callsign   
@@ -3470,7 +3527,7 @@ public class MainWindow extends javax.swing.JFrame
           if(addEntryToLog())
             {
               initEntryFields();   
-              jtextfieldCallsign.requestFocus(); // Move focus to Callsign field
+              jtextfieldCallsign.requestFocusInWindow(); // Move focus to Callsign field
               pressedF3();
             } 
           evt.consume();
@@ -3724,6 +3781,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JScrollPane jScrollPane4;
   private javax.swing.JScrollPane jScrollPane5;
   private javax.swing.JTextField jTextField1;
+  private javax.swing.JToggleButton jToggleButton1;
   private javax.swing.JButton jbuttonCreateNewLog;
   private javax.swing.JButton jbuttonDeleteEntry;
   private javax.swing.JButton jbuttonJumpToCqFreq;
@@ -3754,6 +3812,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JPanel jpanelCompleteLog;
   private javax.swing.JPanel jpanelCqSettings;
   private javax.swing.JPanel jpanelFunctionKeys;
+  private javax.swing.JPanel jpanelKeyerConnection;
   private javax.swing.JPanel jpanelKeyerSettings;
   private javax.swing.JPanel jpanelRadioConnection;
   private javax.swing.JPanel jpanelTypeOfWork;
@@ -3767,9 +3826,11 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JTextField jtextfieldContinuousCqPeriod;
   private javax.swing.JTextField jtextfieldFreqWidth;
   private javax.swing.JTextField jtextfieldFrequency;
+  private javax.swing.JTextField jtextfieldKeyerCommPortInUse;
   private javax.swing.JTextField jtextfieldMode;
   private javax.swing.JTextField jtextfieldPollingTime;
   private javax.swing.JTextField jtextfieldQsoRepeatPeriod;
+  private javax.swing.JTextField jtextfieldRadioCommPortInUse;
   private javax.swing.JTextField jtextfieldRcv;
   private javax.swing.JTextField jtextfieldSnt;
   private javax.swing.JTextField jtextfieldf1;

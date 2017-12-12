@@ -1,20 +1,21 @@
-- bandmap - hide the freq columns
-
+High priority:
+- support for winkey
+- support Icom CAT
+- Baud rate settings to be done from the App.
+- all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
 - continious CQ interval should work 
+- serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
+
 - serial comm - needs to work fast. There were some problems with responsivnes during the contest
 - when generating cabrilo check for obvious mistakes
 - Try to catch all keyboard presses (f4 should not close HDSDR)
 - the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
-- all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings 
 - bandmap - add reset button
-- serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
-- bandmap - if the freq columns are removed try horizontal organization 
-- bandmap - when hovering over the cell it should show the current freq
 
 
 
-After contest:
-- "do not show after" to be 4 hours
+
+Low priority:
 - show qso rate
 - band map should be updated depending on the current freq and mode
 - there should be an option for entering worked frequency for people that do not use CAT
@@ -22,18 +23,19 @@ After contest:
 - when correcting callsign in the log the call is written with small letters
 - adjust row sizes depending on the font
 - delete callsign when moving away from freq and enter into bandmap
-- new settings options should not break window organization
-- Baud rate settings to be done from the App.
-- support Icom CAT
+- bandmap - when hovering over the cell it should show the current freq
 - enter frequency in callsign
 - note za wsqka vruzka 
 - opciq vsichki nuli da sa T
 - remember the size of the columns in the tables
 - alt+k = 
 - first part of sent serial number is not updated (e.g. when changing the serial number from the table)
+- remember which windows are maximized/minimized
 
 
 Solved:
+- Focus change should be reliable now (using requestrequestFocusInWindow())
+- bandmap - hide the freq columns
 - For Elekraft when sending CW put space between F-keys (e.g. f5 i f2)
 - ;' - da rabotqt
 - mark CQ frequency on bandmap
@@ -41,3 +43,5 @@ Solved:
 - new bandmap spot should not be prevented if there is a same spot close to this frequency (was 500Hz now is 100Hz)
 - mouse press on bandmap should always work - get rid of the table borders if possible (events handled on mouse pressed)
 - bandmap - blue S&P entries were actually dupes (bug)
+- "do not show after" to be 4 hours
+- new settings options should not break window organization

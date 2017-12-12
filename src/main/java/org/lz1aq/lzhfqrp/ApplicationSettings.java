@@ -37,7 +37,8 @@ public final class ApplicationSettings
 
   static final String SETTINGS_FILE_NAME = "settings.properties";
 
-  static final String PROPERTY_COMPORT = "com_port";
+  static final String PROPERTY_RADIO_COMPORT = "radio_com_port";
+  static final String PROPERTY_KEYER_COMPORT = "keyer_com_port";
   static final String PROPERTY_MY_CALL_SIGN = "my_callsign";
   static final String PROPERTY_QUICK_CALLSIGN_MODE = "quick_callsign_mode";
   static final String PROPERTY_DEFAULT_PREFIX = "default_prefix";
@@ -88,7 +89,8 @@ public final class ApplicationSettings
   }
   
 
-  private String comPort;
+  private String radioComPort;
+  private String keyerComPort;
   private String myCallsign;
   private boolean isQuickCallsignModeEnabled;
   private boolean emsEnabled;
@@ -183,14 +185,24 @@ public final class ApplicationSettings
     showBandmapFreqColumnsEnabled = isEnabled;
   }
   
-  public String getComPort()
+  public String getRadioComPort()
   {
-    return comPort;
+    return radioComPort;
   }
 
-  public void setComPort(String comPort)
+  public void setRadioComPort(String comPort)
   {
-    this.comPort = comPort;
+    this.radioComPort = comPort;
+  }
+  
+  public String getKeyerComPort()
+  {
+    return keyerComPort;
+  }
+
+  public void setKeyerComPort(String comPort)
+  {
+    this.keyerComPort = comPort;
   }
 
   public String getMyCallsign()
@@ -209,6 +221,13 @@ public final class ApplicationSettings
     this.emsEnabled = isEnabled;
   }
   
+  /**
+   * If "Enter Sends Message" is enabled:
+   *  - sends "599 and report" when enter is pressed while focus is on Callsign text field.
+   *  - sends "tu" when enter is pressed while focus in on RCV text field.
+   * 
+   * @return 
+   */
   public boolean isEmsEnabled()
   {
     return this.emsEnabled;
@@ -427,7 +446,8 @@ public final class ApplicationSettings
    */
   public void SaveSettingsToDisk()
   {
-    prop.setProperty(PROPERTY_COMPORT, comPort);
+    prop.setProperty(PROPERTY_RADIO_COMPORT, radioComPort);
+    prop.setProperty(PROPERTY_KEYER_COMPORT, keyerComPort);
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
     prop.setProperty(PROPERTY_QUICK_CALLSIGN_MODE, Boolean.toString(isQuickCallsignModeEnabled));
     prop.setProperty(PROPERTY_AUTO_CQ_FREQ_JUMP, Boolean.toString(autoCqJumpEnabled));
@@ -477,120 +497,120 @@ public final class ApplicationSettings
 
       // Read the dimensions for the different frames
       if(getPropertiesFramesSizes() == false)
-        throwMissingPropertyException(PROPERTY_FRAMES_DIMENSIONS);
+        SetSettingsToDefault(PROPERTY_FRAMES_DIMENSIONS);
           
       // Read the fonts
       if(getPropertiesFonts() == false)
-        throwMissingPropertyException(PROPERTY_FONTS);
+        SetSettingsToDefault(PROPERTY_FONTS);
       
-      // Comport
-      comPort = prop.getProperty(PROPERTY_COMPORT);
-      if (comPort == null)
-        throwMissingPropertyException(PROPERTY_COMPORT);
+      // Radio Comport
+      radioComPort = prop.getProperty(PROPERTY_RADIO_COMPORT);
+      if (radioComPort == null)
+        SetSettingsToDefault(PROPERTY_RADIO_COMPORT);
 
+      // Keyer Comport
+      keyerComPort = prop.getProperty(PROPERTY_KEYER_COMPORT);
+      if (keyerComPort == null)
+        SetSettingsToDefault(PROPERTY_KEYER_COMPORT);
+      
       // My callsign
       myCallsign = prop.getProperty(PROPERTY_MY_CALL_SIGN);
       if (myCallsign == null)
-        throwMissingPropertyException(PROPERTY_MY_CALL_SIGN);
+        SetSettingsToDefault(PROPERTY_MY_CALL_SIGN);
 
       // Now read the texts for the function keys
       getProperties(PROPERTY_FUNCTION_KEYS, functionKeyTexts);
       for (String str : functionKeyTexts)
       {
         if (str == null)
-          throwMissingPropertyException(PROPERTY_FUNCTION_KEYS);
+        {
+          SetSettingsToDefault(PROPERTY_FUNCTION_KEYS);
+          break;
+        }
       }
 
       
       // Misc settings
       String temp = prop.getProperty(PROPERTY_QUICK_CALLSIGN_MODE);
       if (temp == null)
-        throwMissingPropertyException(PROPERTY_QUICK_CALLSIGN_MODE);
-      isQuickCallsignModeEnabled = Boolean.parseBoolean(temp);
+        SetSettingsToDefault(PROPERTY_QUICK_CALLSIGN_MODE);
+      else
+        isQuickCallsignModeEnabled = Boolean.parseBoolean(temp);
       
       temp = prop.getProperty(PROPERTY_AUTO_CQ_FREQ_JUMP);
       if (temp == null)
-        throwMissingPropertyException(PROPERTY_AUTO_CQ_FREQ_JUMP);
-      autoCqJumpEnabled = Boolean.parseBoolean(temp);
+        SetSettingsToDefault(PROPERTY_AUTO_CQ_FREQ_JUMP);
+      else
+        autoCqJumpEnabled = Boolean.parseBoolean(temp);
       
       temp = prop.getProperty(PROPERTY_ESM);
       if (temp == null)
-        throwMissingPropertyException(PROPERTY_ESM);
-      emsEnabled = Boolean.parseBoolean(temp);
+        SetSettingsToDefault(PROPERTY_ESM);
+      else
+        emsEnabled = Boolean.parseBoolean(temp);
       
       temp = prop.getProperty(PROPERTY_SEND_ZERO_AS_T);
       if (temp == null)
-        throwMissingPropertyException(PROPERTY_SEND_ZERO_AS_T);
-      sendZeroAsT_Enabled = Boolean.parseBoolean(temp);
+        SetSettingsToDefault(PROPERTY_SEND_ZERO_AS_T);
+      else
+        sendZeroAsT_Enabled = Boolean.parseBoolean(temp);
 
       
       // Default prefix
       defaultPrefix = prop.getProperty(PROPERTY_DEFAULT_PREFIX);
       if (defaultPrefix == null)
-        throwMissingPropertyException(PROPERTY_DEFAULT_PREFIX);
+        SetSettingsToDefault(PROPERTY_DEFAULT_PREFIX);
 
       // Repeat period for Qso
       temp = prop.getProperty(PROPERTY_QSO_REPEAT_PERIOD_SEC);
       if(temp == null)
-        throwMissingPropertyException(PROPERTY_QSO_REPEAT_PERIOD_SEC);
-      qsoRepeatPeriodInSeconds = Integer.parseInt(temp);
+        SetSettingsToDefault(PROPERTY_QSO_REPEAT_PERIOD_SEC);
+      else
+        qsoRepeatPeriodInSeconds = Integer.parseInt(temp);
       
       // Incoming qso hide after
       temp = prop.getProperty(PROPERTY_INCOMING_QSO_HIDE_AFTER);
       if (temp == null)
-        throwMissingPropertyException(PROPERTY_QSO_REPEAT_PERIOD_SEC);
-      incomingQsoHiderAfter = Integer.parseInt(temp); 
+        SetSettingsToDefault(PROPERTY_QSO_REPEAT_PERIOD_SEC);
+      else
+        incomingQsoHiderAfter = Integer.parseInt(temp); 
       
       // Incoming qso max entries
       temp = prop.getProperty(PROPERTY_INCOMING_QSO_MAX_ENTRIES);
       if (temp == null)
-        throwMissingPropertyException(PROPERTY_INCOMING_QSO_MAX_ENTRIES);
-      incomingQsoMaxEntries = Integer.parseInt(temp);
+        SetSettingsToDefault(PROPERTY_INCOMING_QSO_MAX_ENTRIES);
+      else
+        incomingQsoMaxEntries = Integer.parseInt(temp);
       
       // Read the bandmap settings
       temp = prop.getProperty(PROPERTY_BANDMAP_COLUMN_COUNT);
       if (temp == null)
-        throwMissingPropertyException(PROPERTY_BANDMAP_COLUMN_COUNT);
-      bandmapColumnCount = Integer.parseInt(temp);
+        SetSettingsToDefault(PROPERTY_BANDMAP_COLUMN_COUNT);
+      else
+        bandmapColumnCount = Integer.parseInt(temp);
       
       temp = prop.getProperty(PROPERTY_BANDMAP_ROW_COUNT);
       if (temp == null)
-      {
-        throwMissingPropertyException(PROPERTY_BANDMAP_ROW_COUNT);
-      }
-      bandmapRowCount = Integer.parseInt(temp);
+        SetSettingsToDefault(PROPERTY_BANDMAP_ROW_COUNT);
+      else
+        bandmapRowCount = Integer.parseInt(temp);
       
       temp = prop.getProperty(PROPERTY_BANDMAP_STEP);
       if (temp == null)
-      {
-        throwMissingPropertyException(PROPERTY_BANDMAP_STEP);
-      }
-      bandmapStepInHz = Integer.parseInt(temp);
+        SetSettingsToDefault(PROPERTY_BANDMAP_STEP);
+      else
+        bandmapStepInHz = Integer.parseInt(temp);
+    
       
       temp = prop.getProperty(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS);
       if(temp == null)
-      {
-        showBandmapFreqColumnsEnabled = true;
-      }
+        SetSettingsToDefault(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS);
       else
-      {
         showBandmapFreqColumnsEnabled = Boolean.parseBoolean(temp);
-      }
       
-    }
-    catch (IOException ex)
-    {
-      this.SetSettingsToDefault();
-      Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    catch (NumberFormatException ex)
-    {
-      this.SetSettingsToDefault();
-      Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, ex);
     }
     catch (Exception ex)
     {
-      this.SetSettingsToDefault();
       Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, ex);
     }
 
@@ -599,72 +619,124 @@ public final class ApplicationSettings
   /**
    * Set all settings to default
    */
-  private void SetSettingsToDefault()
+  private void SetSettingsToDefault(String propertyname)
   {
-    comPort = "";
-    myCallsign = "LZ1ABC";
-    isQuickCallsignModeEnabled = false;
-    defaultPrefix = "LZ0";
-    autoCqJumpEnabled = false;
-    emsEnabled = false;
-    sendZeroAsT_Enabled = false; 
-    qsoRepeatPeriodInSeconds = 1800;
-
-    // Set texts for the direction buttons
-    functionKeyTexts[0] = "test {mycall}";       // F1
-    functionKeyTexts[1] = "not defined by user"; // F2
-    functionKeyTexts[2] = "tu";                  // F3
-    functionKeyTexts[3] = "not defined by user";
-    functionKeyTexts[4] = "not defined by user";
-    functionKeyTexts[5] = "nr?";
-    functionKeyTexts[6] = "?";
-    functionKeyTexts[7] = "qsob4";
-    functionKeyTexts[8] = "hello";
-    functionKeyTexts[9] = "";
-    functionKeyTexts[10] = "not defined by user";
-    functionKeyTexts[11] = "not defined by user";
-
-    incomingQsoHiderAfter = -14400; // If overtime is 4 hours don't show the entry
-    incomingQsoMaxEntries = 20;  // Number of entries visible on the Incoming Qso panel
-    
-    // Default positions for the different frames
-    if(framesDimensions[FrameIndex.JFRAME.toInt()] == null) // Initialize is it was not....
-      framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(20, 20, 600, 600); 
-    if(framesDimensions[FrameIndex.BANDMAP.toInt()] == null)
-      framesDimensions[FrameIndex.BANDMAP.toInt()] = new Rectangle(10, 10, 200, 200);
-    if(framesDimensions[FrameIndex.ENTRY.toInt()] == null)
-      framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(40, 40, 200, 200);
-    if(framesDimensions[FrameIndex.INCOMING_QSO.toInt()] == null)
-      framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(60, 60, 200, 200);
-    if(framesDimensions[FrameIndex.LOG.toInt()] == null)
-      framesDimensions[FrameIndex.LOG.toInt()] = new Rectangle(80, 80, 200, 200);
-    if(framesDimensions[FrameIndex.RADIO.toInt()] == null)
-      framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(100, 100, 300, 50);
-    if(framesDimensions[FrameIndex.SETTINGS.toInt()] == null)
-      framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(150, 150, 300, 300);
-    
-    // Fonts
-    if(fonts[FontIndex.BANDMAP.toInt()]==null)
-      fonts[FontIndex.BANDMAP.toInt()] = new Font("Dialog", Font.PLAIN, 12);
-    if(fonts[FontIndex.CALLSIGN.toInt()]==null)
-      fonts[FontIndex.CALLSIGN.toInt()] = new Font("Dialog", Font.PLAIN, 24);
-    if(fonts[FontIndex.INCOMING_QSO.toInt()]==null)
-      fonts[FontIndex.INCOMING_QSO.toInt()] = new Font("Dialog", 1, 18);
-    if(fonts[FontIndex.LOG.toInt()]==null)
-      fonts[FontIndex.LOG.toInt()] = new Font("Dialog", Font.PLAIN, 12);
-    if(fonts[FontIndex.RCV.toInt()]==null)
-      fonts[FontIndex.RCV.toInt()] = new Font("Dialog", Font.PLAIN, 24);
-    if(fonts[FontIndex.SNT.toInt()]==null)
-      fonts[FontIndex.SNT.toInt()] = new Font("Dialog", Font.PLAIN, 24);
-    
-    bandmapColumnCount = 16;
-    bandmapRowCount = 15;
-    bandmapStepInHz = 200;
-    showBandmapFreqColumnsEnabled = true;
+    switch (propertyname)
+    {
+      case PROPERTY_RADIO_COMPORT:
+        radioComPort = "";
+        break;
+        
+      case PROPERTY_KEYER_COMPORT:
+        keyerComPort = "";
+        break;
+        
+      case PROPERTY_MY_CALL_SIGN:
+        myCallsign = "LZ1ABC";
+        break;
+        
+      case PROPERTY_QUICK_CALLSIGN_MODE:
+        isQuickCallsignModeEnabled = false;
+        break;
+        
+      case PROPERTY_DEFAULT_PREFIX:
+        defaultPrefix = "LZ";
+        break;
+        
+      case PROPERTY_QSO_REPEAT_PERIOD_SEC:
+        qsoRepeatPeriodInSeconds = 1800;
+        break;
+        
+      case PROPERTY_INCOMING_QSO_MAX_ENTRIES:
+        incomingQsoMaxEntries = 20;  // Number of entries visible on the Incoming Qso panel
+        break;
+        
+      case PROPERTY_INCOMING_QSO_HIDE_AFTER:
+        incomingQsoHiderAfter = -14400; // If overtime is 4 hours don't show the entry
+        break;
+        
+      case PROPERTY_FUNCTION_KEYS:
+        // Set texts for the direction buttons
+        functionKeyTexts[0] = "test {mycall}";       // F1
+        functionKeyTexts[1] = "not defined by user"; // F2
+        functionKeyTexts[2] = "tu";                  // F3
+        functionKeyTexts[3] = "not defined by user";
+        functionKeyTexts[4] = "not defined by user";
+        functionKeyTexts[5] = "nr?";
+        functionKeyTexts[6] = "?";
+        functionKeyTexts[7] = "qsob4";
+        functionKeyTexts[8] = "hello";
+        functionKeyTexts[9] = "";
+        functionKeyTexts[10] = "not defined by user";
+        functionKeyTexts[11] = "not defined by user";
+        break;
+        
+      case PROPERTY_FRAMES_DIMENSIONS:
+        // Default positions for the different frames
+        if(framesDimensions[FrameIndex.JFRAME.toInt()] == null) // Initialize is it was not....
+          framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(20, 20, 600, 600); 
+        if(framesDimensions[FrameIndex.BANDMAP.toInt()] == null)
+          framesDimensions[FrameIndex.BANDMAP.toInt()] = new Rectangle(10, 10, 200, 200);
+        if(framesDimensions[FrameIndex.ENTRY.toInt()] == null)
+          framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(40, 40, 200, 200);
+        if(framesDimensions[FrameIndex.INCOMING_QSO.toInt()] == null)
+          framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(60, 60, 200, 200);
+        if(framesDimensions[FrameIndex.LOG.toInt()] == null)
+          framesDimensions[FrameIndex.LOG.toInt()] = new Rectangle(80, 80, 200, 200);
+        if(framesDimensions[FrameIndex.RADIO.toInt()] == null)
+          framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(100, 100, 300, 50);
+        if(framesDimensions[FrameIndex.SETTINGS.toInt()] == null)
+          framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(150, 150, 300, 300);
+        break;
+        
+      case PROPERTY_BANDMAP_STEP:
+        bandmapStepInHz = 200;
+        break;
+        
+      case PROPERTY_BANDMAP_COLUMN_COUNT:
+        bandmapColumnCount = 16;
+        break;
+        
+      case PROPERTY_BANDMAP_ROW_COUNT:
+        bandmapRowCount = 15;
+        break;
+        
+      case PROPERTY_FONTS:
+        // Fonts
+        if(fonts[FontIndex.BANDMAP.toInt()]==null)
+          fonts[FontIndex.BANDMAP.toInt()] = new Font("Dialog", Font.PLAIN, 12);
+        if(fonts[FontIndex.CALLSIGN.toInt()]==null)
+          fonts[FontIndex.CALLSIGN.toInt()] = new Font("Dialog", Font.PLAIN, 24);
+        if(fonts[FontIndex.INCOMING_QSO.toInt()]==null)
+          fonts[FontIndex.INCOMING_QSO.toInt()] = new Font("Dialog", 1, 18);
+        if(fonts[FontIndex.LOG.toInt()]==null)
+          fonts[FontIndex.LOG.toInt()] = new Font("Dialog", Font.PLAIN, 12);
+        if(fonts[FontIndex.RCV.toInt()]==null)
+          fonts[FontIndex.RCV.toInt()] = new Font("Dialog", Font.PLAIN, 24);
+        if(fonts[FontIndex.SNT.toInt()]==null)
+          fonts[FontIndex.SNT.toInt()] = new Font("Dialog", Font.PLAIN, 24);
+        break;
+        
+      case PROPERTY_ESM:
+        emsEnabled = false;
+        break;
+        
+      case PROPERTY_SEND_ZERO_AS_T:
+        sendZeroAsT_Enabled = false; 
+        break;
+        
+      case PROPERTY_AUTO_CQ_FREQ_JUMP:
+        autoCqJumpEnabled = false;
+        break;
+        
+      case PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS:
+        showBandmapFreqColumnsEnabled = true;
+        break;
+      
+      default:
+        Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, "Property has no default settings");
+        break;
+    }
   }
-
-  void throwMissingPropertyException(String propertyName) throws Exception
-  {
-    throw new Exception("Error when trying to read element " + propertyName + " from file " + SETTINGS_FILE_NAME);
-  }
+  
 }
