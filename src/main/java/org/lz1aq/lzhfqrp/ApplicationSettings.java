@@ -38,7 +38,9 @@ public final class ApplicationSettings
   static final String SETTINGS_FILE_NAME = "settings.properties";
 
   static final String PROPERTY_RADIO_COMPORT = "radio_com_port";
+  static final String PROPERTY_RADIO_COMPORT_BAUDRATE = "radio_com_port_baudrate";
   static final String PROPERTY_KEYER_COMPORT = "keyer_com_port";
+  static final String PROPERTY_KEYER_COMPORT_BAUDRATE = "keyer_com_port_baudrate";
   static final String PROPERTY_MY_CALL_SIGN = "my_callsign";
   static final String PROPERTY_QUICK_CALLSIGN_MODE = "quick_callsign_mode";
   static final String PROPERTY_DEFAULT_PREFIX = "default_prefix";
@@ -90,7 +92,9 @@ public final class ApplicationSettings
   
 
   private String radioComPort;
+  private int    radioComPortBaudRate;
   private String keyerComPort;
+  private int    keyerComPortBaudRate;
   private String myCallsign;
   private boolean isQuickCallsignModeEnabled;
   private boolean emsEnabled;
@@ -205,6 +209,26 @@ public final class ApplicationSettings
     this.keyerComPort = comPort;
   }
 
+  public int getRadioComPortBaudRate()
+  {
+    return radioComPortBaudRate;
+  }
+
+  public int getKeyerComPortBaudRate()
+  {
+    return keyerComPortBaudRate;
+  }
+
+  public void setKeyerComPortBaudRate(int keyerComPortBaudRate)
+  {
+    this.keyerComPortBaudRate = keyerComPortBaudRate;
+  }
+
+  public void setRadioComPortBaudRate(int radioComPortBaudRate)
+  {
+    this.radioComPortBaudRate = radioComPortBaudRate;
+  }
+  
   public String getMyCallsign()
   {
     return this.myCallsign;
@@ -448,6 +472,8 @@ public final class ApplicationSettings
   {
     prop.setProperty(PROPERTY_RADIO_COMPORT, radioComPort);
     prop.setProperty(PROPERTY_KEYER_COMPORT, keyerComPort);
+    prop.setProperty(PROPERTY_RADIO_COMPORT_BAUDRATE, Integer.toString(radioComPortBaudRate));
+    prop.setProperty(PROPERTY_KEYER_COMPORT_BAUDRATE, Integer.toString(keyerComPortBaudRate));
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
     prop.setProperty(PROPERTY_QUICK_CALLSIGN_MODE, Boolean.toString(isQuickCallsignModeEnabled));
     prop.setProperty(PROPERTY_AUTO_CQ_FREQ_JUMP, Boolean.toString(autoCqJumpEnabled));
@@ -507,11 +533,25 @@ public final class ApplicationSettings
       radioComPort = prop.getProperty(PROPERTY_RADIO_COMPORT);
       if (radioComPort == null)
         SetSettingsToDefault(PROPERTY_RADIO_COMPORT);
-
+      
+      // Radio Comport baud rate
+      String temp = prop.getProperty(PROPERTY_RADIO_COMPORT_BAUDRATE);
+      if (temp == null)
+        SetSettingsToDefault(PROPERTY_RADIO_COMPORT_BAUDRATE);
+      else
+        radioComPortBaudRate = Integer.parseInt(temp);
+      
       // Keyer Comport
       keyerComPort = prop.getProperty(PROPERTY_KEYER_COMPORT);
       if (keyerComPort == null)
         SetSettingsToDefault(PROPERTY_KEYER_COMPORT);
+      
+      // Keyer Comport baud rate
+      temp = prop.getProperty(PROPERTY_KEYER_COMPORT_BAUDRATE);
+      if (temp == null)
+        SetSettingsToDefault(PROPERTY_KEYER_COMPORT_BAUDRATE);
+      else
+        keyerComPortBaudRate = Integer.parseInt(temp);
       
       // My callsign
       myCallsign = prop.getProperty(PROPERTY_MY_CALL_SIGN);
@@ -531,7 +571,7 @@ public final class ApplicationSettings
 
       
       // Misc settings
-      String temp = prop.getProperty(PROPERTY_QUICK_CALLSIGN_MODE);
+      temp = prop.getProperty(PROPERTY_QUICK_CALLSIGN_MODE);
       if (temp == null)
         SetSettingsToDefault(PROPERTY_QUICK_CALLSIGN_MODE);
       else
@@ -630,6 +670,12 @@ public final class ApplicationSettings
       case PROPERTY_KEYER_COMPORT:
         keyerComPort = "";
         break;
+      
+      case PROPERTY_RADIO_COMPORT_BAUDRATE:
+        radioComPortBaudRate = 19200;
+        
+      case PROPERTY_KEYER_COMPORT_BAUDRATE:
+        keyerComPortBaudRate = 1200;
         
       case PROPERTY_MY_CALL_SIGN:
         myCallsign = "LZ1ABC";

@@ -25,7 +25,6 @@ import org.lz1aq.py.rig.I_DecodedTransaction;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import org.lz1aq.rsi.event.*;
-import org.lz1aq.utils.Misc;
 import org.lz1aq.utils.DynamicByteArray;
 import org.lz1aq.py.rig.I_Radio;
 import java.util.concurrent.BlockingQueue;
@@ -52,9 +51,9 @@ public class Radio
 {
   private static final int QUEUE_SIZE = 30;   // Max number of commands that queueWithTransactions can hold
   
-  private boolean                   isConnected = false;  // If there is a com port open
   private final CopyOnWriteArrayList<RadioListener>  eventListeners;    // 
   private final String              serialPortName;       // 
+  private final int                 baudRate;             
   private       SerialPort          serialPort;           // Used for writing to serialPort
   private final I_Radio             radioProtocolParser;  // Used for decoding/encoding msg from/to the radio (jython object)
   private final Thread              threadPortWriter;     // Thread that writes transaction to the serial port
@@ -79,11 +78,13 @@ public class Radio
    * 
    * @param protocolParser - provides the protocol for communicating with the radio
    * @param portName -  name of the serial port that will be used for communicating with the radio
+   * @param baudRate -  baud rate to be used for the serial port
    */
-  public Radio(I_Radio protocolParser, String portName)
+  public Radio(I_Radio protocolParser, String portName, int baudRate)
   {
     radioProtocolParser   = protocolParser;           // Store the reference to the jython object
     serialPortName        = portName;
+    this.baudRate         = baudRate;
     queueWithTransactions = new LinkedBlockingQueue<>(); 
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
     receiveBuffer         = new DynamicByteArray(200);  // Set the initial size to some reasonable value
@@ -108,12 +109,11 @@ public class Radio
    */
   public void connect() throws Exception
   {
-    if(isConnected==true)
+    if(isConnected())
       logger.warning("Radio already disconnected!");
     if(threadPortWriter.getState() != Thread.State.NEW )
       throw new Exception("Please create a new Radio object");
     
-   
     // Open the serial port using the settings from the python file
     serialPort = new SerialPort(serialPortName);
     serialPort.openPort();
@@ -129,8 +129,6 @@ public class Radio
     serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
     serialPort.addEventListener(new PortReader());
     
-    isConnected = true;
-    
     this.queueTransactions(radioProtocolParser.encodeInit());
   }
   
@@ -145,7 +143,7 @@ public class Radio
    */
   public void disconnect() throws SerialPortException
   {
-    if(isConnected==false)
+    if(!isConnected())
       logger.warning("Radio already disconnected!");
     
     this.queueTransactions(radioProtocolParser.encodeCleanup());
@@ -156,7 +154,16 @@ public class Radio
     serialPort.removeEventListener();
     serialPort.closePort();
     
-    isConnected = false;
+    serialPort = null;
+  }
+  
+  /**
+   * Checks if currently connected to the radio
+   * @return false if not connected
+   */
+  public boolean isConnected()
+  {
+    return !(serialPort==null || serialPort.isOpened()==false);   
   }
   
   
@@ -483,7 +490,7 @@ public class Radio
       logger.log(Level.WARNING, "I_EncodedTransaction[] is empty"); //, Misc.getStack()
       return;
     }
-    if(isConnected==false) 
+    if(!isConnected()) 
     {
       logger.warning("Not connected to radio! Please call the connect() method!");
       return;
@@ -546,6 +553,7 @@ public class Radio
   private void setComPortParams(SerialPort port, I_SerialSettings settings) throws SerialPortException
   {
     int parity = SerialPort.PARITY_NONE;
+    int stopbits = SerialPort.STOPBITS_2;
     
     switch(settings.getParity().toLowerCase())
     {
@@ -570,9 +578,22 @@ public class Radio
         break;
     }
     
-    port.setParams(settings.getBauderateMax(),
+    switch(settings.getStopBits()) // stopbits values are defined in serial_setting.py
+    {
+      case 1:
+         stopbits = SerialPort.STOPBITS_1;
+        break;
+      case 2:
+        stopbits = SerialPort.STOPBITS_1_5;
+        break;
+      case 3:
+        stopbits = serialPort.STOPBITS_2;
+        break;
+    }
+    
+    port.setParams(baudRate,
                    settings.getDataBits(),
-                   settings.getStopBits(),
+                   stopbits,
                    parity);
     
     switch (settings.getDtr().toLowerCase())
