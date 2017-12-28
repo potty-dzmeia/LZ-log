@@ -17,14 +17,16 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.rsi;
+package org.lz1aq.radio;
 
+import org.lz1aq.radio.event.NotsupportedEvent;
+import org.lz1aq.radio.event.RadioListener;
+import org.lz1aq.radio.event.ConfirmationEvent;
 import org.lz1aq.py.rig.I_EncodedTransaction;
 import org.lz1aq.py.rig.I_SerialSettings;
 import org.lz1aq.py.rig.I_DecodedTransaction;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import org.lz1aq.rsi.event.*;
 import org.lz1aq.utils.DynamicByteArray;
 import org.lz1aq.py.rig.I_Radio;
 import java.util.concurrent.BlockingQueue;
@@ -36,7 +38,7 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
-import org.lz1aq.rsi.event.EmptyRadioListener;
+import org.lz1aq.radio.event.EmptyRadioListener;
 
 
 

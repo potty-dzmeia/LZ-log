@@ -19,6 +19,7 @@
 // ***************************************************************************
 package org.lz1aq.lzhfqrp;
 
+import org.lz1aq.keyer.WinKeyer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.KeyEventDispatcher;
@@ -52,11 +53,12 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import jssc.SerialPortList;
+import org.lz1aq.keyer.Keyer;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.LogDatabase;
 import org.lz1aq.log.LogTableModel;
 import org.lz1aq.log.Qso;
-import org.lz1aq.rsi.Radio;
+import org.lz1aq.radio.Radio;
 import org.lz1aq.utils.FontChooser;
 import org.lz1aq.utils.Misc;
 import org.lz1aq.utils.RadioModes;
@@ -79,6 +81,7 @@ public class MainWindow extends javax.swing.JFrame
   private BandmapTableModel             jtablemodelBandmap;
   private final ApplicationSettings     applicationSettings;
   private final RadioController         radioController;
+  private Keyer                         keyer; // WinKeyer or Radio
   private WinKeyer                      winKeyer;
   private int                           cqFrequency =3500000;
   private int                           keyerSpeed = 28;
@@ -193,6 +196,7 @@ public class MainWindow extends javax.swing.JFrame
     
     // Communicating with the radio
     radioController = new RadioController();
+    keyer = radioController; // Radio will the default keyer
     
     // This is used for catching global key presses (i.e. needed for F1-F12 presses)
     KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
@@ -2192,6 +2196,7 @@ public class MainWindow extends javax.swing.JFrame
     if(radioController.isConnected())
     {
       jtogglebuttonConnectToRadio.setSelected(true);
+      radioController.setCwSpeed(keyerSpeed);
       jcomboboxBand.setEnabled(false);
       jcomboboxMode.setEnabled(false);
       jcheckboxRadioPolling.setEnabled(true);
@@ -2644,10 +2649,13 @@ public class MainWindow extends javax.swing.JFrame
     
     if(winKeyer.isConnected())
     {
+      keyer = winKeyer;
+      keyer.setCwSpeed(keyerSpeed);
       jtogglebuttonConnectToKeyer.setSelected(true);
     }
     else
     {
+      keyer = radioController;
       jtogglebuttonConnectToKeyer.setSelected(false);
     }
   }//GEN-LAST:event_jtogglebuttonConnectToKeyerActionPerformed
@@ -2666,7 +2674,7 @@ public class MainWindow extends javax.swing.JFrame
       return;
     
     keyerSpeed++;
-    radioController.setKeyerSpeed(keyerSpeed);
+    keyer.setCwSpeed(keyerSpeed);
     jlabelKeyerSpeed.setText(Integer.toString(keyerSpeed)+" WPM");
   }
   
@@ -2676,7 +2684,7 @@ public class MainWindow extends javax.swing.JFrame
       return;
     
     keyerSpeed--;
-    radioController.setKeyerSpeed(keyerSpeed);
+    keyer.setCwSpeed(keyerSpeed);
     jlabelKeyerSpeed.setText(Integer.toString(keyerSpeed)+" WPM");
   }
    
@@ -3228,7 +3236,7 @@ public class MainWindow extends javax.swing.JFrame
     
     String text = applicationSettings.getFunctionKeyMessage(0);  // Get the text for the F1 key
     text = text.replaceAll("\\{mycall\\}", applicationSettings.getMyCallsign()); // Substitute {mycall} with my callsign
-    radioController.sendMorse(text+" ");                          // Send to radio
+    keyer.sendCw(text+" ");                          // Send to radio
    
     // Select the CQ radio button
     jradiobuttonCQ.setSelected(true);
@@ -3272,42 +3280,42 @@ public class MainWindow extends javax.swing.JFrame
   
   private void pressedF3()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(2)+" ");
+    keyer.sendCw(applicationSettings.getFunctionKeyMessage(2)+" ");
   }
   
   private void pressedF4()
   {
-    radioController.sendMorse(applicationSettings.getMyCallsign()+" ");
+    keyer.sendCw(applicationSettings.getMyCallsign()+" ");
   }
   
   private void pressedF5()
   {
-    radioController.sendMorse(getCallsignFromTextField()+" ");
+    keyer.sendCw(getCallsignFromTextField()+" ");
   }
   
   private void pressedF6()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(5)+" ");
+    keyer.sendCw(applicationSettings.getFunctionKeyMessage(5)+" ");
   }
   
   private void pressedF7()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(6)+" ");
+    keyer.sendCw(applicationSettings.getFunctionKeyMessage(6)+" ");
   }
   
   private void pressedF8()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(7)+" ");
+    keyer.sendCw(applicationSettings.getFunctionKeyMessage(7)+" ");
   }
   
   private void pressedF9()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(8)+" ");
+    keyer.sendCw(applicationSettings.getFunctionKeyMessage(8)+" ");
   }
   
   private void pressedF10()
   {
-    radioController.sendMorse(applicationSettings.getFunctionKeyMessage(9)+" ");
+    keyer.sendCw(applicationSettings.getFunctionKeyMessage(9)+" ");
   }
   
   private void pressedF11()
@@ -3319,7 +3327,7 @@ public class MainWindow extends javax.swing.JFrame
   
   private void pressedEsc()
   {
-    radioController.interruptMorseSending();
+    keyer.stopSendingCw();
     if(timerContinuousCq.isRunning())
       timerContinuousCq.stop();
   }
@@ -3356,7 +3364,7 @@ public class MainWindow extends javax.swing.JFrame
       serial = Misc.leadingZerosToT(serial);
     }
    
-    radioController.sendMorse(serial.substring(0, 3)+ " " +serial.substring(3, 6)+" ");
+    keyer.sendCw(serial.substring(0, 3)+ " " +serial.substring(3, 6)+" ");
     
     
   }

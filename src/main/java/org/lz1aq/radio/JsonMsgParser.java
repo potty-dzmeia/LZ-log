@@ -17,15 +17,20 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.rsi;
+package org.lz1aq.radio;
 
-import org.lz1aq.rsi.event.RadioListener;
+import org.lz1aq.radio.event.FrequencyEvent;
+import org.lz1aq.radio.event.NotsupportedEvent;
+import org.lz1aq.radio.event.ModeEvent;
+import org.lz1aq.radio.event.ActiveVfoEvent;
+import org.lz1aq.radio.event.ConfirmationEvent;
+import org.lz1aq.radio.event.SmeterEvent;
+import org.lz1aq.radio.event.RadioListener;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONObject;
-import org.lz1aq.rsi.event.*;
 import org.lz1aq.utils.RadioModes;
 import org.lz1aq.utils.RadioVfos;
 
@@ -33,7 +38,7 @@ import org.lz1aq.utils.RadioVfos;
 /**
  *  For parsing radio events in JSON format and notifying the interested parties 
  */
-public class JsonMsgParser
+class JsonMsgParser
 {
   // Currently supported JSON messages comming from the radio
   public static final String NOT_SUPPORTED_MSG  = "not_supported";

@@ -17,7 +17,7 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.lzhfqrp;
+package org.lz1aq.keyer;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +28,7 @@ import jssc.SerialPortException;
  *
  * @author potty
  */
-public class WinKeyer
+public class WinKeyer implements Keyer
 {
  
   private final String              serialPortName;        
@@ -134,7 +134,8 @@ public class WinKeyer
     return !(serialPort==null || serialPort.isOpened()==false);   
   }
   
-  public void send(String textToSend)
+  @Override
+  public void sendCw(String textToSend)
   {
     textToSend = textToSend.toUpperCase();
     try
@@ -149,7 +150,12 @@ public class WinKeyer
     }
   }
   
-  public void stopSending()
+  
+  /**
+   * Interrupt CW sending
+   */
+  @Override
+  public void stopSendingCw()
   {
     try
     {
@@ -167,7 +173,8 @@ public class WinKeyer
    *  Set WPM Speed
    * @param wpm  in the range of 5-99 WPM
    */
-  public void setSpeed(int wpm)
+  @Override
+  public void setCwSpeed(int wpm)
   {
     if(wpm<5 && wpm>99)
       return;

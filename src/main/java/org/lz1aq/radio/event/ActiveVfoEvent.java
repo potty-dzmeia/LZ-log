@@ -17,24 +17,26 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.rsi.event;
+package org.lz1aq.radio.event;
+
+import org.lz1aq.utils.RadioVfos;
 
 /**
- * Radio has send us positive or negative confirmation
+ *
+ * @author potty
  */
-public class ConfirmationEvent
+public class ActiveVfoEvent
 {
+  private final RadioVfos vfo;    // Which VFO has become active
 
-  private final boolean isPositive;
-
-  public ConfirmationEvent(boolean isPositive)
+  public ActiveVfoEvent(RadioVfos vfo)
   {
-    this.isPositive = isPositive;
+    this.vfo = vfo;
   }
 
-  public boolean getConfirmation()
+  public RadioVfos getVfo()
   {
-    return isPositive;
+    return this.vfo;
   }
-
+  
 }

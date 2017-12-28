@@ -17,31 +17,28 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.rsi.event;
+package org.lz1aq.keyer;
 
-import org.lz1aq.utils.RadioModes;
-import org.lz1aq.utils.RadioVfos;
-
-
-public class ModeEvent
+/**
+ *
+ * @author potty
+ */
+public interface Keyer
 {
-
-  private final RadioModes mode;  // The new mode
-  private final RadioVfos vfo;    // Which VFO changed its mode
-
-  public ModeEvent(RadioModes mode, RadioVfos vfo)
-  {
-    this.mode = mode;
-    this.vfo = vfo;
-  }
-
-  public RadioModes getMode()
-  {
-    return mode;
-  }
-
-  public RadioVfos getVfo()
-  {
-    return this.vfo;
-  }
+  /**
+   * Send the specified text as Morse code
+   * @param text what we are about to send
+   */
+  void sendCw(String text);
+  
+  /**
+   * Interrupt Morse sending
+   */
+  void stopSendingCw();
+  
+  /**
+   * Set the speed with which we will transmit
+   * @param wpm 
+   */
+  void setCwSpeed(int wpm);
 }

@@ -17,26 +17,30 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.rsi.event;
+package org.lz1aq.radio.event;
+
+import org.lz1aq.utils.RadioVfos;
 
 
-public class EmptyRadioListener implements RadioListener
+public class FrequencyEvent
 {
-  @Override
-  public void eventNotsupported(NotsupportedEvent e){}
 
-  @Override
-  public void eventConfirmation(ConfirmationEvent e){}
+  private final String freq;    // The new frequency
+  private final RadioVfos vfo;  // Which VFO changed its frequency
 
-  @Override
-  public void eventFrequency(FrequencyEvent e){}
+  public FrequencyEvent(String freq, RadioVfos vfo)
+  {
+    this.freq = freq;
+    this.vfo = vfo;
+  }
 
-  @Override
-  public void eventMode(ModeEvent e){}
+  public String getFrequency()
+  {
+    return this.freq;
+  }
 
-  @Override
-  public void eventSmeter(SmeterEvent e){}
-
-  @Override
-  public void eventActiveVfo(ActiveVfoEvent e){}
+  public RadioVfos getVfo()
+  {
+    return this.vfo;
+  }
 }

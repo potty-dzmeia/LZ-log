@@ -17,30 +17,27 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.rsi.event;
-
-import org.lz1aq.utils.RadioVfos;
+package org.lz1aq.radio.event;
 
 
-public class FrequencyEvent
-{
-
-  private final String freq;    // The new frequency
-  private final RadioVfos vfo;  // Which VFO changed its frequency
-
-  public FrequencyEvent(String freq, RadioVfos vfo)
+/** Occurs when the radio has send us something that we couldn't decoded */
+public class NotsupportedEvent
   {
-    this.freq = freq;
-    this.vfo = vfo;
-  }
+    private final String data;
 
-  public String getFrequency()
-  {
-    return this.freq;
-  }
+    public NotsupportedEvent(String data)
+    {
+      this.data = data;
+    }
+    
+    /**
+     * Returns the data that couldn't be decoded
+     * 
+     * @return The data is in hex format of the type: "0xFE 0xFE 0xFD..."
+     */
+    public String getData()
+    {
+      return data;
+    }
 
-  public RadioVfos getVfo()
-  {
-    return this.vfo;
   }
-}

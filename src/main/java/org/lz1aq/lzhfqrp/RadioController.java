@@ -26,16 +26,17 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import jssc.SerialPortException;
 import org.apache.commons.lang3.StringUtils;
+import org.lz1aq.keyer.Keyer;
 import org.lz1aq.py.rig.I_Radio;
 import org.lz1aq.py.rig.I_SerialSettings;
-import org.lz1aq.rsi.Radio;
-import org.lz1aq.rsi.event.ActiveVfoEvent;
-import org.lz1aq.rsi.event.ConfirmationEvent;
-import org.lz1aq.rsi.event.FrequencyEvent;
-import org.lz1aq.rsi.event.ModeEvent;
-import org.lz1aq.rsi.event.NotsupportedEvent;
-import org.lz1aq.rsi.event.RadioListener;
-import org.lz1aq.rsi.event.SmeterEvent;
+import org.lz1aq.radio.Radio;
+import org.lz1aq.radio.event.ActiveVfoEvent;
+import org.lz1aq.radio.event.ConfirmationEvent;
+import org.lz1aq.radio.event.FrequencyEvent;
+import org.lz1aq.radio.event.ModeEvent;
+import org.lz1aq.radio.event.NotsupportedEvent;
+import org.lz1aq.radio.event.RadioListener;
+import org.lz1aq.radio.event.SmeterEvent;
 import org.lz1aq.utils.RadioModes;
 import org.lz1aq.utils.RadioVfos;
 
@@ -45,7 +46,7 @@ import org.lz1aq.utils.RadioVfos;
  * 
  * Represents the 
  */
-public class RadioController
+public class RadioController implements Keyer
 {
   private boolean isConnected = false;
   private int freqVfoA = 14000000;
@@ -215,7 +216,8 @@ public class RadioController
   }
   
   
-  public void sendMorse(String text)
+  @Override
+  public void sendCw(String text)
   {
     if (!isConnected())
       return;
@@ -230,7 +232,8 @@ public class RadioController
     }
   }
   
-  public void setKeyerSpeed(int speed)
+  @Override
+  public void setCwSpeed(int speed)
   {
     if (!isConnected())
       return;
@@ -247,7 +250,8 @@ public class RadioController
   }
   
   
-  public void interruptMorseSending()
+  @Override
+  public void stopSendingCw()
   {
     if (!isConnected())
       return;
