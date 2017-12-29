@@ -42,6 +42,8 @@ public class WinKeyer implements Keyer
     this.baudRate         = baudRate;
   }
   
+  
+  @Override
   public void connect() throws Exception
   {
     
@@ -76,7 +78,7 @@ public class WinKeyer implements Keyer
       }
       catch(SerialPortException ex1)
       {
-        Logger.getLogger(WinKeyer.class.getName()).log(Level.SEVERE, null, ex1);
+        logger.log(Level.SEVERE, null, ex1);
       }
       serialPort = null;
       throw new Exception("Couldn't set setting for "+serialPortName);
@@ -93,6 +95,8 @@ public class WinKeyer implements Keyer
     }
   }
   
+  
+  @Override
   public void disconnect()
   {
     if(!isConnected())
@@ -120,15 +124,17 @@ public class WinKeyer implements Keyer
     }
     catch(SerialPortException ex)
     {
-      Logger.getLogger(WinKeyer.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
     serialPort = null;
   }
+  
   
   /**
    * Checks if currently connected to the radio
    * @return false if not connected
    */
+  @Override
   public boolean isConnected()
   {
     return !(serialPort==null || serialPort.isOpened()==false);   
@@ -176,7 +182,7 @@ public class WinKeyer implements Keyer
   @Override
   public void setCwSpeed(int wpm)
   {
-    if(wpm<5 && wpm>99)
+    if(wpm<10 && wpm>60)
       return;
     
     try
@@ -237,16 +243,7 @@ public class WinKeyer implements Keyer
     }
     catch(InterruptedException ex)
     {
-      Logger.getLogger(WinKeyer.class.getName()).log(Level.SEVERE, null, ex);
+      logger.getLogger(WinKeyer.class.getName()).log(Level.SEVERE, null, ex);
     }
-//
-//    b = serialPort.readBytes();
-//    if(b == null)
-//    {
-//      logger.log(Level.SEVERE, "No response from WK3!");
-//      throw new Exception("No response from WK3!");
-//    }
-//    
-//    logger.log(Level.INFO, "Response to HostOpen command is:" + b.toString());
   }
 }

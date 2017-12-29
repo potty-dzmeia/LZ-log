@@ -17,9 +17,9 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.lzhfqrp;
+package org.lz1aq.lzlog;
 
-import org.lz1aq.keyer.WinKeyer;
+import org.lz1aq.keyer.KeyerTypes;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.KeyEventDispatcher;
@@ -54,6 +54,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import jssc.SerialPortList;
 import org.lz1aq.keyer.Keyer;
+import org.lz1aq.keyer.KeyerFactory;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.LogDatabase;
 import org.lz1aq.log.LogTableModel;
@@ -61,7 +62,7 @@ import org.lz1aq.log.Qso;
 import org.lz1aq.radio.Radio;
 import org.lz1aq.utils.FontChooser;
 import org.lz1aq.utils.Misc;
-import org.lz1aq.utils.RadioModes;
+import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.TimeUtils;
 
 /**
@@ -70,7 +71,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.1.1";
+  static final String PROGRAM_VERSION = "1.2";
   static final String PROGRAM_NAME    = "LZ-Log";
           
   static final int    SERIAL_NUMBER_LENGTH = 6;
@@ -81,8 +82,7 @@ public class MainWindow extends javax.swing.JFrame
   private BandmapTableModel             jtablemodelBandmap;
   private final ApplicationSettings     applicationSettings;
   private final RadioController         radioController;
-  private Keyer                         keyer; // WinKeyer or Radio
-  private WinKeyer                      winKeyer;
+  private Keyer                         keyer; // Dedicated Keyer or Radio
   private int                           cqFrequency =3500000;
   private int                           keyerSpeed = 28;
   private final Timer                   timer1sec;
@@ -196,7 +196,7 @@ public class MainWindow extends javax.swing.JFrame
     
     // Communicating with the radio
     radioController = new RadioController();
-    keyer = radioController; // Radio will the default keyer
+    keyer = radioController.getKeyer(); // Radio will the default keyer
     
     // This is used for catching global key presses (i.e. needed for F1-F12 presses)
     KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
@@ -348,10 +348,16 @@ public class MainWindow extends javax.swing.JFrame
     jPanel4 = new javax.swing.JPanel();
     jComboBoxRadioComPort = new javax.swing.JComboBox();
     jLabel12 = new javax.swing.JLabel();
+    jComboBoxRadioComPortBaudRate = new javax.swing.JComboBox();
+    jLabel20 = new javax.swing.JLabel();
+    jPanel12 = new javax.swing.JPanel();
     jLabel19 = new javax.swing.JLabel();
     jComboBoxKeyerComPort = new javax.swing.JComboBox();
-    jComboBoxRadioComPortBaudRate = new javax.swing.JComboBox();
     jComboBoxKeyerComPortBaudRate = new javax.swing.JComboBox();
+    jLabel21 = new javax.swing.JLabel();
+    jRadioButtonWinkeyer = new javax.swing.JRadioButton();
+    jRadioButtonDtrKeyer = new javax.swing.JRadioButton();
+    jRadioButtonRtsKeyer = new javax.swing.JRadioButton();
     jPanel3 = new javax.swing.JPanel();
     textfieldSettingsMyCallsign = new javax.swing.JTextField();
     jPanel7 = new javax.swing.JPanel();
@@ -395,6 +401,7 @@ public class MainWindow extends javax.swing.JFrame
     jdialogLogSelection = new LogSelectionDialog();
     jbuttonCreateNewLog = new javax.swing.JButton();
     jbuttonOpenExistingLog = new javax.swing.JButton();
+    buttonGroupKeyer = new javax.swing.ButtonGroup();
     jDesktopPane1 = new javax.swing.JDesktopPane();
     intframeTimeToNextQso = new javax.swing.JInternalFrame();
     jScrollPane2 = new javax.swing.JScrollPane();
@@ -501,7 +508,7 @@ public class MainWindow extends javax.swing.JFrame
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
 
-    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("CommPort settings"));
+    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Radio"));
     jPanel4.setLayout(new java.awt.GridBagLayout());
 
     jComboBoxRadioComPort.setModel(getComportsComboboxModel());
@@ -521,7 +528,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     jPanel4.add(jComboBoxRadioComPort, gridBagConstraints);
 
-    jLabel12.setText("Radio CommPort");
+    jLabel12.setText("CommPort");
     jLabel12.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -531,26 +538,6 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     jPanel4.add(jLabel12, gridBagConstraints);
-
-    jLabel19.setText("Keyer CommPort");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    jPanel4.add(jLabel19, gridBagConstraints);
-
-    jComboBoxKeyerComPort.setModel(getComportsComboboxModel());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-    jPanel4.add(jComboBoxKeyerComPort, gridBagConstraints);
 
     jComboBoxRadioComPortBaudRate.setModel(getBaudRates());
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -562,15 +549,15 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     jPanel4.add(jComboBoxRadioComPortBaudRate, gridBagConstraints);
 
-    jComboBoxKeyerComPortBaudRate.setModel(getBaudRates());
+    jLabel20.setText("Baud rate");
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-    jPanel4.add(jComboBoxKeyerComPortBaudRate, gridBagConstraints);
+    gridBagConstraints.ipadx = 1;
+    gridBagConstraints.ipady = 1;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    jPanel4.add(jLabel20, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -580,6 +567,85 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
     jPanel1.add(jPanel4, gridBagConstraints);
+
+    jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder("Keyer"));
+    jPanel12.setLayout(new java.awt.GridBagLayout());
+
+    jLabel19.setText("CommPort");
+    jLabel19.setToolTipText("");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    jPanel12.add(jLabel19, gridBagConstraints);
+
+    jComboBoxKeyerComPort.setModel(getComportsComboboxModel());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+    jPanel12.add(jComboBoxKeyerComPort, gridBagConstraints);
+
+    jComboBoxKeyerComPortBaudRate.setModel(getBaudRates());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+    jPanel12.add(jComboBoxKeyerComPortBaudRate, gridBagConstraints);
+
+    jLabel21.setText("Baud rate");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    jPanel12.add(jLabel21, gridBagConstraints);
+
+    buttonGroupKeyer.add(jRadioButtonWinkeyer);
+    jRadioButtonWinkeyer.setText("WinKeyer");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel12.add(jRadioButtonWinkeyer, gridBagConstraints);
+
+    buttonGroupKeyer.add(jRadioButtonDtrKeyer);
+    jRadioButtonDtrKeyer.setText("DTR");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel12.add(jRadioButtonDtrKeyer, gridBagConstraints);
+
+    buttonGroupKeyer.add(jRadioButtonRtsKeyer);
+    jRadioButtonRtsKeyer.setText("RTS");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel12.add(jRadioButtonRtsKeyer, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+    jPanel1.add(jPanel12, gridBagConstraints);
 
     jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("My callsign"));
     jPanel3.setLayout(new java.awt.GridBagLayout());
@@ -596,7 +662,7 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -657,7 +723,7 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -719,7 +785,7 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
     gridBagConstraints.weighty = 0.1;
@@ -759,7 +825,7 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.1;
@@ -789,7 +855,7 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -835,7 +901,7 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -2034,7 +2100,7 @@ public class MainWindow extends javax.swing.JFrame
   private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonSaveActionPerformed
   {//GEN-HEADEREND:event_jButtonSaveActionPerformed
     jDialogSettings.setVisible(false); // Hide the SettingsDialog
-    storeSettingsDialogParams();       // Read the state of the controls and save them
+    storeSettings();       // Read the state of the controls and save them
     
     initMainWindow(false);
   }//GEN-LAST:event_jButtonSaveActionPerformed
@@ -2196,7 +2262,7 @@ public class MainWindow extends javax.swing.JFrame
     if(radioController.isConnected())
     {
       jtogglebuttonConnectToRadio.setSelected(true);
-      radioController.setCwSpeed(keyerSpeed);
+      radioController.getKeyer().setCwSpeed(keyerSpeed); 
       jcomboboxBand.setEnabled(false);
       jcomboboxMode.setEnabled(false);
       jcheckboxRadioPolling.setEnabled(true);
@@ -2626,14 +2692,14 @@ public class MainWindow extends javax.swing.JFrame
   private void jtogglebuttonConnectToKeyerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToKeyerActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
     JToggleButton tBtn = (JToggleButton) evt.getSource();
-
+ 
     // Connect
     if (tBtn.isSelected())
-    {
-      winKeyer = new WinKeyer(applicationSettings.getKeyerComPort(), applicationSettings.getKeyerComPortBaudRate());
+    {    
+      keyer = KeyerFactory.create(applicationSettings.getKeyerType(), applicationSettings.getKeyerComPort(), applicationSettings.getKeyerComPortBaudRate());
       try
       {
-        winKeyer.connect();
+        keyer.connect();
       }
       catch(Exception ex)
       {
@@ -2643,21 +2709,21 @@ public class MainWindow extends javax.swing.JFrame
     // Disconnect
     else
     {
-        winKeyer.disconnect();
+        keyer.disconnect();
     }
     
     
-    if(winKeyer.isConnected())
+    if(keyer.isConnected())
     {
-      keyer = winKeyer;
-      keyer.setCwSpeed(keyerSpeed);
       jtogglebuttonConnectToKeyer.setSelected(true);
     }
     else
     {
-      keyer = radioController;
+      keyer = radioController.getKeyer(); // If disconnected keying will be redirected to the radio (hopefully it will supported)
       jtogglebuttonConnectToKeyer.setSelected(false);
     }
+    
+    keyer.setCwSpeed(keyerSpeed);
   }//GEN-LAST:event_jtogglebuttonConnectToKeyerActionPerformed
   
   
@@ -2853,6 +2919,38 @@ public class MainWindow extends javax.swing.JFrame
       return Qso.TYPE_OF_WORK_CQ;
   }
   
+  
+  private KeyerTypes getSelectedKey()
+  {
+    if(jRadioButtonDtrKeyer.isSelected())
+    {
+      return KeyerTypes.DTR;
+    }
+    else if(jRadioButtonRtsKeyer.isSelected())
+    {
+      return KeyerTypes.RTS;
+    }
+    else //(jRadioButtonWinkeyer.isSelected())
+    {
+      return KeyerTypes.WINKEYER;
+    }
+  }
+  
+  private void setSelectedKey(KeyerTypes keyerType)
+  {
+    if(keyerType == KeyerTypes.WINKEYER)
+    {
+      jRadioButtonWinkeyer.setSelected(true);
+    }
+    else if(keyerType == KeyerTypes.DTR)
+    {
+      jRadioButtonDtrKeyer.setSelected(true);
+    }
+    else if(keyerType == KeyerTypes.RTS)
+    {
+      jRadioButtonRtsKeyer.setSelected(true);
+    }
+  }
   
   /**
    * Determines the current working mode. Takes into account if the connected
@@ -3064,6 +3162,10 @@ public class MainWindow extends javax.swing.JFrame
     // Keyer baud rate selection
     jComboBoxKeyerComPortBaudRate.setSelectedItem(Integer.toString(applicationSettings.getKeyerComPortBaudRate()));
     
+    // Set the selected Keyer radiobutton
+    setSelectedKey(applicationSettings.getKeyerType());
+    
+    
     // my callsing texts
     textfieldSettingsMyCallsign.setText(applicationSettings.getMyCallsign());
 
@@ -3104,7 +3206,7 @@ public class MainWindow extends javax.swing.JFrame
   /**
    * User has closed the setting dialog and we need to save the state of the controls
    */
-  private boolean storeSettingsDialogParams()
+  private boolean storeSettings()
   { 
     // Radio Commport
     if(jComboBoxRadioComPort.getSelectedItem() != null)
@@ -3119,6 +3221,14 @@ public class MainWindow extends javax.swing.JFrame
       applicationSettings.setKeyerComPort(jComboBoxKeyerComPort.getSelectedItem().toString());
     }
     applicationSettings.setKeyerComPortBaudRate(Integer.parseInt(jComboBoxKeyerComPortBaudRate.getSelectedItem().toString()));
+    
+    // Keyer type
+    if(jRadioButtonDtrKeyer.isSelected())
+      applicationSettings.setKeyerType(KeyerTypes.DTR);
+    else if(jRadioButtonWinkeyer.isSelected())
+       applicationSettings.setKeyerType(KeyerTypes.WINKEYER);
+    else if(jRadioButtonRtsKeyer.isSelected())
+       applicationSettings.setKeyerType(KeyerTypes.RTS);
     
     // Callsign   
     if(!Qso.isValidCallsign(textfieldSettingsMyCallsign.getText()))
@@ -3137,7 +3247,7 @@ public class MainWindow extends javax.swing.JFrame
     applicationSettings.setFunctionKeyMessage(8, jtextfieldf9.getText());
     applicationSettings.setFunctionKeyMessage(9, jtextfieldf10.getText());
     
-   
+    
     // Misc settings
     applicationSettings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
     //TODO applicationSettings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
@@ -3176,6 +3286,8 @@ public class MainWindow extends javax.swing.JFrame
       JOptionPane.showMessageDialog(null, "Incoming Qso panel - invalid entry");
       return false;
     }
+    
+    applicationSettings.SaveSettingsToDisk(); // Save all settings to disk
     
     return true;
   }
@@ -3812,6 +3924,7 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.ButtonGroup buttonGroupKeyer;
   private javax.swing.ButtonGroup buttonGroupTypeOfWork;
   private javax.swing.JCheckBox checkboxESM;
   private javax.swing.JCheckBox checkboxSendLeadingZeroAsT;
@@ -3862,6 +3975,8 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel18;
   private javax.swing.JLabel jLabel19;
   private javax.swing.JLabel jLabel2;
+  private javax.swing.JLabel jLabel20;
+  private javax.swing.JLabel jLabel21;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
@@ -3881,6 +3996,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel10;
   private javax.swing.JPanel jPanel11;
+  private javax.swing.JPanel jPanel12;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JPanel jPanel4;
@@ -3890,6 +4006,9 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JPanel jPanel8;
   private javax.swing.JPanel jPanel9;
   private javax.swing.JPanel jPanelStatusBar;
+  private javax.swing.JRadioButton jRadioButtonDtrKeyer;
+  private javax.swing.JRadioButton jRadioButtonRtsKeyer;
+  private javax.swing.JRadioButton jRadioButtonWinkeyer;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JScrollPane jScrollPane3;

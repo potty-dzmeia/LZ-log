@@ -21,59 +21,108 @@ package org.lz1aq.utils;
 
 import java.util.HashMap;
 
-public class MorseCode 
+public class MorseCode
 {
-//  private static HashMap<String, String> codes = createMap();
-//  
-//  private static HashMap<String, String> createMap()
-//  {
-//    HashMap<String, Integer> myMap = new HashMap<>();
-//    codes.put("a", ".-");
-//    codes.put("b", "-..");
-//    codes.put("c", "-.-.");
-//    codes.put("d", "-..");
-//    codes.put("e", ".");
-//    codes.put("f", "..-.");
-//    codes.put("g", "--.");
-//    codes.put("h", "....");
-//    codes.put("i", "..");
-//    codes.put("j", ".---");
-//    codes.put("k", "-.-");
-//    codes.put("l", ".-..");
-//    codes.put("m", "--");
-//    codes.put("n", "-.");
-//    codes.put("o", "---");
-//    codes.put("p", ".--.");
-//    codes.put("q", "--.-");
-//    codes.put("r", ".-.");
-//    codes.put("s", "...");
-//    codes.put("t", "-");
-//    codes.put("u", "..-");
-//    codes.put("v", "");
-//    codes.put("w", "");
-//    codes.put("x", "");
-//    codes.put("y", "");
-//    codes.put("z", "");
-//    codes.put("0", "");
-//    codes.put("1", "");
-//    codes.put("2", "");
-//    codes.put("3", "");
-//    codes.put("4", "");
-//    codes.put("5", "");
-//    codes.put("6", "");
-//    codes.put("7", "");
-//    codes.put("8", "");
-//    codes.put("9", "");
-//    codes.put("/", "");
-//    codes.put(" ", "");
-//    
-//    
-// 
-//  }
-//    
-//    
-//	static public int getNumberOfDotElements(String text)
-//  {
-//    
-//  }
+  public static final char DOT = '.';
+  public static final char DASH = '-';
+  
+  
+  private static final HashMap morse = new HashMap();
+
+  static
+  {  // perhaps not the best way to represent morse, but it's easy to deal with
+    morse.put(new Character('A'), ".-");
+    morse.put(new Character('B'), "-...");
+    morse.put(new Character('C'), "-.-.");
+    morse.put(new Character('D'), "-..");
+    morse.put(new Character('E'), ".");
+    morse.put(new Character('F'), "..-.");
+    morse.put(new Character('G'), "--.");
+    morse.put(new Character('H'), "....");
+    morse.put(new Character('I'), "..");
+    morse.put(new Character('J'), ".---");
+    morse.put(new Character('K'), "-.-");
+    morse.put(new Character('L'), ".-..");
+    morse.put(new Character('M'), "--");
+    morse.put(new Character('N'), "-.");
+    morse.put(new Character('O'), "---");
+    morse.put(new Character('P'), ".--.");
+    morse.put(new Character('Q'), "--.-");
+    morse.put(new Character('R'), ".-.");
+    morse.put(new Character('S'), "...");
+    morse.put(new Character('T'), "-");
+    morse.put(new Character('U'), "..-");
+    morse.put(new Character('V'), "...-");
+    morse.put(new Character('W'), ".--");
+    morse.put(new Character('X'), "-..-");
+    morse.put(new Character('Y'), "-.--");
+    morse.put(new Character('Z'), "--..");
+    
+    morse.put(new Character('a'), ".-");
+    morse.put(new Character('b'), "-...");
+    morse.put(new Character('c'), "-.-.");
+    morse.put(new Character('d'), "-..");
+    morse.put(new Character('e'), ".");
+    morse.put(new Character('f'), "..-.");
+    morse.put(new Character('g'), "--.");
+    morse.put(new Character('h'), "....");
+    morse.put(new Character('i'), "..");
+    morse.put(new Character('j'), ".---");
+    morse.put(new Character('k'), "-.-");
+    morse.put(new Character('l'), ".-..");
+    morse.put(new Character('m'), "--");
+    morse.put(new Character('n'), "-.");
+    morse.put(new Character('o'), "---");
+    morse.put(new Character('p'), ".--.");
+    morse.put(new Character('q'), "--.-");
+    morse.put(new Character('r'), ".-.");
+    morse.put(new Character('s'), "...");
+    morse.put(new Character('t'), "-");
+    morse.put(new Character('u'), "..-");
+    morse.put(new Character('v'), "...-");
+    morse.put(new Character('w'), ".--");
+    morse.put(new Character('x'), "-..-");
+    morse.put(new Character('y'), "-.--");
+    morse.put(new Character('z'), "--..");
+
+    morse.put(new Character('0'), "-----");
+    morse.put(new Character('1'), ".----");
+    morse.put(new Character('2'), "..---");
+    morse.put(new Character('3'), "...--");
+    morse.put(new Character('4'), "....-");
+    morse.put(new Character('5'), ".....");
+    morse.put(new Character('6'), "-....");
+    morse.put(new Character('7'), "--...");
+    morse.put(new Character('8'), "---..");
+    morse.put(new Character('9'), "----.");
+
+    morse.put(new Character('/'), "-..-.");
+    morse.put(new Character('?'), "..--..");
+    morse.put(new Character(','), "--..--");
+    morse.put(new Character('.'), ".-.-.-");
+    morse.put(new Character('-'), "-....-");  // wait; interpretation as - arguably wrong
+    morse.put(new Character('='), "-...-");  // BT (=?  As per ARRL Handbook)
+    morse.put(new Character(':'), "---...");
+    morse.put(new Character(';'), "-.-.-.");
+    morse.put(new Character('('), "-.--.");
+    morse.put(new Character(')'), "-.--.-");
+    morse.put(new Character('*'), "...-.-");  // SK (unnatural)
+    morse.put(new Character('^'), ".-.-.");   // AR (unnatural)
+  }
+
+
+  /**
+   * Get the Morse code representation of a character
+   * @param ch character for which we will get the Morse code representation.
+   * @return string containing DOTs and DASHes (see this.DOT and this.DASH)
+   */
+  static public String getMorseCode(Character ch)
+  {
+    return (String)morse.get(ch);
+  }
+  
+  static public int getDurationOfMessage(String text, int wpm)
+  {
+    return 0;
+  }
 }

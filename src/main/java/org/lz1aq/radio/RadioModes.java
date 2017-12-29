@@ -17,31 +17,29 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.radio.event;
+package org.lz1aq.radio;
 
-import org.lz1aq.radio.RadioModes;
-import org.lz1aq.radio.RadioVfos;
-
-
-public class ModeEvent
+public enum RadioModes
 {
-
-  private final RadioModes mode;  // The new mode
-  private final RadioVfos vfo;    // Which VFO changed its mode
-
-  public ModeEvent(RadioModes mode, RadioVfos vfo)
-  {
-    this.mode = mode;
-    this.vfo = vfo;
-  }
-
-  public RadioModes getMode()
-  {
-    return mode;
-  }
-
-  public RadioVfos getVfo()
-  {
-    return this.vfo;
-  }
+  NONE,
+  AM,       // AM -- Amplitude Modulation 
+  CW,       // CW - CW "normal" sideband
+  USB,      // USB - Upper Side Band
+  LSB,      // LSB - Lower Side Band 
+  RTTY,     // RTTY - Radio Teletype 
+  FM,       // FM - "narrow" band FM 
+  WFM,      // WFM - broadcast wide FM 
+  CWR,      // CWR - CW "reverse" sideband
+  RTTYR,    // RTTYR - RTTY "reverse" sideband
+  AMS,      // AMS - Amplitude Modulation Synchronous 
+  PKTLSB,   // PKTLSB - Packet/Digital LSB mode (dedicated port) 
+  PKTUSB,   // PKTUSB - Packet/Digital USB mode (dedicated port) 
+  PKTFM,    // PKTFM - Packet/Digital FM mode (dedicated port) 
+  ECSSUSB,  // ECSSUSB - Exalted Carrier Single Sideband USB 
+  ECSSLSB,  // ECSSLSB - Exalted Carrier Single Sideband LSB 
+  FAX,      // FAX - Facsimile Mode
+  SAM,      // SAM - Synchronous AM double sideband
+  SAL,      // SAL - Synchronous AM lower sideband
+  SAH,      // SAH - Synchronous AM upper (higher) sideband
+  DSB       // DSB - Double sideband suppressed carrier
 }

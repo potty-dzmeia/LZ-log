@@ -19,7 +19,7 @@
 // ***************************************************************************
 package org.lz1aq.radio.event;
 
-import org.lz1aq.utils.RadioVfos;
+import org.lz1aq.radio.RadioVfos;
 
 
 public class FrequencyEvent

@@ -17,65 +17,28 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.lzhfqrp;
+package org.lz1aq.keyer;
 
-import java.util.Objects;
 
 /**
  *
  * @author potty
  */
-public class BandmapSpot
+public class KeyerFactory
 {
-
-  private final String callsign;
-  private int freq = 3500000;
-
-  
-  public BandmapSpot(String callsign)
+  public static Keyer create(KeyerTypes type, String serialPort, int baudrate)
   {
-    this.callsign = callsign;
-  }
-  
-  public BandmapSpot(String callsign, int freq)
-  {
-    this.callsign = callsign;
-    this.freq = freq;
-  }
-  
-
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (obj == this) return true;
-    
-    if (!(obj instanceof BandmapSpot))
+    if(type==KeyerTypes.DTR)
     {
-      return false;
+      return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.DTR);
     }
-    BandmapSpot user = (BandmapSpot) obj;
-    return Objects.equals(callsign, user.callsign);     
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return Objects.hash(callsign);
-  }
-  
-  
-  public int getFreq()
-  {
-    return freq;
-  }
-  
-  public String getCallsign()
-  {
-    return callsign;
-  }
-  
-  public void setFreq(int freq)
-  {
-    this.freq = freq;
+    else if(type==KeyerTypes.RTS)
+    {
+      return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.RTS);
+    }
+    else //if(type == KeyerTypes.WINKEYER)
+    {
+      return new WinKeyer(serialPort, baudrate);
+    }
   }
 }

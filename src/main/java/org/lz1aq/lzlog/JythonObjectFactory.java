@@ -1,4 +1,4 @@
-package org.lz1aq.lzhfqrp;
+package org.lz1aq.lzlog;
 
 import org.python.core.Py;
 import org.python.core.PyObject;

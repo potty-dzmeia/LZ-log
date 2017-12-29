@@ -17,7 +17,7 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.lzhfqrp;
+package org.lz1aq.lzlog;
 
 import java.util.EventListener;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -37,8 +37,8 @@ import org.lz1aq.radio.event.ModeEvent;
 import org.lz1aq.radio.event.NotsupportedEvent;
 import org.lz1aq.radio.event.RadioListener;
 import org.lz1aq.radio.event.SmeterEvent;
-import org.lz1aq.utils.RadioModes;
-import org.lz1aq.utils.RadioVfos;
+import org.lz1aq.radio.RadioModes;
+import org.lz1aq.radio.RadioVfos;
 
 /**
  *
@@ -46,7 +46,7 @@ import org.lz1aq.utils.RadioVfos;
  * 
  * Represents the 
  */
-public class RadioController implements Keyer
+public class RadioController
 {
   private boolean isConnected = false;
   private int freqVfoA = 14000000;
@@ -57,6 +57,8 @@ public class RadioController implements Keyer
   private final CopyOnWriteArrayList<RadioControllerListener>  eventListeners;
   private Radio         radio;
   private I_Radio       radioParser;  
+  private final Keyer   keyer = new RadioKeyer();
+  
   
   private static final Logger logger = Logger.getLogger(Radio.class.getName());
   
@@ -216,8 +218,17 @@ public class RadioController implements Keyer
   }
   
   
-  @Override
-  public void sendCw(String text)
+  /**
+   * Call this function to get access to a Keyer object which is responsible for transmitting Morse code.
+   * @return Keyer interface for sending CW
+   */
+  public Keyer getKeyer()
+  {
+    return keyer;
+  }
+  
+  
+  private void transmitCW(String text)
   {
     if (!isConnected())
       return;
@@ -232,15 +243,15 @@ public class RadioController implements Keyer
     }
   }
   
-  @Override
-  public void setCwSpeed(int speed)
+ 
+  private void setCwWpm(int wpm)
   {
     if (!isConnected())
       return;
     
     try
     {
-      radio.setKeyerSpeed(speed);
+      radio.setKeyerSpeed(wpm);
     }
     catch (Exception ex)
     {
@@ -250,8 +261,7 @@ public class RadioController implements Keyer
   }
   
   
-  @Override
-  public void stopSendingCw()
+  private void interruptCwTransmit()
   {
     if (!isConnected())
       return;
@@ -322,7 +332,7 @@ public class RadioController implements Keyer
   { 
     this.eventListeners.remove(listener);
   }
-  
+
   
   /**
    * Handlers for events coming from the radio
@@ -435,5 +445,45 @@ public class RadioController implements Keyer
     public void frequency();
     public void mode();
     public void vfo();
+  }
+  
+  private class RadioKeyer implements Keyer
+  {
+
+    @Override
+    public void connect() throws Exception
+    {
+      // nothing to do during connect
+    }
+
+    @Override
+    public void disconnect()
+    {
+      // nothing to do during disconnect
+    }
+
+    @Override
+    public boolean isConnected()
+    {
+      return true; // assume always connected
+    }
+
+    @Override
+    public void sendCw(String text)
+    {
+      transmitCW(text);
+    }
+
+    @Override
+    public void stopSendingCw()
+    {
+      interruptCwTransmit();
+    }
+
+    @Override
+    public void setCwSpeed(int wpm)
+    {
+      setCwWpm(wpm);
+    }
   }
 }

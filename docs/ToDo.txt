@@ -11,6 +11,7 @@ High priority:
 - Try to catch all keyboard presses (f4 should not close HDSDR)
 - the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
 - bandmap - add reset button
+- input filter for the F messages
 
 
 

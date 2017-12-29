@@ -17,19 +17,65 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.utils;
+package org.lz1aq.lzlog;
 
-public enum RadioVfos {
-   NONE(-1), 
-   A(0),
-   B(1), 
-   C(2), 
-   D(3), 
-   E(4), 
-   F(5), 
-   G(6);
+import java.util.Objects;
 
-   private final int code;
-   RadioVfos(int code)  { this.code = code; }
-   public int getCode() { return code; }
+/**
+ *
+ * @author potty
+ */
+public class BandmapSpot
+{
+
+  private final String callsign;
+  private int freq = 3500000;
+
+  
+  public BandmapSpot(String callsign)
+  {
+    this.callsign = callsign;
+  }
+  
+  public BandmapSpot(String callsign, int freq)
+  {
+    this.callsign = callsign;
+    this.freq = freq;
+  }
+  
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == this) return true;
+    
+    if (!(obj instanceof BandmapSpot))
+    {
+      return false;
+    }
+    BandmapSpot user = (BandmapSpot) obj;
+    return Objects.equals(callsign, user.callsign);     
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return Objects.hash(callsign);
+  }
+  
+  
+  public int getFreq()
+  {
+    return freq;
+  }
+  
+  public String getCallsign()
+  {
+    return callsign;
+  }
+  
+  public void setFreq(int freq)
+  {
+    this.freq = freq;
+  }
 }

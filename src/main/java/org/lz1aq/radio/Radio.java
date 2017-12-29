@@ -53,8 +53,8 @@ public class Radio
 {
   private static final int QUEUE_SIZE = 30;   // Max number of commands that queueWithTransactions can hold
   
-  private final CopyOnWriteArrayList<RadioListener>  eventListeners;    // 
-  private final String              serialPortName;       // 
+  private final CopyOnWriteArrayList<RadioListener>  eventListeners;    
+  private final String              serialPortName;       
   private final int                 baudRate;             
   private       SerialPort          serialPort;           // Used for writing to serialPort
   private final I_Radio             radioProtocolParser;  // Used for decoding/encoding msg from/to the radio (jython object)

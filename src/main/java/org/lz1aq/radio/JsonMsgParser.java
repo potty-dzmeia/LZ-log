@@ -31,8 +31,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONObject;
-import org.lz1aq.utils.RadioModes;
-import org.lz1aq.utils.RadioVfos;
 
 
 /**

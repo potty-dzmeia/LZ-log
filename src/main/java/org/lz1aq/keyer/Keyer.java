@@ -26,6 +26,15 @@ package org.lz1aq.keyer;
 public interface Keyer
 {
   /**
+   * 
+   * @throws Exception 
+   */
+  public void connect() throws Exception;
+  
+  public void disconnect();
+  
+  public boolean isConnected();
+  /**
    * Send the specified text as Morse code
    * @param text what we are about to send
    */
