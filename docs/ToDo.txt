@@ -1,5 +1,6 @@
 High priority:
 - support Icom CAT
+- create help
 - all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
 - continious CQ interval should work 
 - there should be an option for entering worked frequency for people that do not use CAT

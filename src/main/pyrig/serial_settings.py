@@ -47,9 +47,7 @@ class SerialSettings(I_SerialSettings):
         :rtype : str
         """
         jsonBlock = dict()
-        jsonBlock["baudrate_min"] = self.baudrate_min_
-        jsonBlock["baudrate_max"] = self.baudrate_max_
-        jsonBlock["data_bits"] = self.baudrate_min_
+        jsonBlock["baudrate"] = "Check you app settings"
         jsonBlock["data_bits"] = self.data_bits_
         jsonBlock["stop_bits"] = self.stop_bits_
         jsonBlock["parity"] = self.parity
