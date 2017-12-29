@@ -32,14 +32,14 @@ public class WinKeyer implements Keyer
 {
  
   private final String              serialPortName;        
-  private final int                 baudRate;             
+  private final int                 baudRate = 1200;             
   private       SerialPort          serialPort;           
   private static final Logger       logger = Logger.getLogger(WinKeyer.class.getName());
 
-  public WinKeyer(String portName, int baudRate)
+  public WinKeyer(String portName)
   {
     serialPortName        = portName;
-    this.baudRate         = baudRate;
+    //this.baudRate         = baudRate;
   }
   
   

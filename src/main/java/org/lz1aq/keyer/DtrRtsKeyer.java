@@ -43,29 +43,27 @@ import jssc.SerialPortException;
 import org.lz1aq.utils.MorseCode;
 
 
+/**
+ * Class for transmitting Morse code over the serial port DTR or RTS pins
+ * @author potty
+ */
 public class DtrRtsKeyer implements Keyer 
 {  
   /** One of the two ways generating CW - through the DRT or the RTS pin*/
   public static enum CONTROL_PIN{DTR, RTS};
-        
+  
+  private final String serialPortName;
+  private SerialPort   serialPort = null;
+  private CONTROL_PIN  control_pin = CONTROL_PIN.DTR;
   
   private static final int QUEUE_SIZE = 30;   // Max number of texts that queueWithTexts can hold
+  private final BlockingQueue<String>  queueWithTexts = new LinkedBlockingQueue<>(QUEUE_SIZE); 
+  private Thread threadKeyer = new Thread(new TransmitThread(), "Keyer thread");  // Thread responsible for transmitting the messages 
+  
   private static final double dashDotRatio = 3.0;
   private static final double markSpaceRatio = 1.0;
   private static final double charSpaceRatio = 3.0;
   private static final double wordSpaceRatio = 9.0;
-  
-  private static final Character SPACE = ' ';
-  
-  private static final Logger logger = Logger.getLogger(DtrRtsKeyer.class.getName());
-  
-  private final BlockingQueue<String>  queueWithTexts = new LinkedBlockingQueue<>(); 
-  private final String serialPortName;
-  private SerialPort serialPort = null;
-  private CONTROL_PIN control_pin = CONTROL_PIN.DTR;
-  
-  private Thread threadDtr = new Thread(new TransmitThread(), "DTR thread");  // Thread responsible for sending the texts messages 
-  
   private double dotTime = 0.05; // Determines the speed with which CW will be send (dottime is in seconds)
   private long dotMillis = (long) (dotTime * 1000);
   private long dashMillis = (long) (dotTime * dashDotRatio * 1000);
@@ -73,7 +71,7 @@ public class DtrRtsKeyer implements Keyer
   private long charSpaceMillis = (long) (dotTime * charSpaceRatio * 1000);
   private long wordSpaceMillis = (long) (dotTime * wordSpaceRatio * 1000);
 
-  
+  private static final Logger logger = Logger.getLogger(DtrRtsKeyer.class.getName());
 
   public DtrRtsKeyer(String portName, CONTROL_PIN pin) 
   {
@@ -90,7 +88,7 @@ public class DtrRtsKeyer implements Keyer
       logger.warning("Keyer already connected!.");
       return;
     }
-    if(threadDtr.getState() != Thread.State.NEW)
+    if(threadKeyer.getState() != Thread.State.NEW)
     {
       throw new Exception("For some reason the DTR thread is already running.");
     }
@@ -128,7 +126,7 @@ public class DtrRtsKeyer implements Keyer
   
   
   /**
-   * Disconnect the keyer from the comport and also kill the thread responsible for sending CW
+   * Disconnect the keyer from the comport and also kill the threadKeyer responsible for sending CW
    */
   @Override
   public void disconnect()
@@ -140,8 +138,8 @@ public class DtrRtsKeyer implements Keyer
       return;
     }
     
-    threadDtr.interrupt();      // Stop the thread that is actually sending the morse
-    while(threadDtr.isAlive()); // wait till the thread is closed
+    threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
+    while(threadKeyer.isAlive()); // wait till the threadKeyer is closed
     
     try
     {
@@ -176,16 +174,17 @@ public class DtrRtsKeyer implements Keyer
     if(queueWithTexts.offer(text)== false)
     {
       logger.warning("Max queue sized reached!");
+      return;
     }
     
-    if(threadDtr.getState() == Thread.State.NEW)
+    if(threadKeyer.getState() == Thread.State.NEW)
     {
-      threadDtr.start();
+      threadKeyer.start();
     }
-    else if(threadDtr.getState() == Thread.State.TERMINATED)
+    else if(threadKeyer.getState() == Thread.State.TERMINATED)
     {
-      threadDtr = new Thread(new TransmitThread(), "DTR thread");
-      threadDtr.start();
+      threadKeyer = new Thread(new TransmitThread(), "DTR thread");
+      threadKeyer.start();
     }
   }
   
@@ -196,15 +195,15 @@ public class DtrRtsKeyer implements Keyer
   @Override
   public void stopSendingCw()
   {
-    if(threadDtr == null)
+    if(threadKeyer == null)
     {
       return;
     }
     
     queueWithTexts.clear();
-    if(threadDtr.isAlive())
+    if(threadKeyer.isAlive())
     {
-      threadDtr.interrupt();
+      threadKeyer.interrupt();
     }
   }
   
@@ -237,7 +236,7 @@ public class DtrRtsKeyer implements Keyer
    * @param state
    * @throws SerialPortException 
    */
-  void setControlPin(boolean state) throws SerialPortException
+  private void setControlPin(boolean state) throws SerialPortException
   {
     if(control_pin == CONTROL_PIN.DTR)
     {
@@ -292,7 +291,7 @@ public class DtrRtsKeyer implements Keyer
       for(int i = 0; i < text.length(); i++)
       {
         Character c = text.charAt(i);
-        if(c.equals(SPACE))
+        if(c.equals(' '))
         {
           playWordSpace();
         }

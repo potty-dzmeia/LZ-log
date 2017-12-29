@@ -196,7 +196,7 @@ public class MainWindow extends javax.swing.JFrame
     
     // Communicating with the radio
     radioController = new RadioController();
-    keyer = radioController.getKeyer(); // Radio will the default keyer
+    keyer = radioController.getKeyer(); // Radio will be the default keyer
     
     // This is used for catching global key presses (i.e. needed for F1-F12 presses)
     KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
@@ -353,8 +353,6 @@ public class MainWindow extends javax.swing.JFrame
     jPanel12 = new javax.swing.JPanel();
     jLabel19 = new javax.swing.JLabel();
     jComboBoxKeyerComPort = new javax.swing.JComboBox();
-    jComboBoxKeyerComPortBaudRate = new javax.swing.JComboBox();
-    jLabel21 = new javax.swing.JLabel();
     jRadioButtonWinkeyer = new javax.swing.JRadioButton();
     jRadioButtonDtrKeyer = new javax.swing.JRadioButton();
     jRadioButtonRtsKeyer = new javax.swing.JRadioButton();
@@ -592,27 +590,6 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     jPanel12.add(jComboBoxKeyerComPort, gridBagConstraints);
-
-    jComboBoxKeyerComPortBaudRate.setModel(getBaudRates());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-    jPanel12.add(jComboBoxKeyerComPortBaudRate, gridBagConstraints);
-
-    jLabel21.setText("Baud rate");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    jPanel12.add(jLabel21, gridBagConstraints);
 
     buttonGroupKeyer.add(jRadioButtonWinkeyer);
     jRadioButtonWinkeyer.setText("WinKeyer");
@@ -983,6 +960,7 @@ public class MainWindow extends javax.swing.JFrame
     });
     jPanel10.add(jButton18);
 
+    jButton19.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
     jButton19.setText("OK");
     jButton19.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
     jButton19.addActionListener(new java.awt.event.ActionListener()
@@ -1359,7 +1337,8 @@ public class MainWindow extends javax.swing.JFrame
     intframeRadioConnection.setVisible(true);
     intframeRadioConnection.getContentPane().setLayout(new java.awt.GridBagLayout());
 
-    jpanelRadioConnection.setBorder(javax.swing.BorderFactory.createTitledBorder("Radio"));
+    jpanelRadioConnection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Radio"));
+    jpanelRadioConnection.setPreferredSize(new java.awt.Dimension(353, 87));
     jpanelRadioConnection.setLayout(new java.awt.GridBagLayout());
 
     jtogglebuttonConnectToRadio.setText("Connect");
@@ -1378,7 +1357,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.2;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 20, 5, 20);
+    gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 20);
     jpanelRadioConnection.add(jtogglebuttonConnectToRadio, gridBagConstraints);
 
     jtextfieldFrequency.setEditable(false);
@@ -1452,12 +1431,13 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     intframeRadioConnection.getContentPane().add(jpanelRadioConnection, gridBagConstraints);
 
-    jpanelKeyerConnection.setBorder(javax.swing.BorderFactory.createTitledBorder("Keyer"));
-    jpanelKeyerConnection.setMinimumSize(new java.awt.Dimension(243, 87));
+    jpanelKeyerConnection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Keyer"));
+    jpanelKeyerConnection.setMinimumSize(new java.awt.Dimension(235, 85));
     jpanelKeyerConnection.setName(""); // NOI18N
     jpanelKeyerConnection.setPreferredSize(new java.awt.Dimension(353, 87));
     jpanelKeyerConnection.setLayout(new java.awt.GridBagLayout());
@@ -1474,15 +1454,16 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.2;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 20, 5, 20);
+    gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 20);
     jpanelKeyerConnection.add(jtogglebuttonConnectToKeyer, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.2;
+    gridBagConstraints.weighty = 1.0;
     intframeRadioConnection.getContentPane().add(jpanelKeyerConnection, gridBagConstraints);
 
     jDesktopPane1.add(intframeRadioConnection);
@@ -2092,25 +2073,6 @@ public class MainWindow extends javax.swing.JFrame
     pack();
   }// </editor-fold>//GEN-END:initComponents
 
-  private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonCancelActionPerformed
-  {//GEN-HEADEREND:event_jButtonCancelActionPerformed
-    jDialogSettings.setVisible(false);
-  }//GEN-LAST:event_jButtonCancelActionPerformed
-
-  private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonSaveActionPerformed
-  {//GEN-HEADEREND:event_jButtonSaveActionPerformed
-    jDialogSettings.setVisible(false); // Hide the SettingsDialog
-    storeSettings();       // Read the state of the controls and save them
-    
-    initMainWindow(false);
-  }//GEN-LAST:event_jButtonSaveActionPerformed
-
-  private void jDialogSettingsComponentShown(java.awt.event.ComponentEvent evt)//GEN-FIRST:event_jDialogSettingsComponentShown
-  {//GEN-HEADEREND:event_jDialogSettingsComponentShown
-    // Settings dialog is shown and we need to set the states of the controls
-    initSettingsDialog();
-  }//GEN-LAST:event_jDialogSettingsComponentShown
-
   private void formWindowOpened(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowOpened
   {//GEN-HEADEREND:event_formWindowOpened
     initMainWindow(true);
@@ -2143,14 +2105,6 @@ public class MainWindow extends javax.swing.JFrame
     jDialogSettings.pack();
     jDialogSettings.setVisible(true);
   }//GEN-LAST:event_jmenuSettingsActionPerformed
-
-  private void checkboxSettingsQuickModeStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_checkboxSettingsQuickModeStateChanged
-  {//GEN-HEADEREND:event_checkboxSettingsQuickModeStateChanged
-    if(checkboxSettingsQuickMode.isSelected())
-      textfieldSettingsDefaultPrefix.setEnabled(true);
-    else
-      textfieldSettingsDefaultPrefix.setEnabled(false);
-  }//GEN-LAST:event_checkboxSettingsQuickModeStateChanged
 
   private void jButton12ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton12ActionPerformed
   {//GEN-HEADEREND:event_jButton12ActionPerformed
@@ -2596,11 +2550,6 @@ public class MainWindow extends javax.swing.JFrame
     }
   }//GEN-LAST:event_jcheckboxRadioPollingItemStateChanged
 
-  private void jtextfieldQsoRepeatPeriodActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtextfieldQsoRepeatPeriodActionPerformed
-  {//GEN-HEADEREND:event_jtextfieldQsoRepeatPeriodActionPerformed
-    // TODO add your handling code here:
-  }//GEN-LAST:event_jtextfieldQsoRepeatPeriodActionPerformed
-
   private void jtableBandmapMousePressed(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableBandmapMousePressed
   {//GEN-HEADEREND:event_jtableBandmapMousePressed
     JTable target = (JTable) evt.getSource();
@@ -2684,11 +2633,6 @@ public class MainWindow extends javax.swing.JFrame
      }
   }//GEN-LAST:event_jcomboboxShowFreqColumnsItemStateChanged
 
-  private void jComboBoxRadioComPortActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jComboBoxRadioComPortActionPerformed
-  {//GEN-HEADEREND:event_jComboBoxRadioComPortActionPerformed
-    // TODO add your handling code here:
-  }//GEN-LAST:event_jComboBoxRadioComPortActionPerformed
-
   private void jtogglebuttonConnectToKeyerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToKeyerActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
     JToggleButton tBtn = (JToggleButton) evt.getSource();
@@ -2696,7 +2640,7 @@ public class MainWindow extends javax.swing.JFrame
     // Connect
     if (tBtn.isSelected())
     {    
-      keyer = KeyerFactory.create(applicationSettings.getKeyerType(), applicationSettings.getKeyerComPort(), applicationSettings.getKeyerComPortBaudRate());
+      keyer = KeyerFactory.create(applicationSettings.getKeyerType(), applicationSettings.getKeyerComPort());
       try
       {
         keyer.connect();
@@ -2725,6 +2669,43 @@ public class MainWindow extends javax.swing.JFrame
     
     keyer.setCwSpeed(keyerSpeed);
   }//GEN-LAST:event_jtogglebuttonConnectToKeyerActionPerformed
+
+  private void jDialogSettingsComponentShown(java.awt.event.ComponentEvent evt)//GEN-FIRST:event_jDialogSettingsComponentShown
+  {//GEN-HEADEREND:event_jDialogSettingsComponentShown
+    // Settings dialog is shown and we need to set the states of the controls
+    initSettingsDialog();
+  }//GEN-LAST:event_jDialogSettingsComponentShown
+
+  private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonSaveActionPerformed
+  {//GEN-HEADEREND:event_jButtonSaveActionPerformed
+    jDialogSettings.setVisible(false); // Hide the SettingsDialog
+    storeSettings();       // Read the state of the controls and save them
+
+    initMainWindow(false);
+  }//GEN-LAST:event_jButtonSaveActionPerformed
+
+  private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonCancelActionPerformed
+  {//GEN-HEADEREND:event_jButtonCancelActionPerformed
+    jDialogSettings.setVisible(false);
+  }//GEN-LAST:event_jButtonCancelActionPerformed
+
+  private void jtextfieldQsoRepeatPeriodActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtextfieldQsoRepeatPeriodActionPerformed
+  {//GEN-HEADEREND:event_jtextfieldQsoRepeatPeriodActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_jtextfieldQsoRepeatPeriodActionPerformed
+
+  private void checkboxSettingsQuickModeStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_checkboxSettingsQuickModeStateChanged
+  {//GEN-HEADEREND:event_checkboxSettingsQuickModeStateChanged
+    if(checkboxSettingsQuickMode.isSelected())
+    textfieldSettingsDefaultPrefix.setEnabled(true);
+    else
+    textfieldSettingsDefaultPrefix.setEnabled(false);
+  }//GEN-LAST:event_checkboxSettingsQuickModeStateChanged
+
+  private void jComboBoxRadioComPortActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jComboBoxRadioComPortActionPerformed
+  {//GEN-HEADEREND:event_jComboBoxRadioComPortActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_jComboBoxRadioComPortActionPerformed
   
   
   private void changeBandmapTableModelStructure()
@@ -3160,7 +3141,7 @@ public class MainWindow extends javax.swing.JFrame
     jComboBoxKeyerComPort.setSelectedItem(applicationSettings.getKeyerComPort());
 
     // Keyer baud rate selection
-    jComboBoxKeyerComPortBaudRate.setSelectedItem(Integer.toString(applicationSettings.getKeyerComPortBaudRate()));
+    //jComboBoxKeyerComPortBaudRate.setSelectedItem(Integer.toString(applicationSettings.getKeyerComPortBaudRate()));
     
     // Set the selected Keyer radiobutton
     setSelectedKey(applicationSettings.getKeyerType());
@@ -3220,7 +3201,7 @@ public class MainWindow extends javax.swing.JFrame
     {
       applicationSettings.setKeyerComPort(jComboBoxKeyerComPort.getSelectedItem().toString());
     }
-    applicationSettings.setKeyerComPortBaudRate(Integer.parseInt(jComboBoxKeyerComPortBaudRate.getSelectedItem().toString()));
+    //applicationSettings.setKeyerComPortBaudRate(Integer.parseInt(jComboBoxKeyerComPortBaudRate.getSelectedItem().toString()));
     
     // Keyer type
     if(jRadioButtonDtrKeyer.isSelected())
@@ -3957,7 +3938,6 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JButton jButtonCancel;
   private javax.swing.JButton jButtonSave;
   private javax.swing.JComboBox jComboBoxKeyerComPort;
-  private javax.swing.JComboBox jComboBoxKeyerComPortBaudRate;
   private javax.swing.JComboBox jComboBoxRadioComPort;
   private javax.swing.JComboBox jComboBoxRadioComPortBaudRate;
   private javax.swing.JDesktopPane jDesktopPane1;
@@ -3976,7 +3956,6 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel19;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel20;
-  private javax.swing.JLabel jLabel21;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;

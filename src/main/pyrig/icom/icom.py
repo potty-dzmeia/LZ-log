@@ -24,7 +24,7 @@ class Icom(radio.Radio):
 
     # Get default serial port settings
     serial_settings = SerialSettings() # If different values than the default ones are need - uncomment and set to desired value
-    serial_settings.baudrate_max_   = 9600
+    serial_settings.baudrate_max_   = 9600 # Not used. Set from the within the program.
     serial_settings.rts_            = SerialSettings.RTS_STATE_ON  # This is used to power the electronics
     # serial_settings.baudrate_min_ = 2400
     # serial_settings.data_bits_    = SerialSettings.DATABITS_EIGTH

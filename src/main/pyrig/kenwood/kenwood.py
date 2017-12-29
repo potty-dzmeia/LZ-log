@@ -24,8 +24,8 @@ class Kenwood(Radio):
 
     # Get default serial port settings
     serial_settings = SerialSettings() # If different values than the default ones are need - uncomment and set to desired value
-    serial_settings.baudrate_min_   = 4800
-    serial_settings.baudrate_max_   = 38400
+    serial_settings.baudrate_min_   = 4800   # Note used. Baud rate is set from the application
+    serial_settings.baudrate_max_   = 38400  # Note used. Baud rate is set from the application
     serial_settings.stop_bits_      = SerialSettings.STOPBITS_TWO
     serial_settings.rts_            = SerialSettings.RTS_STATE_OFF
     serial_settings.dtr_            = SerialSettings.DTR_STATE_OFF

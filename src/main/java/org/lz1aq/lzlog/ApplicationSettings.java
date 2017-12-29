@@ -41,7 +41,7 @@ public final class ApplicationSettings
   static final String PROPERTY_RADIO_COMPORT = "radio_com_port";
   static final String PROPERTY_RADIO_COMPORT_BAUDRATE = "radio_com_port_baudrate";
   static final String PROPERTY_KEYER_COMPORT = "keyer_com_port";
-  static final String PROPERTY_KEYER_COMPORT_BAUDRATE = "keyer_com_port_baudrate";
+  //static final String PROPERTY_KEYER_COMPORT_BAUDRATE = "keyer_com_port_baudrate";
   static final String PROPERTY_KEYER_TYPE = "keyer_type";
   static final String PROPERTY_MY_CALL_SIGN = "my_callsign";
   static final String PROPERTY_QUICK_CALLSIGN_MODE = "quick_callsign_mode";
@@ -95,7 +95,7 @@ public final class ApplicationSettings
   private String radioComPort;
   private int    radioComPortBaudRate;
   private String keyerComPort;
-  private int    keyerComPortBaudRate;
+  //private int    keyerComPortBaudRate;
   private KeyerTypes keyerType;
   private String myCallsign;
   private boolean isQuickCallsignModeEnabled;
@@ -226,15 +226,15 @@ public final class ApplicationSettings
     return radioComPortBaudRate;
   }
 
-  public int getKeyerComPortBaudRate()
-  {
-    return keyerComPortBaudRate;
-  }
-
-  public void setKeyerComPortBaudRate(int keyerComPortBaudRate)
-  {
-    this.keyerComPortBaudRate = keyerComPortBaudRate;
-  }
+//  public int getKeyerComPortBaudRate()
+//  {
+//    return keyerComPortBaudRate;
+//  }
+//
+//  public void setKeyerComPortBaudRate(int keyerComPortBaudRate)
+//  {
+//    this.keyerComPortBaudRate = keyerComPortBaudRate;
+//  }
 
   public void setRadioComPortBaudRate(int radioComPortBaudRate)
   {
@@ -485,7 +485,7 @@ public final class ApplicationSettings
     prop.setProperty(PROPERTY_RADIO_COMPORT, radioComPort);
     prop.setProperty(PROPERTY_KEYER_COMPORT, keyerComPort);
     prop.setProperty(PROPERTY_RADIO_COMPORT_BAUDRATE, Integer.toString(radioComPortBaudRate));
-    prop.setProperty(PROPERTY_KEYER_COMPORT_BAUDRATE, Integer.toString(keyerComPortBaudRate));
+    //prop.setProperty(PROPERTY_KEYER_COMPORT_BAUDRATE, Integer.toString(keyerComPortBaudRate));
     prop.setProperty(PROPERTY_KEYER_TYPE, Integer.toString(keyerType.toInt()));
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
     prop.setProperty(PROPERTY_QUICK_CALLSIGN_MODE, Boolean.toString(isQuickCallsignModeEnabled));
@@ -560,11 +560,11 @@ public final class ApplicationSettings
         SetSettingToDefault(PROPERTY_KEYER_COMPORT);
       
       // Keyer Comport baud rate
-      temp = prop.getProperty(PROPERTY_KEYER_COMPORT_BAUDRATE);
-      if (temp == null)
-        SetSettingToDefault(PROPERTY_KEYER_COMPORT_BAUDRATE);
-      else
-        keyerComPortBaudRate = Integer.parseInt(temp);
+//      temp = prop.getProperty(PROPERTY_KEYER_COMPORT_BAUDRATE);
+//      if (temp == null)
+//        SetSettingToDefault(PROPERTY_KEYER_COMPORT_BAUDRATE);
+//      else
+//        keyerComPortBaudRate = Integer.parseInt(temp);
       
       // Keyer type
       temp = prop.getProperty(PROPERTY_KEYER_TYPE);
@@ -686,7 +686,7 @@ public final class ApplicationSettings
 
     radioComPortBaudRate = 19200;
 
-    keyerComPortBaudRate = 1200;
+//    keyerComPortBaudRate = 1200;
 
     keyerType = KeyerTypes.DTR;
 
@@ -716,20 +716,20 @@ public final class ApplicationSettings
     functionKeyTexts[10] = "not defined by user";
     functionKeyTexts[11] = "not defined by user";
 
-    // Default positions for the different frames
-    framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(20, 20, 600, 600);
-    framesDimensions[FrameIndex.BANDMAP.toInt()] = new Rectangle(10, 10, 200, 200);
-    framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(40, 40, 200, 200);
-    framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(60, 60, 200, 200);
-    framesDimensions[FrameIndex.LOG.toInt()] = new Rectangle(80, 80, 200, 200);
-    framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(100, 100, 300, 50);
-    framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(150, 150, 300, 300);
-
+    // Default positions for the different frames               x  y  width height
+    framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(48, 1, 1374, 744);
+    framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(9, 6, 383, 244);
+    framesDimensions[FrameIndex.LOG.toInt()]  = new Rectangle(430, 473, 943, 164);
+    framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(9, 254, 384, 375);
+    framesDimensions[FrameIndex.BANDMAP.toInt()]  = new Rectangle(440, 4, 932, 471);
+    framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(236, 318, 394, 223);
+    framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(306, 32, 265, 277);
+    
     bandmapStepInHz = 200;
 
-    bandmapColumnCount = 16;
+    bandmapColumnCount = 18;
 
-    bandmapRowCount = 15;
+    bandmapRowCount = 24;
 
     // Fonts  
     fonts[FontIndex.BANDMAP.toInt()] = new Font("Dialog", Font.PLAIN, 12);
@@ -767,9 +767,9 @@ public final class ApplicationSettings
         radioComPortBaudRate = 19200;
         break;
         
-      case PROPERTY_KEYER_COMPORT_BAUDRATE:
-        keyerComPortBaudRate = 1200;
-        break;
+//      case PROPERTY_KEYER_COMPORT_BAUDRATE:
+//        keyerComPortBaudRate = 1200;
+//        break;
       
       case PROPERTY_KEYER_TYPE:
         keyerType = KeyerTypes.DTR;
@@ -815,22 +815,15 @@ public final class ApplicationSettings
         functionKeyTexts[11] = "not defined by user";
         break;
         
-      case PROPERTY_FRAMES_DIMENSIONS:
-        // Default positions for the different frames
-        if(framesDimensions[FrameIndex.JFRAME.toInt()] == null) // Initialize is it was not....
-          framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(20, 20, 600, 600); 
-        if(framesDimensions[FrameIndex.BANDMAP.toInt()] == null)
-          framesDimensions[FrameIndex.BANDMAP.toInt()] = new Rectangle(10, 10, 200, 200);
-        if(framesDimensions[FrameIndex.ENTRY.toInt()] == null)
-          framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(40, 40, 200, 200);
-        if(framesDimensions[FrameIndex.INCOMING_QSO.toInt()] == null)
-          framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(60, 60, 200, 200);
-        if(framesDimensions[FrameIndex.LOG.toInt()] == null)
-          framesDimensions[FrameIndex.LOG.toInt()] = new Rectangle(80, 80, 200, 200);
-        if(framesDimensions[FrameIndex.RADIO.toInt()] == null)
-          framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(100, 100, 300, 50);
-        if(framesDimensions[FrameIndex.SETTINGS.toInt()] == null)
-          framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(150, 150, 300, 300);
+      case PROPERTY_FRAMES_DIMENSIONS:  
+        // Default positions for the different frames               x  y  width height
+        framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(48, 1, 1374, 744);
+        framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(9, 6, 383, 244);
+        framesDimensions[FrameIndex.LOG.toInt()]  = new Rectangle(430, 473, 943, 164);
+        framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(9, 254, 384, 375);
+        framesDimensions[FrameIndex.BANDMAP.toInt()]  = new Rectangle(440, 4, 932, 471);
+        framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(236, 318, 394, 223);
+        framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(306, 32, 265, 277);
         break;
         
       case PROPERTY_BANDMAP_STEP:
@@ -838,11 +831,11 @@ public final class ApplicationSettings
         break;
         
       case PROPERTY_BANDMAP_COLUMN_COUNT:
-        bandmapColumnCount = 16;
+        bandmapColumnCount = 18;
         break;
         
       case PROPERTY_BANDMAP_ROW_COUNT:
-        bandmapRowCount = 15;
+        bandmapRowCount = 24;
         break;
         
       case PROPERTY_FONTS:

@@ -26,7 +26,7 @@ package org.lz1aq.keyer;
  */
 public class KeyerFactory
 {
-  public static Keyer create(KeyerTypes type, String serialPort, int baudrate)
+  public static Keyer create(KeyerTypes type, String serialPort)
   {
     if(type==KeyerTypes.DTR)
     {
@@ -38,7 +38,7 @@ public class KeyerFactory
     }
     else //if(type == KeyerTypes.WINKEYER)
     {
-      return new WinKeyer(serialPort, baudrate);
+      return new WinKeyer(serialPort);
     }
   }
 }

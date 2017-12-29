@@ -1,30 +1,24 @@
 High priority:
-- support for winkey
 - support Icom CAT
-- Baud rate settings to be done from the App.
 - all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
 - continious CQ interval should work 
-- serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
-
+- there should be an option for entering worked frequency for people that do not use CAT
+- band map should be updated depending on the current freq and mode
+- show qso rate
 - serial comm - needs to work fast. There were some problems with responsivnes during the contest
 - when generating cabrilo check for obvious mistakes
 - Try to catch all keyboard presses (f4 should not close HDSDR)
 - the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
 - bandmap - add reset button
 - input filter for the F messages
-
-
+- bandmap - when hovering over the cell it should show the current freq
 
 
 Low priority:
-- show qso rate
-- band map should be updated depending on the current freq and mode
-- there should be an option for entering worked frequency for people that do not use CAT
 - For some reason F10 is activating the Menu
 - when correcting callsign in the log the call is written with small letters
 - adjust row sizes depending on the font
 - delete callsign when moving away from freq and enter into bandmap
-- bandmap - when hovering over the cell it should show the current freq
 - enter frequency in callsign
 - note za wsqka vruzka 
 - opciq vsichki nuli da sa T
@@ -35,6 +29,9 @@ Low priority:
 
 
 Solved:
+- serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
+- Baud rate settings to be done from the App.
+- support for winkey
 - Focus change should be reliable now (using requestrequestFocusInWindow())
 - bandmap - hide the freq columns
 - For Elekraft when sending CW put space between F-keys (e.g. f5 i f2)
