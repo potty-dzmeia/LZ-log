@@ -63,6 +63,7 @@ import org.lz1aq.radio.Radio;
 import org.lz1aq.utils.FontChooser;
 import org.lz1aq.utils.Misc;
 import org.lz1aq.radio.RadioModes;
+import org.lz1aq.utils.MorseCode;
 import org.lz1aq.utils.TimeUtils;
 
 /**
@@ -3329,18 +3330,19 @@ public class MainWindow extends javax.swing.JFrame
     
     String text = applicationSettings.getFunctionKeyMessage(0);  // Get the text for the F1 key
     text = text.replaceAll("\\{mycall\\}", applicationSettings.getMyCallsign()); // Substitute {mycall} with my callsign
-    keyer.sendCw(text+" ");                          // Send to radio
+    text = text + " ";
+    keyer.sendCw(text); // Send to keyer
    
     // Select the CQ radio button
     jradiobuttonCQ.setSelected(true);
     
-    
+    int period = 0;
     // Continious CQ is enabled ...
     if(jcheckboxContinuousCq.isSelected())
     {
-      int period = getCqDuration(text,keyerSpeed);
-      period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());
-      
+      period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());     
+      period += MorseCode.getDurationOfMessage(text, keyerSpeed);
+              
       if(timerContinuousCq.isRunning())
       {
         timerContinuousCq.stop();
@@ -3348,21 +3350,6 @@ public class MainWindow extends javax.swing.JFrame
       timerContinuousCq.setInitialDelay(period);
       timerContinuousCq.start();
     }
-  }
-  
-  
-  /**
-   * Calculates the duration of the CQ depending on the morse code speed and the text that needs to be sent
-   * 
-   * @return Duration of the CQ in milliseconds
-   */
-  private int getCqDuration(String text, int speed)
-  {
-    int duration = 0;
-    
-    
-    
-    return duration;
   }
   
   

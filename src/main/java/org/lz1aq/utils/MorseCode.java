@@ -20,14 +20,24 @@
 package org.lz1aq.utils;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.python.jline.internal.Log;
 
 public class MorseCode
 {
   public static final char DOT = '.';
   public static final char DASH = '-';
   
+  private static final int dashDotRatio = 3;
+  private static final int markSpaceRatio = 1;
+  private static final int charSpaceRatio = 3;
+  private static final int wordSpaceRatio = 9;
+  
   
   private static final HashMap morse = new HashMap();
+  
+  private static final Logger logger = Logger.getLogger(MorseCode.class.getName());
 
   static
   {  // perhaps not the best way to represent morse, but it's easy to deal with
@@ -100,8 +110,8 @@ public class MorseCode
     morse.put(new Character('?'), "..--..");
     morse.put(new Character(','), "--..--");
     morse.put(new Character('.'), ".-.-.-");
-    morse.put(new Character('-'), "-....-");  // wait; interpretation as - arguably wrong
-    morse.put(new Character('='), "-...-");  // BT (=?  As per ARRL Handbook)
+    morse.put(new Character('-'), "-....-"); 
+    morse.put(new Character('='), "-...-"); 
     morse.put(new Character(':'), "---...");
     morse.put(new Character(';'), "-.-.-.");
     morse.put(new Character('('), "-.--.");
@@ -113,16 +123,88 @@ public class MorseCode
 
   /**
    * Get the Morse code representation of a character
+   * 
    * @param ch character for which we will get the Morse code representation.
    * @return string containing DOTs and DASHes (see this.DOT and this.DASH)
    */
-  static public String getMorseCode(Character ch)
+  static public String getCode(Character ch)
   {
     return (String)morse.get(ch);
   }
   
+  
+  /**
+   * How much time it will take to transmit the specified "text" message
+   * 
+   * @param text the message that we would like to know how long it will take to transmit
+   * @param wpm the speed with which we will transmit the message (words per minute)
+   * @return Duration of the transmission in milliseconds
+   */
   static public int getDurationOfMessage(String text, int wpm)
   {
-    return 0;
+    int durationInMsec = 0; // duration it milliseconds
+    
+    for(char ch:text.toCharArray())
+    {
+      durationInMsec +=getDurationOfCharacter(ch, wpm);
+    }  
+    
+    return durationInMsec;
   }
+  
+  
+  /**
+   * How much time it will take to transmit the given character
+   * 
+   * 
+   * @param character - the char which length we want to know
+   * @param wpm - the speed with which the char will be transmitted
+   * @return duration in seconds. Will return 0 if the char has no Morse code representation
+   * 
+   * 
+   */
+  static private int getDurationOfCharacter(char character, int wpm)
+  {
+    String tempStr; 
+    double dotTime = 1.2 / (double) wpm;
+    int dotMillis = (int) (dotTime * 1000);
+    int duration = 0; // duration in dotTime
+    
+    if(isValidCharacter(character))
+    {
+      tempStr = (String)morse.get(character);
+      for(char ch:tempStr.toCharArray())
+      {
+        if(ch == DOT)
+        {
+          duration +=1;
+        }
+        else if(ch == DASH)
+        {
+          duration +=dashDotRatio;
+        }
+        duration +=markSpaceRatio; //between mark
+      }
+      duration -= markSpaceRatio; // remove the extra space mark space that we have added
+      duration +=charSpaceRatio;
+    }
+    else if(character==' ')
+    {
+      duration = wordSpaceRatio;
+    }
+    else
+    {
+      logger.log(Level.SEVERE, "Not a valid character");
+    }
+    
+    
+    return duration*dotMillis;
+  }
+  
+  
+  static public boolean isValidCharacter(char ch)
+  {
+    return morse.containsKey(new Character(ch));
+  }
+  
 }

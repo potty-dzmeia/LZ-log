@@ -1,4 +1,4 @@
-// ***************************************************************************
+  // ***************************************************************************
 // *   Copyright (C) 2015 by Chavdar Levkov                              
 // *   ch.levkov@gmail.com                                                   
 // *                                                                         
@@ -297,7 +297,7 @@ public class DtrRtsKeyer implements Keyer
         }
         else
         {
-          String dotsndashes = MorseCode.getMorseCode(c);   // c must be an Object to be a hashkey
+          String dotsndashes = MorseCode.getCode(c);   // c must be an Object to be a hashkey
           for(int j = 0; j < dotsndashes.length(); j++)
           {
             char ch = dotsndashes.charAt(j);

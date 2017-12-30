@@ -1,12 +1,12 @@
 High priority:
 - support Icom CAT
 - create help
-- all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
-- continious CQ interval should work 
 - there should be an option for entering worked frequency for people that do not use CAT
 - band map should be updated depending on the current freq and mode
 - show qso rate
+- all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
 - serial comm - needs to work fast. There were some problems with responsivnes during the contest
+- the app should load the last used log. If there are no logs the app should ask you for name of the new log. Also add "New log" and "Open log" in the File menu
 - when generating cabrilo check for obvious mistakes
 - Try to catch all keyboard presses (f4 should not close HDSDR)
 - the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
@@ -30,6 +30,7 @@ Low priority:
 
 
 Solved:
+- continious CQ interval should work 
 - serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
 - Baud rate settings to be done from the App.
 - support for winkey
