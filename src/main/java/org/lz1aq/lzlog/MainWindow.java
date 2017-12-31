@@ -72,7 +72,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.2";
+  static final String PROGRAM_VERSION = "1.3";
   static final String PROGRAM_NAME    = "LZ-Log";
           
   static final int    SERIAL_NUMBER_LENGTH = 6;
