@@ -3340,7 +3340,16 @@ public class MainWindow extends javax.swing.JFrame
     // Continious CQ is enabled ...
     if(jcheckboxContinuousCq.isSelected())
     {
-      period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());     
+      try
+      {
+        period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());        
+      }
+      catch(NumberFormatException numberFormatException)
+      {
+        period +=3000; // default length if crap is entered fro the user
+      }
+  
+      
       period += MorseCode.getDurationOfMessage(text, keyerSpeed);
               
       if(timerContinuousCq.isRunning())

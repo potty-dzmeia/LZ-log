@@ -22,7 +22,6 @@ package org.lz1aq.utils;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.python.jline.internal.Log;
 
 public class MorseCode
 {
@@ -113,11 +112,11 @@ public class MorseCode
     morse.put(new Character('-'), "-....-"); 
     morse.put(new Character('='), "-...-"); 
     morse.put(new Character(':'), "---...");
-    morse.put(new Character(';'), "-.-.-.");
+    // morse.put(new Character(';'), "-.-.-."); // removed - not supported by ts-590
     morse.put(new Character('('), "-.--.");
     morse.put(new Character(')'), "-.--.-");
-    morse.put(new Character('*'), "...-.-");  // SK (unnatural)
-    morse.put(new Character('^'), ".-.-.");   // AR (unnatural)
+    morse.put(new Character('*'), "...-.-");  
+    // morse.put(new Character('^'), ".-.-.");  // removed - not supported by ts-590
   }
 
 
@@ -205,6 +204,24 @@ public class MorseCode
   static public boolean isValidCharacter(char ch)
   {
     return morse.containsKey(new Character(ch));
+  }
+
+  
+  /**
+   * Checks all the characters in "text" can be represented as Morse code
+   * 
+   * @param text the message string
+   * @return true if this can be send as a Morse code message; false if there are some illegal
+   *              characters inside the string.
+   */
+  public static boolean isValidMessage(String text)
+  {
+    for(char ch:text.toCharArray())
+    {
+      if(!isValidCharacter(ch) && ch!=' ')
+        return false;
+    }
+    return true;
   }
   
 }

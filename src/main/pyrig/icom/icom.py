@@ -34,7 +34,7 @@ class Icom(radio.Radio):
     #serial_settings.dtr_           = SerialSettings.DTR_STATE_NONE
 
 
-    CIV_ADDRESS  = 0x5c # The address of the Icom transceiver. Value of 0x5c is good for 756Pro
+    CIV_ADDRESS  = 0x5C # Icom address - value of 0x5c is good for 756Pro
     CTRL_ADDRESS = 0xE0 # Controller's address (default is 0xE0).
 
 
@@ -124,7 +124,7 @@ class Icom(radio.Radio):
 
         :return: Initialization command that is to be send to the Rig
         :rtype: EncodedTransaction
-        """
+        """radio.getFrequency(RadioVfos.A.getCode())
 
         return list()
 
@@ -147,19 +147,21 @@ class Icom(radio.Radio):
 
         :param freq: Frequency in Hz. E.g. 7100000 for 7.1MHz
         :type freq: int
-        :param vfo: The vfo for which we want to set the frequency
+        :param vfo: The vfo for which we want to set the frequency. Not used for Icom
         :type vfo: int
         :return: Object containing transaction with some additional control settings
         :rtype: EncodedTransaction
         """
 
-        temp = cls.__transaction(0x07)                              # Select VFO mode
-        tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
-        tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x05, data=misc_utils.toBcd(freq, 10))  # Select the frequency
+        #temp = cls.__transaction(0x07)                              # Select VFO mode
+        #tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        #temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
+        #tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        temp = cls.__transaction(cls.SET_FREQ, data=misc_utils.toBcd(freq, 10))  # Select the frequency
         tr3 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        return [tr1, tr2, tr3]
+
+         #return [tr1, tr2, tr3]
+        return [tr3]
 
 
     @classmethod
@@ -167,20 +169,21 @@ class Icom(radio.Radio):
         """
         Gets the command with which we can tell the radio send us the current frequency
 
-        :param vfo: For which VFO we want the mode
+        :param vfo: For which VFO we want the mode. Not used for Icom
         :type vfo: int
         :return: Object containing transaction with some additional control settings
         :rtype: EncodedTransaction
         """
 
-        temp = cls.__transaction(0x07)                              # Select VFO mode
-        tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
-        tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x03)                              # Read the frequency
-        tr3 = EncodedTransaction(bytearray(temp).__str__(), post_write_delay=100) # Add delay to give the radio time to send the Freq
+        #temp = cls.__transaction(0x07)                              # Select VFO mode
+        #tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        #temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
+        #tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        temp = cls.__transaction(cls.READ_FREQ)                              # Read the frequency
+        tr3 = EncodedTransaction(bytearray(temp).__str__()) # Add delay to give the radio time to send the Freq
 
-        return [tr1, tr2, tr3]
+        #return [tr1, tr2, tr3]
+        return [tr3]
 
 
 
@@ -191,7 +194,7 @@ class Icom(radio.Radio):
 
         :param mode: Specifies the mode - see Radio.modes
         :type mode: str
-        :param vfo: The vfo which mode must be changed
+        :param vfo: The vfo which mode must be changed. Not used for Icom
         :type vfo: int
         :return: Object containing transaction with some additional control settings
         :rtype: EncodedTransaction
@@ -200,14 +203,15 @@ class Icom(radio.Radio):
         if not cls.mode_codes.__contains__(new_mode):
             raise ValueError("Unsupported mode: "+mode+"!")
 
-        temp = cls.__transaction(0x07)                              # Select VFO mode
-        tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
-        tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x06, sub_command=cls.mode_codes[new_mode])   # Set the Mode
+        #temp = cls.__transaction(0x07)                              # Select VFO mode
+        #tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        #temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
+        #tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        temp = cls.__transaction(cls.SET_MODE, sub_command=cls.mode_codes[new_mode])   # Set the Mode
         tr3 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
 
-        return [tr1, tr2, tr3]
+        #return [tr1, tr2, tr3]
+        return [tr3]
 
 
     @classmethod
@@ -220,14 +224,16 @@ class Icom(radio.Radio):
         :return: Object containing transaction with some additional control settings
         :rtype: EncodedTransaction
         """
-        temp = cls.__transaction(0x07)                         # Select VFO mode
-        tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x07, 0xD0 + vfo)             # Select the desired VFO
-        tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(0x04)                         # Get the Mode
-        tr3 = EncodedTransaction(bytearray(temp).__str__(), post_write_delay=100) # Add a delay to give the radio time to send the Mode back
+        #temp = cls.__transaction(0x07)                         # Select VFO mode
+        #tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        #temp = cls.__transaction(0x07, 0xD0 + vfo)             # Select the desired VFO
+        #tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        temp = cls.__transaction(cls.READ_MODE)                         # Get the Mode
+        tr3 = EncodedTransaction(bytearray(temp).__str__()) # Add a delay to give the radio time to send the Mode back
 
-        return [tr1, tr2, tr3]
+        #return [tr1, tr2, tr3]
+        return [tr3]
+
 
     @classmethod
     def encodeSendCW(cls, text):
@@ -262,13 +268,19 @@ class Icom(radio.Radio):
         """
         return list()
 
+
     @classmethod
     def encodePoll(cls):
         """
         Gets the command with which we can tell the radio to send us status information (e.g. freq, mode, vfo etc.)
         :return:
         """
-        return list()
+        temp = cls.__transaction(cls.READ_FREQ)                      # Read the frequency
+        tr1 = EncodedTransaction(bytearray(temp).__str__())
+        temp = cls.__transaction(cls.READ_MODE)                      # Get the Mode
+        tr2 = EncodedTransaction(bytearray(temp).__str__())
+
+        return [tr1, tr2]
 
 
     @classmethod
@@ -308,7 +320,7 @@ class Icom(radio.Radio):
 
         trans = bytearray(data)
 
-        # Find the beginning of the transaction
+        # Find the beginning of the transaction (0xfe 0xfe)
         trans_start_index = trans.find(cls.TRANS_START)
         if trans_start_index == -1:
             return DecodedTransaction(None, 0)
@@ -318,21 +330,26 @@ class Icom(radio.Radio):
         if trans_end_index == -1:
             return DecodedTransaction(None, 0)
 
-        cmd_idx = trans_start_index + 4  # get the index of the command
 
         result_dic = dict()
 
-        if trans[cmd_idx] == cls.CFM_POSITIVE:      # <------------------------- positive confirm
+        cmd_idx = trans_start_index + 4  # get the index of the command
+
+           # Check if Icom is sending this transaction - 3rd byte is 0x5c
+        if trans[trans_start_index+3] != cls.CIV_ADDRESS:
+             DecodedTransaction.insertNotSupported(result_dic, misc_utils.getListInHex(trans[trans_start_index:trans_end_index+1]))
+
+        elif trans[cmd_idx] == cls.CFM_POSITIVE:      # <------------------------- positive confirm
             DecodedTransaction.insertPositiveCfm(result_dic)
 
         elif trans[cmd_idx] == cls.CFM_NEGATIVE:    # <------------------------- negative confirm
             DecodedTransaction.insertNegativeCfm(result_dic)
 
-        elif trans[cmd_idx] == cls.SEND_FREQ:       # <------------------------- frequency
+        elif trans[cmd_idx] == cls.SEND_FREQ or trans[cmd_idx] == cls.READ_FREQ:  # <------------------------- frequency
             freq = cls.__frequency_from_bcd_to_string(trans[(cmd_idx + 1):trans_end_index])
             DecodedTransaction.insertFreq(result_dic, freq)
 
-        elif trans[cmd_idx] == cls.SEND_MODE:       # <------------------------- mode
+        elif trans[cmd_idx] == cls.SEND_MODE or trans[cmd_idx] == cls.READ_MODE:  # <------------------------- mode
             mode = cls.__mode_from_byte_to_string(trans[cmd_idx+1])
             DecodedTransaction.insertMode(result_dic, mode)
 
@@ -422,11 +439,15 @@ class Icom(radio.Radio):
     #|   Icom command codes
     #+--------------------------------------------------------------------------+
 
-    TRANS_START = bytearray([0xFE, 0xFE, CTRL_ADDRESS, CIV_ADDRESS])  # Trans send by the Icom starts with: 0xFE 0xFE CTRL CIV
+    TRANS_START = bytearray([0xFE, 0xFE])  # Trans send by the Icom starts with: 0xFE 0xFE CTRL CIV
     TRANS_END = bytearray([0xFD])  # Transactions ends with: 0xFD
 
     SEND_FREQ = 0x00        # send by the Icom when frequency has changed
     SEND_MODE = 0x01        # send by the Icom whe mode has changed
+    READ_FREQ = 0x03        # Read operating frequency
+    READ_MODE = 0x04        # Read operating mode
+    SET_FREQ = 0x05         # Set frequency data (same as SEND_FREQ)
+    SET_MODE = 0x06         # Set mode data (same as SEND_MODE)
     CFM_POSITIVE = 0xFB     # Positive confirmation send by the Icom radio
     CFM_NEGATIVE = 0xFA     # Negative confirmation send by the Icom radio
 

@@ -4,8 +4,9 @@ High priority:
 - there should be an option for entering worked frequency for people that do not use CAT
 - band map should be updated depending on the current freq and mode
 - show qso rate
+- show hints when hovering over controls
 - all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
-- serial comm - needs to work fast. There were some problems with responsivnes during the contest
+- serial comm - needs to work fast. There were some problems with responsivnes during the contest when using it togather with HDSDR
 - the app should load the last used log. If there are no logs the app should ask you for name of the new log. Also add "New log" and "Open log" in the File menu
 - when generating cabrilo check for obvious mistakes
 - Try to catch all keyboard presses (f4 should not close HDSDR)

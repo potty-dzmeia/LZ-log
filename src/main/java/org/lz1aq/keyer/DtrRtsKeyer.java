@@ -297,7 +297,8 @@ public class DtrRtsKeyer implements Keyer
         }
         else
         {
-          String dotsndashes = MorseCode.getCode(c);   // c must be an Object to be a hashkey
+          String dotsndashes = MorseCode.getCode(c); // c must be an Object to be a hashkey
+          if(dotsndashes == null) return; // not a valid character - stop transmitting
           for(int j = 0; j < dotsndashes.length(); j++)
           {
             char ch = dotsndashes.charAt(j);

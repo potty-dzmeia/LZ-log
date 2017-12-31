@@ -39,6 +39,7 @@ import org.lz1aq.radio.event.RadioListener;
 import org.lz1aq.radio.event.SmeterEvent;
 import org.lz1aq.radio.RadioModes;
 import org.lz1aq.radio.RadioVfos;
+import org.lz1aq.utils.MorseCode;
 
 /**
  *
@@ -182,6 +183,8 @@ public class RadioController
   {
     return activeVfo;
   }
+  
+  
   /**
    *  Set the frequency of the currently active VFO
    * @param freq
@@ -202,10 +205,14 @@ public class RadioController
       {
         radio.setFrequency(freq, RadioVfos.B.getCode());
       }
+      
+      radio.getFrequency(RadioVfos.A.getCode()); // workaround for Icom transcievers. They don't send update when frequency is changed through the CAT
     }catch (Exception ex) 
     {
       Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
     }
+    
+    ;
   }
   
   
@@ -359,13 +366,21 @@ public class RadioController
         if (e.getVfo() == RadioVfos.A)
         {
           freqVfoA = Integer.parseInt(e.getFrequency()); //Misc.formatFrequency(e.getFrequency());
-        } else if (e.getVfo() == RadioVfos.B)
+        } 
+        else if (e.getVfo() == RadioVfos.B)
         {
           freqVfoB = Integer.parseInt(e.getFrequency());
-        } else
+        } 
+        else if(e.getVfo() == RadioVfos.NONE)
         {
-          logger.warning("Frequency event from unknown VFO!");
-          return;
+          if(activeVfo == RadioVfos.A)
+            freqVfoA = Integer.parseInt(e.getFrequency());
+          else
+            freqVfoB = Integer.parseInt(e.getFrequency());   
+        }
+        else
+        {
+          logger.warning("Frequency event from unknown VFO! Will consider it as VFO A.");
         }
 
         // Notify any listeners
@@ -471,7 +486,10 @@ public class RadioController
     @Override
     public void sendCw(String text)
     {
-      transmitCW(text);
+      if(MorseCode.isValidMessage(text))
+      {
+        transmitCW(text);
+      }
     }
 
     @Override
