@@ -5,8 +5,10 @@
 	<title></title>
 	<meta name="generator" content="LibreOffice 4.3.3.2 (Linux)"/>
 	<meta name="created" content="00:00:00"/>
-	<meta name="changed" content="2018-01-01T23:45:43.557125457"/>
+	<meta name="changed" content="2018-01-02T00:09:32.735957460"/>
 	<meta name="" content=""/>
+	<meta name="created" content="00:00:00">
+	<meta name="changed" content="2018-01-01T23:45:43.557125457">
 	<meta name="created" content="00:00:00">
 	<meta name="changed" content="2018-01-01T21:26:26.524678636">
 	<style type="text/css">
@@ -84,8 +86,7 @@ the station. For example instead of LZ1ABC you can enter 1ABC.</span></p>
 <p><span style="font-weight: normal">CQ – when this radio
 	button is selected you are in run mode (i.e. calling CQ). When you
 	work a station in this mode it will </span><b>not</b> <span style="font-weight: normal">be
-	added to the </span><span style="font-weight: normal">B</span><span style="font-weight: normal">andmap
-	window.</span></p>
+	added to the Bandmap window.</span></p>
 	<li/>
 <p style="font-weight: normal">S&amp;P – Search and Pounce
 	mode (e.g. you are searching for stations). When you work a station
@@ -112,11 +113,10 @@ keys</font></font></p>
 keys</font></font></p>
 <ul>
 	<li/>
-<p style="font-weight: normal">;  - Sends TU message and
-	enters the contact in log</p>
+<p style="font-weight: normal">; - Sends TU message and enters
+	the contact in log</p>
 	<li/>
-<p style="font-weight: normal">'  - Sends hos call and
-	exchange</p>
+<p style="font-weight: normal">' - Sends hos call and exchange</p>
 	<li/>
 <p style="font-weight: normal">ALT+W or CTR+W – same as F12</p>
 </ul>
@@ -131,16 +131,26 @@ press the C<b>onnect</b> button. Then navigate to the file describing
 the communication protocol of your radio.</p>
 <ul>
 	<li/>
-<p>For Icom rig select the file: icom/icom.py</p>
+<p>For <b>Kenwood</b> rig: kenwood/kenwood.py</p>
 	<li/>
-<p>For Kenwood rig: kenwood/kenwood.py</p>
+<p>For <b>K3</b>: elecraft/elecraft.py</p>
 	<li/>
-<p>For K3: elecraft/elecraft.py</p>
+<p>For <b>Icom</b> rig select the file: icom/icom.py 
+	</p>
 </ul>
-<p>If you transceiver does not send data automatically when changing
-frequency or mode you need to enable polling. For many transceiver
-you can enable from the rig menu to send this status data
-automatically so that polling is not needed.</p>
+<p><b>For Icom rigs only</b>: Each Icom model has its own unique
+address and when communicating with the rig over the serial
+connection the program needs to use this unique address. For this
+purpose you need to edit the file pyrig/icom/<b>icom.py</b><span style="font-weight: normal">.
+Open the file using the a text editor and edit the line CIV_ADDRESS 
+= 0x5C The value 0x5C is good for Icom 756PRO. If for example you
+have IC-7000 you need to edit it so that CIV_ADDRESS  = 0x70 After
+this is done open the program and connect using the Connect button.</span></p>
+<p><b>Polling: </b>If you transceiver does not send data
+automatically when changing frequency or mode you need to enable
+polling. For many transceiver you can enable the rig to send this
+status data automatically so that polling is not needed. Enabling is
+done through the internal menu of the rig.</p>
 <p style="margin-top: 0.17in; page-break-after: avoid"><font face="Albany, sans-serif"><font size="4" style="font-size: 14pt">Keyer</font></font></p>
 <p>Set the desired keyer type and com port in the Settings and then
 press the C<b>onnect</b> button.</p>
@@ -199,10 +209,10 @@ can:</p>
 <h2 class="western"><b>Misc window</b></h2>
 <ul>
 	<li/>
-<p><span style="font-weight: normal">Continuous C</span><span style="font-weight: normal">Q
-	</span><span style="font-weight: normal">– if selected once you
-	press the F1 key the program will transmit periodically a CQ
-	message. The period is specified in milliseconds.</span></p>
+<p><span style="font-weight: normal">Continuous CQ </span>–
+	<span style="font-weight: normal">if selected once you press the F1
+	key the program will transmit periodically a CQ message. The period
+	is specified in milliseconds.</span></p>
 	<li/>
 <p><span style="font-weight: normal">F1 jumps to CQ frequency
 	– if selected when F1 is pressed the program will change the
