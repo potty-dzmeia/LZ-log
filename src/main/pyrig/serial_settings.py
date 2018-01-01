@@ -16,8 +16,8 @@ class SerialSettings(I_SerialSettings):
 
     def __init__(self):
         # underscore added because of a jython issue
-        self.baudrate_min_ = 2400
-        self.baudrate_max_ = 19200
+        self.baudrate_min_ = 2400                   # min supported baudrate
+        self.baudrate_max_ = 19200                  # max supported baudrate
         self.data_bits_ = self.DATABITS_EIGTH
         self.stop_bits_ = self.STOPBITS_ONE
         self.parity_ = self.PARITY_NONE

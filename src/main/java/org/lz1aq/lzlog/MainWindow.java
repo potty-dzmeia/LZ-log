@@ -22,6 +22,7 @@ package org.lz1aq.lzlog;
 import org.lz1aq.keyer.KeyerTypes;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
@@ -34,6 +35,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -72,8 +74,9 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.3";
+  static final String PROGRAM_VERSION = "1.3.1";
   static final String PROGRAM_NAME    = "LZ-Log";
+  static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
   static final int    SERIAL_NUMBER_LENGTH = 6;
   
@@ -401,6 +404,11 @@ public class MainWindow extends javax.swing.JFrame
     jbuttonCreateNewLog = new javax.swing.JButton();
     jbuttonOpenExistingLog = new javax.swing.JButton();
     buttonGroupKeyer = new javax.swing.ButtonGroup();
+    jDialogAbout = new javax.swing.JDialog();
+    jPanel13 = new javax.swing.JPanel();
+    jScrollPane6 = new javax.swing.JScrollPane();
+    jTextArea1 = new javax.swing.JTextArea();
+    jButton20 = new javax.swing.JButton();
     jDesktopPane1 = new javax.swing.JDesktopPane();
     intframeTimeToNextQso = new javax.swing.JInternalFrame();
     jScrollPane2 = new javax.swing.JScrollPane();
@@ -491,6 +499,9 @@ public class MainWindow extends javax.swing.JFrame
     jMenuItem4 = new javax.swing.JMenuItem();
     jMenuItem5 = new javax.swing.JMenuItem();
     jMenuItem6 = new javax.swing.JMenuItem();
+    jMenu3 = new javax.swing.JMenu();
+    jMenuItemHelp = new javax.swing.JMenuItem();
+    jMenuItemAbout = new javax.swing.JMenuItem();
 
     jDialogSettings.setTitle("Settings");
     jDialogSettings.setAlwaysOnTop(true);
@@ -709,7 +720,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
     jPanel1.add(jPanel7, gridBagConstraints);
 
-    jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Misc"));
+    jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Other"));
     jPanel6.setLayout(new java.awt.GridBagLayout());
 
     checkboxSettingsQuickMode.setText("Enable quick callsign entry");
@@ -1026,6 +1037,45 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
     jdialogLogSelection.getContentPane().add(jbuttonOpenExistingLog, gridBagConstraints);
 
+    jDialogAbout.setTitle("About "+PROGRAM_NAME+" "+PROGRAM_VERSION);
+    jDialogAbout.setMinimumSize(new java.awt.Dimension(450, 250));
+    jDialogAbout.setModal(true);
+    jDialogAbout.setPreferredSize(new java.awt.Dimension(450, 250));
+
+    jPanel13.setLayout(new java.awt.GridBagLayout());
+
+    jTextArea1.setColumns(20);
+    jTextArea1.setLineWrap(true);
+    jTextArea1.setRows(5);
+    jTextArea1.setText(PROGRAM_ABOUT);
+    jTextArea1.setWrapStyleWord(true);
+    jScrollPane6.setViewportView(jTextArea1);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel13.add(jScrollPane6, gridBagConstraints);
+
+    jButton20.setText("Close");
+    jButton20.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jButton20ActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
+    jPanel13.add(jButton20, gridBagConstraints);
+
+    jDialogAbout.getContentPane().add(jPanel13, java.awt.BorderLayout.CENTER);
+
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     setTitle(PROGRAM_NAME+" by LZ1ABC");
     addWindowListener(new java.awt.event.WindowAdapter()
@@ -1043,7 +1093,6 @@ public class MainWindow extends javax.swing.JFrame
     jDesktopPane1.setMinimumSize(new java.awt.Dimension(600, 400));
 
     intframeTimeToNextQso.setIconifiable(true);
-    intframeTimeToNextQso.setMaximizable(true);
     intframeTimeToNextQso.setResizable(true);
     intframeTimeToNextQso.setTitle("Time to next Qso");
     intframeTimeToNextQso.setVisible(true);
@@ -1065,7 +1114,6 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.setBounds(490, 10, 463, 435);
 
     intframeBandmap.setIconifiable(true);
-    intframeBandmap.setMaximizable(true);
     intframeBandmap.setResizable(true);
     intframeBandmap.setTitle("Bandmap");
     intframeBandmap.setVisible(true);
@@ -1275,7 +1323,6 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.setBounds(500, 520, 637, 459);
 
     intframeLog.setIconifiable(true);
-    intframeLog.setMaximizable(true);
     intframeLog.setResizable(true);
     intframeLog.setTitle("Log");
     intframeLog.setToolTipText("");
@@ -1329,7 +1376,6 @@ public class MainWindow extends javax.swing.JFrame
     intframeLog.setBounds(30, 130, 410, 590);
 
     intframeRadioConnection.setIconifiable(true);
-    intframeRadioConnection.setMaximizable(true);
     intframeRadioConnection.setResizable(true);
     intframeRadioConnection.setTitle("Radio/Keyer connection");
     intframeRadioConnection.setToolTipText("");
@@ -1471,7 +1517,6 @@ public class MainWindow extends javax.swing.JFrame
     intframeRadioConnection.setBounds(30, 20, 402, 150);
 
     intframeEntryWindow.setIconifiable(true);
-    intframeEntryWindow.setMaximizable(true);
     intframeEntryWindow.setResizable(true);
     intframeEntryWindow.setTitle("Entry window");
     intframeEntryWindow.setVisible(true);
@@ -1488,13 +1533,13 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldCallsign.setPreferredSize(new java.awt.Dimension(30, 58));
     jtextfieldCallsign.addKeyListener(new java.awt.event.KeyAdapter()
     {
-      public void keyReleased(java.awt.event.KeyEvent evt)
-      {
-        jtextfieldCallsignKeyReleased(evt);
-      }
       public void keyTyped(java.awt.event.KeyEvent evt)
       {
         jtextfieldCallsignKeyTyped(evt);
+      }
+      public void keyReleased(java.awt.event.KeyEvent evt)
+      {
+        jtextfieldCallsignKeyReleased(evt);
       }
     });
     jpanelCallsign.add(jtextfieldCallsign);
@@ -1799,7 +1844,6 @@ public class MainWindow extends javax.swing.JFrame
     intframeEntryWindow.setBounds(280, 20, 453, 227);
 
     intframeMisc.setIconifiable(true);
-    intframeMisc.setMaximizable(true);
     intframeMisc.setResizable(true);
     intframeMisc.setTitle("Misc");
     intframeMisc.setVisible(true);
@@ -2068,6 +2112,31 @@ public class MainWindow extends javax.swing.JFrame
     jmenuWindows.add(jMenuItem6);
 
     jMenuBar1.add(jmenuWindows);
+
+    jMenu3.setText("Help");
+
+    jMenuItemHelp.setText("Help");
+    jMenuItemHelp.setToolTipText("");
+    jMenuItemHelp.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItemHelpActionPerformed(evt);
+      }
+    });
+    jMenu3.add(jMenuItemHelp);
+
+    jMenuItemAbout.setText("About");
+    jMenuItemAbout.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItemAboutActionPerformed(evt);
+      }
+    });
+    jMenu3.add(jMenuItemAbout);
+
+    jMenuBar1.add(jMenu3);
 
     setJMenuBar(jMenuBar1);
 
@@ -2707,6 +2776,29 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jComboBoxRadioComPortActionPerformed
     // TODO add your handling code here:
   }//GEN-LAST:event_jComboBoxRadioComPortActionPerformed
+
+  private void jMenuItemHelpActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItemHelpActionPerformed
+  {//GEN-HEADEREND:event_jMenuItemHelpActionPerformed
+    File htmlFile = new File("help.html");
+    try
+    {
+      Desktop.getDesktop().browse(htmlFile.toURI());
+    }
+    catch(IOException ex)
+    {
+      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }//GEN-LAST:event_jMenuItemHelpActionPerformed
+
+  private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItemAboutActionPerformed
+  {//GEN-HEADEREND:event_jMenuItemAboutActionPerformed
+    jDialogAbout.setVisible(true);
+  }//GEN-LAST:event_jMenuItemAboutActionPerformed
+
+  private void jButton20ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton20ActionPerformed
+  {//GEN-HEADEREND:event_jButton20ActionPerformed
+    jDialogAbout.setVisible(false);
+  }//GEN-LAST:event_jButton20ActionPerformed
   
   
   private void changeBandmapTableModelStructure()
@@ -3924,6 +4016,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JButton jButton18;
   private javax.swing.JButton jButton19;
   private javax.swing.JButton jButton2;
+  private javax.swing.JButton jButton20;
   private javax.swing.JButton jButton3;
   private javax.swing.JButton jButton4;
   private javax.swing.JButton jButton5;
@@ -3937,6 +4030,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JComboBox jComboBoxRadioComPort;
   private javax.swing.JComboBox jComboBoxRadioComPortBaudRate;
   private javax.swing.JDesktopPane jDesktopPane1;
+  private javax.swing.JDialog jDialogAbout;
   private javax.swing.JDialog jDialogFontChooser;
   private javax.swing.JDialog jDialogSettings;
   private javax.swing.JLabel jLabel1;
@@ -3961,6 +4055,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel9;
   private javax.swing.JMenu jMenu1;
   private javax.swing.JMenu jMenu2;
+  private javax.swing.JMenu jMenu3;
   private javax.swing.JMenuBar jMenuBar1;
   private javax.swing.JMenuItem jMenuItem1;
   private javax.swing.JMenuItem jMenuItem2;
@@ -3968,10 +4063,13 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JMenuItem jMenuItem4;
   private javax.swing.JMenuItem jMenuItem5;
   private javax.swing.JMenuItem jMenuItem6;
+  private javax.swing.JMenuItem jMenuItemAbout;
+  private javax.swing.JMenuItem jMenuItemHelp;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel10;
   private javax.swing.JPanel jPanel11;
   private javax.swing.JPanel jPanel12;
+  private javax.swing.JPanel jPanel13;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JPanel jPanel4;
@@ -3989,6 +4087,8 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JScrollPane jScrollPane3;
   private javax.swing.JScrollPane jScrollPane4;
   private javax.swing.JScrollPane jScrollPane5;
+  private javax.swing.JScrollPane jScrollPane6;
+  private javax.swing.JTextArea jTextArea1;
   private javax.swing.JTextField jTextField1;
   private javax.swing.JButton jbuttonCreateNewLog;
   private javax.swing.JButton jbuttonDeleteEntry;

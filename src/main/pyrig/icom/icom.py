@@ -20,35 +20,40 @@ class Icom(radio.Radio):
     #|  User configuration fields - change if needed                            |
     #+--------------------------------------------------------------------------+
     MANUFACTURER = "Icom"
-    MODEL_NAME = "None"
+    MODEL_NAME = "All models"
 
-    # Get default serial port settings
-    serial_settings = SerialSettings() # If different values than the default ones are need - uncomment and set to desired value
-    serial_settings.baudrate_max_   = 9600 # Not used. Set from the within the program.
-    serial_settings.rts_            = SerialSettings.RTS_STATE_ON  # This is used to power the electronics
-    # serial_settings.baudrate_min_ = 2400
+    CIV_ADDRESS  = 0x5C # Icom address. Set this to the address of your rig.
+    # CIV_ADDRESS of some Icom rigs:
+    # IC-703        0x68
+    # IC-706        0x4e
+    # IC-706MKIIG   0x58
+    # IC-718        0x5e
+    # IC-746        0x56
+    # IC-746Pro     0x66
+    # IC-751        0x1c
+    # IC-756Pro     0x5c
+    # IC-756Pro-II  0x64
+    # IC-756Pro-III 0x6e
+    # IC-775        0x46
+    # IC-781        0x26
+    # IC-7000       0x70
+    # IC-7100       0x88
+    # IC-7200       0x76
+    # IC-7300       0x94
+    # IC-7600       0x7a
+    # IC-7700       0x74
+    # IC-7800       0x6a
+    # IC 9100       0x7c
+    
+    
+    # Get default serial port settings (If different values than the default ones are need - uncomment and set to desired value)
+    serial_settings = SerialSettings()
+    serial_settings.rts_ = SerialSettings.RTS_STATE_ON  # This is used to power the electronics
     # serial_settings.data_bits_    = SerialSettings.DATABITS_EIGTH
     # serial_settings.stop_bits_    = SerialSettings.STOPBITS_ONE
     # serial_settings.handshake_    = SerialSettings.HANDSHAKE_CTSRTS
     # serial_settings.parity_       = SerialSettings.PARITY_NONE
-    #serial_settings.dtr_           = SerialSettings.DTR_STATE_NONE
-
-
-    CIV_ADDRESS  = 0x5C # Icom address - value of 0x5c is good for 756Pro
-    CTRL_ADDRESS = 0xE0 # Controller's address (default is 0xE0).
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # serial_settings.dtr_           = SerialSettings.DTR_STATE_NONE
 
     #+--------------------------------------------------------------------------+
     #|   End of user configuration fields                                       |
@@ -99,19 +104,6 @@ class Icom(radio.Radio):
         return " ".join("%s" % key for key in cls.mode_codes)
 
 
-    # @classmethod
-    # def getAvailableBands(cls):
-    #     """
-    #     The function returns a string with all the bands that it supports.
-    #     Example: "3.5 7 14"
-    #
-    #     :return: A string with the supported bands. Each band is separated from the next with space.
-    #     :rtype: str
-    #     """
-    #     return " ".join("%s" % key for key in cls.mode_codes)
-
-
-
     #+--------------------------------------------------------------------------+
     #|  Encode methods below                                                    |
     #+--------------------------------------------------------------------------+
@@ -124,8 +116,7 @@ class Icom(radio.Radio):
 
         :return: Initialization command that is to be send to the Rig
         :rtype: EncodedTransaction
-        """radio.getFrequency(RadioVfos.A.getCode())
-
+        """
         return list()
 
 
@@ -330,12 +321,11 @@ class Icom(radio.Radio):
         if trans_end_index == -1:
             return DecodedTransaction(None, 0)
 
-
         result_dic = dict()
 
         cmd_idx = trans_start_index + 4  # get the index of the command
 
-           # Check if Icom is sending this transaction - 3rd byte is 0x5c
+        # Check if Icom is sending this transaction - 3rd byte is Icom address (CIV_ADDRESS)
         if trans[trans_start_index+3] != cls.CIV_ADDRESS:
              DecodedTransaction.insertNotSupported(result_dic, misc_utils.getListInHex(trans[trans_start_index:trans_end_index+1]))
 
@@ -388,7 +378,7 @@ class Icom(radio.Radio):
         :return: The ready transaction bytes
         :rtype: list
         """
-        transaction= [0xFE, 0xFE, cls.CIV_ADDRESS, cls.CTRL_ADDRESS, command]
+        transaction = [0xFE, 0xFE, cls.CIV_ADDRESS, cls.CTRL_ADDRESS, command]
         if sub_command is not None:
             transaction.append(sub_command)
         if data is not None:
@@ -434,14 +424,16 @@ class Icom(radio.Radio):
 
 
 
-
     #+--------------------------------------------------------------------------+
-    #|   Icom command codes
+    #|   Icom codes
     #+--------------------------------------------------------------------------+
-
+   
+    CTRL_ADDRESS = 0xE0 # Controller's address (default is 0xE0)
+    
     TRANS_START = bytearray([0xFE, 0xFE])  # Trans send by the Icom starts with: 0xFE 0xFE CTRL CIV
     TRANS_END = bytearray([0xFD])  # Transactions ends with: 0xFD
-
+    
+    # command codes
     SEND_FREQ = 0x00        # send by the Icom when frequency has changed
     SEND_MODE = 0x01        # send by the Icom whe mode has changed
     READ_FREQ = 0x03        # Read operating frequency
@@ -451,8 +443,7 @@ class Icom(radio.Radio):
     CFM_POSITIVE = 0xFB     # Positive confirmation send by the Icom radio
     CFM_NEGATIVE = 0xFA     # Negative confirmation send by the Icom radio
 
-
-    # Codes used for changing the mode
+    # Sub-command codes used for changing the mode
     mode_codes ={'lsb':     0x00,
                  'usb':     0x01,
                  'am':      0x02,
@@ -461,5 +452,3 @@ class Icom(radio.Radio):
                  'fm':      0x05,
                  'cwr':     0x07,
                  'rttyr':   0x08}
-
-

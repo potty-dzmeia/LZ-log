@@ -2,6 +2,7 @@ High priority:
 - support Icom CAT
 - create help
 - there should be an option for entering worked frequency for people that do not use CAT
+- Add support for Yeasu transceivers
 - band map should be updated depending on the current freq and mode
 - show qso rate
 - show hints when hovering over controls

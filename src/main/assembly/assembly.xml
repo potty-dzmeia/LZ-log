@@ -44,6 +44,14 @@
                 <include>*.*</include>
             </includes>-->
         </fileSet>
+        
+        <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>help.html</include>
+            </includes>
+        </fileSet>
       
         <!--
             Adds the jar file of our example application to the root directory
