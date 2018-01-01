@@ -822,7 +822,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
     jPanel1.add(jPanel2, gridBagConstraints);
 
-    jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Time to next Qso"));
+    jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Time to next QSO"));
     jPanel9.setLayout(new java.awt.GridBagLayout());
 
     jLabel10.setText("Do not show after [sec]");
@@ -1094,7 +1094,7 @@ public class MainWindow extends javax.swing.JFrame
 
     intframeTimeToNextQso.setIconifiable(true);
     intframeTimeToNextQso.setResizable(true);
-    intframeTimeToNextQso.setTitle("Time to next Qso");
+    intframeTimeToNextQso.setTitle("Time to next QSO");
     intframeTimeToNextQso.setVisible(true);
 
     jtableIncomingQso.setFont(new java.awt.Font("Liberation Mono", 0, 18)); // NOI18N
@@ -3815,17 +3815,17 @@ public class MainWindow extends javax.swing.JFrame
           evt.consume();
           break;
           
-        case KeyEvent.VK_QUOTE: // ' = Send TU message and enter in log
+        case KeyEvent.VK_QUOTE: // ' = Sends TU message and enter in log
           if(addEntryToLog())
-            {
-              initEntryFields();   
-              jtextfieldCallsign.requestFocusInWindow(); // Move focus to Callsign field
-              pressedF3();
-            } 
+          {
+            initEntryFields();
+            jtextfieldCallsign.requestFocusInWindow(); // Move focus to Callsign field
+            pressedF3();
+          }
           evt.consume();
           break;
           
-        case KeyEvent.VK_SEMICOLON: // ;  = Send call and exchange
+        case KeyEvent.VK_SEMICOLON: // ;  = Sends call and exchange
           pressedF5();
           pressedF2();
           evt.consume();

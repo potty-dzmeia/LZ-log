@@ -422,7 +422,7 @@
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                        <TitledBorder title="Time to next Qso"/>
+                        <TitledBorder title="Time to next QSO"/>
                       </Border>
                     </Property>
                   </Properties>
@@ -881,7 +881,7 @@
           <Properties>
             <Property name="iconifiable" type="boolean" value="true"/>
             <Property name="resizable" type="boolean" value="true"/>
-            <Property name="title" type="java.lang.String" value="Time to next Qso"/>
+            <Property name="title" type="java.lang.String" value="Time to next QSO"/>
             <Property name="visible" type="boolean" value="true"/>
           </Properties>
           <Constraints>
