@@ -19,6 +19,8 @@
 // ***************************************************************************
 package org.lz1aq.keyer;
 
+import jssc.SerialPort;
+
 /**
  *
  * @author potty
@@ -34,6 +36,7 @@ public interface Keyer
   public void disconnect();
   
   public boolean isConnected();
+  
   /**
    * Send the specified text as Morse code
    * @param text what we are about to send
@@ -47,7 +50,7 @@ public interface Keyer
   
   /**
    * Set the speed with which we will transmit
-   * @param wpm 
+   * @param wpm - speed in words per minute
    */
   void setCwSpeed(int wpm);
 }

@@ -5,8 +5,10 @@
 	<title></title>
 	<meta name="generator" content="LibreOffice 4.3.3.2 (Linux)"/>
 	<meta name="created" content="00:00:00"/>
-	<meta name="changed" content="2018-01-02T00:09:32.735957460"/>
+	<meta name="changed" content="2018-01-02T15:48:33.166960183"/>
 	<meta name="" content=""/>
+	<meta name="created" content="00:00:00">
+	<meta name="changed" content="2018-01-02T00:09:32.735957460">
 	<meta name="created" content="00:00:00">
 	<meta name="changed" content="2018-01-01T23:45:43.557125457">
 	<meta name="created" content="00:00:00">
@@ -142,21 +144,27 @@ the communication protocol of your radio.</p>
 address and when communicating with the rig over the serial
 connection the program needs to use this unique address. For this
 purpose you need to edit the file pyrig/icom/<b>icom.py</b><span style="font-weight: normal">.
-Open the file using the a text editor and edit the line CIV_ADDRESS 
-= 0x5C The value 0x5C is good for Icom 756PRO. If for example you
-have IC-7000 you need to edit it so that CIV_ADDRESS  = 0x70 After
-this is done open the program and connect using the Connect button.</span></p>
+Open the file using the a text editor and edit the line CIV_ADDRESS =
+0x5C The value 0x5C is good for Icom 756PRO. If for example you have
+IC-7000 you need to edit it so that CIV_ADDRESS = 0x70 After this is
+done open the program and connect using the Connect button.</span></p>
 <p><b>Polling: </b>If you transceiver does not send data
-automatically when changing frequency or mode you need to enable
-polling. For many transceiver you can enable the rig to send this
-status data automatically so that polling is not needed. Enabling is
-done through the internal menu of the rig.</p>
+automatically when changing frequency or mode you need to set the
+“Enable polling” check box. However, for many transceiver you can
+enable the rig to send this status data automatically so that polling
+is not needed. Enabling is done through the internal menu of the rig.
+<u>For example</u> for Icom transceivers the menu is called <b>CI-V
+Transceive </b>and should be set to ON.</p>
 <p style="margin-top: 0.17in; page-break-after: avoid"><font face="Albany, sans-serif"><font size="4" style="font-size: 14pt">Keyer</font></font></p>
 <p>Set the desired keyer type and com port in the Settings and then
-press the C<b>onnect</b> button.</p>
-<p><a name="__DdeLink__2_2132668708"></a>Note: If you radio supports
-sending Morse code over the CAT you don't have to connect to the
-keyer (connecting to the radio is enough). Radio that I know to
+press the C<b>onnect</b> button. 
+</p>
+<p><u>Note</u>: If you want to use the same com port for the keyer
+and the radio - make sure that you first connect to the radio and
+then to the keyer.</p>
+<p><a name="__DdeLink__2_2132668708"></a><u>Note</u>: If you radio
+supports sending Morse code over the CAT you don't have to connect to
+the keyer (connecting to the radio is enough). Radio that I know to
 support sending Morse code over the CAT are Elecraft K3 and Kenwood
 TS-590.</p>
 <p><br/>

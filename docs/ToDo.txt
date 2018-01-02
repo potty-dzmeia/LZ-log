@@ -1,4 +1,5 @@
 High priority:
+- when EMS and S&P are enabled - when pressing enter should send serial number
 - support Icom CAT
 - create help
 - there should be an option for entering worked frequency for people that do not use CAT

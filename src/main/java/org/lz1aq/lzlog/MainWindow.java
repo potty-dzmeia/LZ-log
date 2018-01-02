@@ -54,6 +54,8 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+import jssc.SerialPort;
+import jssc.SerialPortException;
 import jssc.SerialPortList;
 import org.lz1aq.keyer.Keyer;
 import org.lz1aq.keyer.KeyerFactory;
@@ -2195,6 +2197,8 @@ public class MainWindow extends javax.swing.JFrame
       
       if(applicationSettings.isEmsEnabled() && jradiobuttonCQ.isSelected())
         pressedF3(); 
+      else if(applicationSettings.isEmsEnabled() && jradiobuttonSP.isSelected())
+        pressedF2();
     }
   }//GEN-LAST:event_jtextfieldRcvActionPerformed
 
@@ -2710,7 +2714,41 @@ public class MainWindow extends javax.swing.JFrame
     // Connect
     if (tBtn.isSelected())
     {    
-      keyer = KeyerFactory.create(applicationSettings.getKeyerType(), applicationSettings.getKeyerComPort());
+      boolean isNotUsed = false; 
+      
+      // Find out if the com port is already in use
+      try {
+        SerialPort port = new SerialPort(applicationSettings.getKeyerComPort());
+        isNotUsed = port.openPort();
+        if(isNotUsed) 
+          port.closePort();
+      }
+      catch(SerialPortException ex) 
+      {
+        isNotUsed = false;
+        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+      }
+     
+      
+      // Port is in use try to share it
+      if(isNotUsed == false)
+      {
+        try
+        {
+          keyer = KeyerFactory.create(applicationSettings.getKeyerType(), radioController.getSerialPort());
+        }
+        catch(Exception ex)
+        {
+          JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+      // Port not in use
+      else
+      {
+        keyer = KeyerFactory.create(applicationSettings.getKeyerType(), applicationSettings.getKeyerComPort());
+      }
+      
+      
       try
       {
         keyer.connect();

@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import jssc.SerialPort;
 import jssc.SerialPortException;
 import org.apache.commons.lang3.StringUtils;
 import org.lz1aq.keyer.Keyer;
@@ -123,19 +124,27 @@ public class RadioController
       radio.getMode(RadioVfos.B.getCode());
       radio.getActiveVfo();
     }
-    catch(jssc.SerialPortException exc)
+    catch(SerialPortException exc)
     {
-      JOptionPane.showMessageDialog(null, exc.getExceptionType(), "Error...", JOptionPane.ERROR_MESSAGE);
+      if(exc.getExceptionType().equals(SerialPortException.TYPE_PORT_BUSY))
+      {
+        JOptionPane.showMessageDialog(null, "You are trying to connect to com port that is already in use. \nIf you want to use the DTR/STR keyer on the same com port \n with the radio - please connect first to the radio and then to the keyer.", exc.getExceptionType(), JOptionPane.ERROR_MESSAGE);
+      }
+      else
+      {
+        JOptionPane.showMessageDialog(null, exc, exc.getExceptionType(), JOptionPane.ERROR_MESSAGE);
+      }
       isConnected = false;
+      disconnect();
       return false;
-    }
+    }               
     catch(Exception exc)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, exc);
+      JOptionPane.showMessageDialog(null, exc, "Error...", JOptionPane.ERROR_MESSAGE);
       isConnected = false;
+      disconnect();
       return false;
     }
-   
     
     isConnected = true;
     return true;
@@ -327,6 +336,10 @@ public class RadioController
    return info;
   }
   
+  public SerialPort getSerialPort()
+  {
+    return radio.getSerialPort();
+  }
     
   
   public void addEventListener(RadioControllerListener listener) throws Exception

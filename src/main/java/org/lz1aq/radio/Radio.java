@@ -291,7 +291,10 @@ public class Radio
     this.eventListeners.remove(listener);
   }
   
-  
+  public SerialPort getSerialPort()
+  {
+    return serialPort;
+  }
  
   //----------------------------------------------------------------------
   //                           Private stuff

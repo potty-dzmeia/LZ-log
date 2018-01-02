@@ -39,7 +39,6 @@ public class WinKeyer implements Keyer
   public WinKeyer(String portName)
   {
     serialPortName        = portName;
-    //this.baudRate         = baudRate;
   }
   
   

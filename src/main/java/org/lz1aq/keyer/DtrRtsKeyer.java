@@ -53,6 +53,7 @@ public class DtrRtsKeyer implements Keyer
   public static enum CONTROL_PIN{DTR, RTS};
   
   private final String serialPortName;
+  private boolean isUsingAlreadyOpenComPort; // If the keyer must use an already open com port (sharing a com port is useful when people have the same cable for controlling the radio and the keyer)
   private SerialPort   serialPort = null;
   private CONTROL_PIN  control_pin = CONTROL_PIN.DTR;
   
@@ -73,9 +74,34 @@ public class DtrRtsKeyer implements Keyer
 
   private static final Logger logger = Logger.getLogger(DtrRtsKeyer.class.getName());
 
+  
+  /**
+   * Connect to the keyer by opening a new com port
+   * @param portName
+   * @param pin 
+   */
   public DtrRtsKeyer(String portName, CONTROL_PIN pin) 
   {
     this.serialPortName = portName;
+    control_pin = pin;
+    isUsingAlreadyOpenComPort = false;
+  }
+  
+  /**
+   * Connect to the keyer by using an already open com port
+   * @param serialPort
+   * @param pin 
+   * @throws java.lang.Exception 
+   */
+  public DtrRtsKeyer(SerialPort serialPort, CONTROL_PIN pin) throws Exception 
+  {
+    if(serialPort==null || !serialPort.isOpened())
+    {
+      throw new Exception("Trying to share the com port but it is still not open.");
+    }
+    this.serialPort = serialPort;
+    this.serialPortName = serialPort.getPortName();
+    isUsingAlreadyOpenComPort= true;
     control_pin = pin;
   }
 
@@ -83,44 +109,64 @@ public class DtrRtsKeyer implements Keyer
   @Override
   public void connect() throws Exception
   {
-    if(isConnected())
-    {
-      logger.warning("Keyer already connected!.");
-      return;
-    }
+    
     if(threadKeyer.getState() != Thread.State.NEW)
     {
       throw new Exception("For some reason the DTR thread is already running.");
     }
 
-    serialPort = new SerialPort(serialPortName);
-    try
+    // Open new com port (not shared with the radio)
+    if(isUsingAlreadyOpenComPort == false)
     {
-      serialPort.openPort();
-    }
-    catch(SerialPortException ex)
-    {
-      serialPort = null;
-      throw new Exception("Couldn't open com port: "+serialPortName);
-    }
+      if(isConnected())
+      {
+        logger.warning("Keyer already connected!.");
+        return;
+      }
+      serialPort = new SerialPort(serialPortName);
+      try
+      {
+        serialPort.openPort();
+      }
+      catch(SerialPortException ex)
+      {
+        serialPort = null;
+        throw new Exception("Couldn't open com port: "+serialPortName);
+      }
     
-    try
-    {
-      // key up
-      setControlPin(false);
+
+      try
+      {
+        // key up
+        setControlPin(false);
+      }
+      catch(SerialPortException ex)
+      {
+        try
+        {
+          serialPort.closePort();
+        }
+        catch(SerialPortException ex1)
+        {
+          logger.log(Level.SEVERE, null, ex1);
+        }
+        serialPort = null;
+        throw new Exception("Couldn't manipulate the DTR for comm port: "+serialPortName);
+      }
     }
-    catch(SerialPortException ex)
+    // Shared com port
+    else
     {
       try
       {
-        serialPort.closePort();
+        // key up
+        setControlPin(false);
       }
-      catch(SerialPortException ex1)
+      catch(SerialPortException ex)
       {
-        logger.log(Level.SEVERE, null, ex1);
+        throw new Exception("Couldn't manipulate the DTR for comm port: "+serialPortName);
       }
-      serialPort = null;
-      throw new Exception("Couldn't set manipulate DTR for comm port: "+serialPortName);
+      
     }
   }
   
@@ -131,25 +177,37 @@ public class DtrRtsKeyer implements Keyer
   @Override
   public void disconnect()
   {
-    if(!isConnected())
+    // Close the port if not shared
+    if(isUsingAlreadyOpenComPort == false)
     {
-      logger.warning("Keyer already disconnected!");
+      if(!isConnected())
+      {
+        logger.warning("Keyer already disconnected!");
+        serialPort = null;
+        return;
+      }
+
+      threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
+      while(threadKeyer.isAlive()); // wait till the threadKeyer is closed
+
+      try
+      {
+        serialPort.closePort();
+      }
+      catch(SerialPortException ex)
+      {
+        logger.log(Level.SEVERE, null, ex);
+      }
       serialPort = null;
-      return;
     }
-    
-    threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
-    while(threadKeyer.isAlive()); // wait till the threadKeyer is closed
-    
-    try
+    // Com port is shared - do close com port
+    else
     {
-      serialPort.closePort();
+      threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
+      while(threadKeyer.isAlive()); // wait till the threadKeyer is closed   
+      
+      serialPort = null;
     }
-    catch(SerialPortException ex)
-    {
-      logger.log(Level.SEVERE, null, ex);
-    }
-    serialPort = null;
   }
   
   
@@ -267,7 +325,14 @@ public class DtrRtsKeyer implements Keyer
           catch(InterruptedException ex)
           {
             logger.info("CW transmit interrupted.");
-            setControlPin(false); // key up
+            try
+            {
+              setControlPin(false); // key up
+            }catch(SerialPortException exx)
+            {
+              logger.log(Level.SEVERE, "Error while trying to manipulate the com port");
+              break;
+            } 
             break;
           }
         }catch(SerialPortException ex)

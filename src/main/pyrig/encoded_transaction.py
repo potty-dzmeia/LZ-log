@@ -21,8 +21,8 @@ class EncodedTransaction(I_EncodedTransaction):
         :type write_delay: int
         :param post_write_delay: If there should be a delay between the transactions (in milliseconds)
         :type post_write_delay: int
-        :param timeout: Timeout after which we should abandon sending the transaction to the rig (in milliseconds).
-                        If confirmationExpected_ is 0 there will be no retries anyway.
+        :param timeout: Timeout after which we should not wait for positive confirmation from the rig
+                        If confirmationExpected_ is 0 there will be no waiting anyway.
         :type timeout: int
         :param retry: Maximum number of retries if command fails (0 for no retry)
         :type retry: int
@@ -32,7 +32,7 @@ class EncodedTransaction(I_EncodedTransaction):
         self.confirmationExpected_ = int(is_cfm_expected)   # If the program should expect confirmation after sending this transaction to the rig
         self.writeDelay_           = write_delay        # If there should be a delay between each byte of the transaction being sent out (in milliseconds)
         self.postWriteDelay_       = post_write_delay;  # If there should be a delay between each transaction send out (in milliseconds)
-        self.timeout_              = timeout            # Timeout after which we should abandon sending the transaction to the rig (in milliseconds)
+        self.timeout_              = timeout            # Timeout after which we should not wait for positive confirmation from the rig (in milliseconds). If confirmationExpected_ is 0 there will be no waiting anyway.
         self.retry_                = retry              # Maximum number of retries if command fails (0 for no retry).
 
 

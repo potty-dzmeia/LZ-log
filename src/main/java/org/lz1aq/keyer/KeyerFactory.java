@@ -19,6 +19,8 @@
 // ***************************************************************************
 package org.lz1aq.keyer;
 
+import jssc.SerialPort;
+
 
 /**
  *
@@ -26,7 +28,22 @@ package org.lz1aq.keyer;
  */
 public class KeyerFactory
 {
-  public static Keyer create(KeyerTypes type, String serialPort)
+  public static Keyer create(KeyerTypes type, String portName)
+  {
+    if(type==KeyerTypes.DTR)
+    {
+      return new DtrRtsKeyer(portName, DtrRtsKeyer.CONTROL_PIN.DTR);
+    }
+    else if(type==KeyerTypes.RTS)
+    {
+      return new DtrRtsKeyer(portName, DtrRtsKeyer.CONTROL_PIN.RTS);
+    }
+    else //if(type == KeyerTypes.WINKEYER)
+    {
+      return new WinKeyer(portName);
+    }
+  }
+  public static Keyer create(KeyerTypes type, SerialPort serialPort) throws Exception
   {
     if(type==KeyerTypes.DTR)
     {
@@ -38,7 +55,8 @@ public class KeyerFactory
     }
     else //if(type == KeyerTypes.WINKEYER)
     {
-      return new WinKeyer(serialPort);
+      throw new Exception("Can't connect to Winkeyer using com port which is already in use.");
     }
+    
   }
 }

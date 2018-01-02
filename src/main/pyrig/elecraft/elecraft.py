@@ -20,12 +20,10 @@ class Elecraft(Radio):
     #|  User configuration fields - change if needed                            |
     #+--------------------------------------------------------------------------+
     MANUFACTURER = "Elecraft"
-    MODEL_NAME   = "None"
+    MODEL_NAME   = "All models"
 
     # Get default serial port settings
     serial_settings = SerialSettings() # If different values than the default ones are need - uncomment and set to desired value
-    serial_settings.baudrate_min_   = 4800      # Not used. Set from the within the program.
-    serial_settings.baudrate_max_   = 38400     # Not used. Set from the within the program.
     serial_settings.stop_bits_      = SerialSettings.STOPBITS_TWO
     serial_settings.rts_            = SerialSettings.RTS_STATE_OFF
     serial_settings.dtr_            = SerialSettings.DTR_STATE_OFF

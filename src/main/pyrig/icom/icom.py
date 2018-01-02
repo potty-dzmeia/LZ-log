@@ -166,14 +166,11 @@ class Icom(radio.Radio):
         :rtype: EncodedTransaction
         """
 
-        #temp = cls.__transaction(0x07)                              # Select VFO mode
-        #tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        #temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
-        #tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(cls.READ_FREQ)                              # Read the frequency
-        tr3 = EncodedTransaction(bytearray(temp).__str__()) # Add delay to give the radio time to send the Freq
+        # Read the frequency
+        temp = cls.__transaction(cls.READ_FREQ)
+        # Add delay to give the radio time to send the Freq.
+        tr3 = EncodedTransaction(bytearray(temp).__str__(), post_write_delay=50)
 
-        #return [tr1, tr2, tr3]
         return [tr3]
 
 
@@ -194,15 +191,10 @@ class Icom(radio.Radio):
         if not cls.mode_codes.__contains__(new_mode):
             raise ValueError("Unsupported mode: "+mode+"!")
 
-        #temp = cls.__transaction(0x07)                              # Select VFO mode
-        #tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        #temp = cls.__transaction(0x07, 0xD0 + vfo)                  # Select the desired VFO
-        #tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
         temp = cls.__transaction(cls.SET_MODE, sub_command=cls.mode_codes[new_mode])   # Set the Mode
-        tr3 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
 
-        #return [tr1, tr2, tr3]
-        return [tr3]
+        return [tr1]
 
 
     @classmethod
@@ -215,15 +207,11 @@ class Icom(radio.Radio):
         :return: Object containing transaction with some additional control settings
         :rtype: EncodedTransaction
         """
-        #temp = cls.__transaction(0x07)                         # Select VFO mode
-        #tr1 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        #temp = cls.__transaction(0x07, 0xD0 + vfo)             # Select the desired VFO
-        #tr2 = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
-        temp = cls.__transaction(cls.READ_MODE)                         # Get the Mode
-        tr3 = EncodedTransaction(bytearray(temp).__str__()) # Add a delay to give the radio time to send the Mode back
 
-        #return [tr1, tr2, tr3]
-        return [tr3]
+        temp = cls.__transaction(cls.READ_MODE)                         # Get the Mode
+        tr1 = EncodedTransaction(bytearray(temp).__str__(), post_write_delay=50) # Add a delay to give the radio time to send the Mode back
+
+        return [tr1]
 
 
     @classmethod
@@ -267,9 +255,9 @@ class Icom(radio.Radio):
         :return:
         """
         temp = cls.__transaction(cls.READ_FREQ)                      # Read the frequency
-        tr1 = EncodedTransaction(bytearray(temp).__str__())
+        tr1 = EncodedTransaction(bytearray(temp).__str__(), post_write_delay=50)
         temp = cls.__transaction(cls.READ_MODE)                      # Get the Mode
-        tr2 = EncodedTransaction(bytearray(temp).__str__())
+        tr2 = EncodedTransaction(bytearray(temp).__str__(), post_write_delay=50)
 
         return [tr1, tr2]
 

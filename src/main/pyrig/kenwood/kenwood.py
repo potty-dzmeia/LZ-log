@@ -20,12 +20,10 @@ class Kenwood(Radio):
     #|  User configuration fields - change if needed                            |
     #+--------------------------------------------------------------------------+
     MANUFACTURER = "Kenwood"
-    MODEL_NAME   = "None"
+    MODEL_NAME   = "All models"
 
     # Get default serial port settings
     serial_settings = SerialSettings() # If different values than the default ones are need - uncomment and set to desired value
-    serial_settings.baudrate_min_   = 4800   # Note used. Baud rate is set from the application
-    serial_settings.baudrate_max_   = 38400  # Note used. Baud rate is set from the application
     serial_settings.stop_bits_      = SerialSettings.STOPBITS_TWO
     serial_settings.rts_            = SerialSettings.RTS_STATE_OFF
     serial_settings.dtr_            = SerialSettings.DTR_STATE_OFF
@@ -34,7 +32,7 @@ class Kenwood(Radio):
     # serial_settings.parity_       = SerialSettings.PARITY_NONE
 
 
-    # The AI meta-command can be used to enable automatic responses from the K3 to a computer in response to K3 front panel control changes by the operator.
+    # The AI meta-command can be used to enable automatic responses from the Kenwood to a computer in response to Kenwood front panel control changes by the operator.
     AUTO_INFO_MODE = "AI2;" # Possible values are: "AI0;" "AI2;"
 
 

@@ -54,7 +54,8 @@ public interface I_EncodedTransaction
   public int getPostWriteDelay();
 
   /**
-   * Timeout after which we should abandon sending the transaction to the rig
+   * Timeout after which we should not wait for positive confirmation from the rig
+   * If isConfirmationExpected is false there will be no waiting anyway.
    *
    * @return Timeout, in milliseconds
    */
