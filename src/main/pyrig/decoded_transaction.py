@@ -167,6 +167,7 @@ class DecodedTransaction(I_DecodedTransaction):
     def toJson(cls, dictionary):
         """
         Converts the supplied dict to JSON formatted string
+
         :param dictionary:  dict to be converted to JSON
         :type dictionary: dict
         :return: JSON formatted string

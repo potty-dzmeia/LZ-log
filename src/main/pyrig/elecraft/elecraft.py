@@ -367,7 +367,15 @@ class Elecraft(Radio):
             result_dic = dict()
             DecodedTransaction.insertNotSupported(result_dic, trans)
 
-        result_json = DecodedTransaction.toJson(result_dic)
+        try:
+            result_json = DecodedTransaction.toJson(result_dic)
+        except:
+            # something went wrong during converting to json string. Return not supported...
+            result_dic = dict()
+            DecodedTransaction.insertNotSupported(result_dic, "Unknown character found in the data coming from the radio.")
+            result_json = DecodedTransaction.toJson(result_dic)
+            return result_json
+
         # logger.debug(result_json.__str__())
         logger.debug("parsed result: {0}".format(result_json))
         return result_json

@@ -317,27 +317,35 @@ class Icom(radio.Radio):
         if trans[trans_start_index+3] != cls.CIV_ADDRESS:
              DecodedTransaction.insertNotSupported(result_dic, misc_utils.getListInHex(trans[trans_start_index:trans_end_index+1]))
 
-        elif trans[cmd_idx] == cls.CFM_POSITIVE:      # <------------------------- positive confirm
+        elif trans[cmd_idx] == cls.CFM_POSITIVE:                                    # <------------------------- positive confirm
             DecodedTransaction.insertPositiveCfm(result_dic)
 
-        elif trans[cmd_idx] == cls.CFM_NEGATIVE:    # <------------------------- negative confirm
+        elif trans[cmd_idx] == cls.CFM_NEGATIVE:                                    # <------------------------- negative confirm
             DecodedTransaction.insertNegativeCfm(result_dic)
 
-        elif trans[cmd_idx] == cls.SEND_FREQ or trans[cmd_idx] == cls.READ_FREQ:  # <------------------------- frequency
+        elif trans[cmd_idx] == cls.SEND_FREQ or trans[cmd_idx] == cls.READ_FREQ:    # <------------------------- frequency
             freq = cls.__frequency_from_bcd_to_string(trans[(cmd_idx + 1):trans_end_index])
             DecodedTransaction.insertFreq(result_dic, freq)
 
-        elif trans[cmd_idx] == cls.SEND_MODE or trans[cmd_idx] == cls.READ_MODE:  # <------------------------- mode
+        elif trans[cmd_idx] == cls.SEND_MODE or trans[cmd_idx] == cls.READ_MODE:    # <------------------------- mode
             mode = cls.__mode_from_byte_to_string(trans[cmd_idx+1])
             DecodedTransaction.insertMode(result_dic, mode)
 
-        else:                                       # <------------------------- not-supported
+        else:                                                                       # <------------------------- not-supported
             DecodedTransaction.insertNotSupported(result_dic, misc_utils.getListInHex(trans[trans_start_index:trans_end_index+1]))
 
-        # Convert to JSON string
-        result_json = DecodedTransaction.toJson(result_dic)
 
-        logger.debug("input bytes: {0}".format(misc_utils.getListInHex(bytearray(data))))
+        try:
+            result_json = DecodedTransaction.toJson(result_dic)
+        except:
+            # something went wrong during converting to json string. Return not supported...
+            result_dic = dict()
+            DecodedTransaction.insertNotSupported(result_dic, "Unknown character found in the data coming from the radio.")
+            result_json = DecodedTransaction.toJson(result_dic)
+            return result_json
+
+
+        # logger.debug("input bytes: {0}".format(misc_utils.getListInHex(bytearray(data))))
         logger.debug("returns: {0}; bytes removed: {1}".format(result_json, trans_end_index+1))
 
         # return the object with the decoded transaction and the amount of bytes that we have read from the supplied buffer(string)

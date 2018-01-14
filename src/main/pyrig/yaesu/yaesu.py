@@ -313,8 +313,8 @@ class Yaesu(Radio):
 
         This function actually calls the responsible parser depending on the incoming command code
 
-        :param data: A single transaction string coming from the radio that we have to parse to a meaningful JSON block
-        :type data: str
+        :param trans: A single transaction string coming from the radio that we have to parse to a meaningful JSON block
+        :type trans: str
         :return: JSON formatted block containing the parsed data
         :rtype: str
         """
@@ -327,13 +327,23 @@ class Yaesu(Radio):
                 result_dic = getattr(fn, '__func__')(cls, trans) # call the responsible parser
                 break
 
-        #logger.debug(result_dic.__str__())
+        logger.debug(result_dic.__str__())
 
         if result_dic is None:
             result_dic = dict()
             DecodedTransaction.insertNotSupported(result_dic, trans)
 
-        result_json = DecodedTransaction.toJson(result_dic)
+
+        try:
+            result_json = DecodedTransaction.toJson(result_dic)
+        except:
+            # something went wrong during converting to json string. Return not supported...
+            result_dic = dict()
+            DecodedTransaction.insertNotSupported(result_dic, "Unknown character found in the data coming from the radio.")
+            result_json = DecodedTransaction.toJson(result_dic)
+            return result_json
+
+
         #logger.debug(result_json.__str__())
         logger.debug("parsed result: {0}".format(result_json))
         return result_json
