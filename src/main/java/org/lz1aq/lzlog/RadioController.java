@@ -384,17 +384,16 @@ public class RadioController
         {
           freqVfoB = Integer.parseInt(e.getFrequency());
         } 
-        else if(e.getVfo() == RadioVfos.NONE)
+        else //(e.getVfo() == RadioVfos.NONE)
         {
           if(activeVfo == RadioVfos.A)
             freqVfoA = Integer.parseInt(e.getFrequency());
           else
-            freqVfoB = Integer.parseInt(e.getFrequency());   
-        }
-        else
-        {
+            freqVfoB = Integer.parseInt(e.getFrequency());  
+          
           logger.warning("Frequency event from unknown VFO! Will consider it as VFO A.");
         }
+       
 
         // Notify any listeners
         for (RadioControllerListener listener : eventListeners)

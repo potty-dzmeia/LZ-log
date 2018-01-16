@@ -19,6 +19,8 @@
 // ***************************************************************************
 package org.lz1aq.lzlog;
 
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.ArrayList;
 import java.util.Collections;
 import javax.swing.table.AbstractTableModel;
@@ -135,30 +137,29 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     return incomingQsoArrayList.get(row).isExpired();
   }
   
+  
   /**
    * Updates the content of the table.
-   * @param allowedQsoRepeatPeriodInSec
-   * @param hideAfterSeconds
-   * @param maxEntriesCount
+   *
+   * @param appsettings - settings used by the application
    */
-  public synchronized void refresh(int allowedQsoRepeatPeriodInSec, int hideAfterSeconds)
+  public synchronized void refresh(ApplicationSettings appsettings)
   {
     ArrayList<String> callsigns = log.getUniqueCallsigns();
     
     incomingQsoArrayList = new ArrayList<>(0);
     
-    // For each callsign insert the last qso with this station. 
-    for(int i=0; i<callsigns.size(); i++)
+    // For each callsign insert the last qso with this station.
+    for(String callsign : callsigns)
     {
-      Qso lastQso = log.getLastQso(callsigns.get(i));
-      if(log.getSecondsLeft(lastQso, allowedQsoRepeatPeriodInSec) < hideAfterSeconds)
+      Qso lastQso = log.getLastQso(callsign);
+      if(log.getSecondsLeft(lastQso, appsettings.getQsoRepeatPeriod()) < appsettings.getIncomingQsoHiderAfter())
         continue;
-      IncomingQso incoming = new IncomingQso(lastQso.getHisCallsign(), 
-                                             lastQso.getType(), 
-                                             lastQso.getFrequency(), 
-                                             lastQso.getElapsedSeconds(),
-                                             log.getSecondsLeft(lastQso, allowedQsoRepeatPeriodInSec));
-              
+      IncomingQso incoming = new IncomingQso(lastQso.getHisCallsign(),
+                                            lastQso.getType(),
+                                            lastQso.getFrequency(),
+                                            lastQso.getElapsedSeconds(),
+                                            log.getSecondsLeft(lastQso, appsettings.getQsoRepeatPeriod()));
       incomingQsoArrayList.add(incoming);
     }
     

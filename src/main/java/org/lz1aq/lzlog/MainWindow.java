@@ -20,9 +20,12 @@
 package org.lz1aq.lzlog;
 
 import org.lz1aq.keyer.KeyerTypes;
+import java.awt.FontMetrics;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
@@ -43,6 +46,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
@@ -111,9 +115,7 @@ public class MainWindow extends javax.swing.JFrame
     @Override
     public void actionPerformed(ActionEvent evt)
     {
-      jtablemodelIncomingQso.refresh(applicationSettings.getQsoRepeatPeriod(), // How often we can repeat qso
-              applicationSettings.getIncomingQsoHiderAfter()); // Hide qso after certain overtime
-
+      jtablemodelIncomingQso.refresh(applicationSettings);
       jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
     }
   };
@@ -199,6 +201,7 @@ public class MainWindow extends javax.swing.JFrame
     // Renderer for the bandmap
     jtableBandmap.setDefaultRenderer(Object.class, new BandmapTableCellRender());
     jtableIncomingQso.setDefaultRenderer(Object.class, new IncomingQsoTableCellRender());
+    jtableLog.setDefaultRenderer(Object.class, new LogTableCellRender());
     
     // Communicating with the radio
     radioController = new RadioController();
@@ -944,7 +947,7 @@ public class MainWindow extends javax.swing.JFrame
     });
     jPanel10.add(jButton15);
 
-    jButton16.setText("IncomingQso");
+    jButton16.setText("TimeToNextQso");
     jButton16.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -1042,7 +1045,6 @@ public class MainWindow extends javax.swing.JFrame
     jDialogAbout.setTitle("About "+PROGRAM_NAME+" "+PROGRAM_VERSION);
     jDialogAbout.setMinimumSize(new java.awt.Dimension(450, 250));
     jDialogAbout.setModal(true);
-    jDialogAbout.setPreferredSize(new java.awt.Dimension(450, 250));
 
     jPanel13.setLayout(new java.awt.GridBagLayout());
 
@@ -1100,6 +1102,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.setVisible(true);
 
     jtableIncomingQso.setFont(new java.awt.Font("Liberation Mono", 0, 18)); // NOI18N
+    jtableIncomingQso.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
     jtableIncomingQso.setRowHeight(30);
     jtableIncomingQso.addMouseListener(new java.awt.event.MouseAdapter()
     {
@@ -2161,13 +2164,7 @@ public class MainWindow extends javax.swing.JFrame
     applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.RADIO, intframeRadioConnection.getBounds());
     applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS, intframeMisc.getBounds());
             
-    // Store the fonts being in use
-    applicationSettings.setFont(ApplicationSettings.FontIndex.BANDMAP, jtableBandmap.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.CALLSIGN, jtextfieldCallsign.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.INCOMING_QSO, jtableIncomingQso.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.LOG, jtableLog.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.RCV, jtextfieldRcv.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.SNT, jtextfieldSnt.getFont());
+    storeFonts();
     
     applicationSettings.SaveSettingsToDisk(); // Save all settings to disk
   }//GEN-LAST:event_formWindowClosing
@@ -2396,7 +2393,10 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jButton13ActionPerformed
     fontchooser.setSelectedFont(jtextfieldCallsign.getFont());
     if(fontchooser.showDialog(jtextfieldCallsign)==FontChooser.OK_OPTION)
+    {
       jtextfieldCallsign.setFont(fontchooser.getSelectedFont());
+      storeFonts();
+    }
   }//GEN-LAST:event_jButton13ActionPerformed
 
   private void jButton19ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton19ActionPerformed
@@ -2407,36 +2407,51 @@ public class MainWindow extends javax.swing.JFrame
   private void jButton14ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton14ActionPerformed
   {//GEN-HEADEREND:event_jButton14ActionPerformed
     fontchooser.setSelectedFont(jtextfieldSnt.getFont());
-    if(fontchooser.showDialog(jtextfieldSnt)==FontChooser.OK_OPTION)
+    if(fontchooser.showDialog(jtextfieldSnt) == FontChooser.OK_OPTION)
+    {
       jtextfieldSnt.setFont(fontchooser.getSelectedFont());
+      storeFonts();
+    }
   }//GEN-LAST:event_jButton14ActionPerformed
 
   private void jButton15ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton15ActionPerformed
   {//GEN-HEADEREND:event_jButton15ActionPerformed
     fontchooser.setSelectedFont(jtextfieldRcv.getFont());
-    if(fontchooser.showDialog(jtextfieldRcv)==FontChooser.OK_OPTION)
+    if(fontchooser.showDialog(jtextfieldRcv) == FontChooser.OK_OPTION)
+    {
       jtextfieldRcv.setFont(fontchooser.getSelectedFont());
+      storeFonts();
+    }
   }//GEN-LAST:event_jButton15ActionPerformed
 
   private void jButton16ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton16ActionPerformed
   {//GEN-HEADEREND:event_jButton16ActionPerformed
     fontchooser.setSelectedFont(jtableIncomingQso.getFont());
-    if(fontchooser.showDialog(jtableIncomingQso)==FontChooser.OK_OPTION)
+    if(fontchooser.showDialog(jtableIncomingQso) == FontChooser.OK_OPTION)
+    {
       jtableIncomingQso.setFont(fontchooser.getSelectedFont());
+      storeFonts();
+    }
   }//GEN-LAST:event_jButton16ActionPerformed
 
   private void jButton17ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton17ActionPerformed
   {//GEN-HEADEREND:event_jButton17ActionPerformed
     fontchooser.setSelectedFont(jtableLog.getFont());
-    if(fontchooser.showDialog(jtableLog)==FontChooser.OK_OPTION)
+    if(fontchooser.showDialog(jtableLog) == FontChooser.OK_OPTION)
+    {
       jtableLog.setFont(fontchooser.getSelectedFont());
+      storeFonts();
+    }
   }//GEN-LAST:event_jButton17ActionPerformed
 
   private void jButton18ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton18ActionPerformed
   {//GEN-HEADEREND:event_jButton18ActionPerformed
     fontchooser.setSelectedFont(jtableBandmap.getFont());
-    if(fontchooser.showDialog(jtableBandmap)==FontChooser.OK_OPTION)
+    if(fontchooser.showDialog(jtableBandmap) == FontChooser.OK_OPTION)
+    {
       jtableBandmap.setFont(fontchooser.getSelectedFont());
+      storeFonts();
+    }
   }//GEN-LAST:event_jButton18ActionPerformed
 
   private void jtextfieldRcvKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jtextfieldRcvKeyTyped
@@ -2839,13 +2854,6 @@ public class MainWindow extends javax.swing.JFrame
   }//GEN-LAST:event_jButton20ActionPerformed
   
   
-  private void changeBandmapTableModelStructure()
-  {
-    jtablemodelBandmap.fireTableStructureChanged();
-    jtablemodelBandmap.fireTableStructureChanged(); 
-  }
-  
-  
   private void increaseKeyerSpeed()
   {        
    if(keyerSpeed>45)
@@ -3203,6 +3211,29 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   
+  private void storeFonts()
+  {
+    // Store the fonts being in use
+    applicationSettings.setFont(ApplicationSettings.FontIndex.BANDMAP, jtableBandmap.getFont());
+    applicationSettings.setFont(ApplicationSettings.FontIndex.CALLSIGN, jtextfieldCallsign.getFont());
+    applicationSettings.setFont(ApplicationSettings.FontIndex.INCOMING_QSO, jtableIncomingQso.getFont());
+    applicationSettings.setFont(ApplicationSettings.FontIndex.LOG, jtableLog.getFont());
+    applicationSettings.setFont(ApplicationSettings.FontIndex.RCV, jtextfieldRcv.getFont());
+    applicationSettings.setFont(ApplicationSettings.FontIndex.SNT, jtextfieldSnt.getFont());
+  }
+  
+  
+  private void restoreFonts()
+  {
+    // Restore the fonts
+    jtextfieldCallsign.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.CALLSIGN));
+    jtextfieldSnt.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.SNT));
+    jtextfieldRcv.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.RCV));
+    jtableBandmap.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.BANDMAP));
+    jtableIncomingQso.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.INCOMING_QSO));
+    jtableLog.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.LOG));
+  }
+  
   /**
    * Initialize the controls of the main windows
    */
@@ -3224,13 +3255,7 @@ public class MainWindow extends javax.swing.JFrame
       jcomboboxColumnCount.setSelectedItem(Integer.toString(applicationSettings.getBandmapColumnCount()));
       jcomboboxRowCount.setSelectedItem(Integer.toString(applicationSettings.getBandmapRowCount()));
 
-      // Restore the fonts
-      jtextfieldCallsign.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.CALLSIGN));
-      jtextfieldSnt.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.SNT));
-      jtextfieldRcv.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.RCV));
-      jtableBandmap.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.BANDMAP));
-      jtableIncomingQso.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.INCOMING_QSO));
-      jtableLog.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.LOG)); 
+      restoreFonts();
     }
     
     
@@ -3433,6 +3458,30 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   
+  /**
+   * Sets the jtextfiled with the bandmap frequency
+   * 
+   * @param freqInHz 
+   */
+  private void setBandmapStartFreq(int freqInHz)
+  {
+    if(freqInHz < 1800000)
+    {
+      freqInHz = 1800000;
+    }
+    if(freqInHz > 28000000)
+    {
+      freqInHz = 28000000;
+    }
+
+    freqInHz = freqInHz / 1000;
+    
+    String frequency = Integer.toString(freqInHz);
+    if(!jtextfieldBandmapStartFreq.getText().equals(frequency))
+      jtextfieldBandmapStartFreq.setText(frequency);
+  }
+  
+  
   private void pressedF1()
   {
     // if "jump to cq freq" is enabled we will jump to the cq frequency (cq freq can be set through the button "set cq freq"
@@ -3591,7 +3640,25 @@ public class MainWindow extends javax.swing.JFrame
   
   class LocalRadioControllerListener implements RadioController.RadioControllerListener
   {
-
+    private void updateBandmapStartFreq(int freq, RadioModes mode)
+    {
+      switch(mode)
+      {
+        case LSB:
+        case USB:
+          if(freq>1800000 && freq<2000000)
+            setBandmapStartFreq(1800000);
+          else if(freq>3000000 && freq<3800000)
+            setBandmapStartFreq(3600000);
+           else if(freq>7000000 && freq<7200000)
+            setBandmapStartFreq(7060000);
+          else if(freq>14000000 && freq<14400000)
+            setBandmapStartFreq(14100000);
+          break;
+      }
+    }
+    
+    
     @Override
     public void frequency()
     {
@@ -3612,6 +3679,8 @@ public class MainWindow extends javax.swing.JFrame
           
           // We need to repaint the bandmap table so that the fequency marker is updated
           jtableBandmap.repaint();
+          
+          //updateBandmapStartFreq(radioController.getFrequency(), radioController.getMode());
         }
       });
      
@@ -3918,6 +3987,7 @@ public class MainWindow extends javax.swing.JFrame
    */
   class IncomingQsoTableCellRender extends DefaultTableCellRenderer
   {
+    
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column)
@@ -3925,7 +3995,6 @@ public class MainWindow extends javax.swing.JFrame
       Component comp = super.getTableCellRendererComponent(table, value,isSelected, hasFocus, row, column);
       //SJComponent jc = (JComponent) comp;
             
-      // 
       if(jtablemodelIncomingQso.containsExpiredCallsign(row, column))
       {
         setForeground(Color.BLUE);
@@ -3934,6 +4003,15 @@ public class MainWindow extends javax.swing.JFrame
       {
         setForeground(Color.black);    
       }
+          
+      // Set row height
+      FontMetrics fm = comp.getFontMetrics(comp.getFont());
+      
+      if(table.getRowHeight() != fm.getHeight())
+      {
+        table.setRowHeight(fm.getHeight());
+      }
+      
       return this;
     }
   }
@@ -3951,6 +4029,8 @@ public class MainWindow extends javax.swing.JFrame
       Component comp = super.getTableCellRendererComponent(table, value,isSelected, hasFocus, row, column);
       //SJComponent jc = (JComponent) comp;
             
+      
+      //((JLabel)comp).setToolTipText(Integer.toString(jtablemodelBandmap.cellToFreq(row, column))); find a better way to set it checking all the time
             
       // Show the current freq of the radio by highlighting the appropriate cell
       if(jtablemodelBandmap.isCurrentFreqInThisCell(row, column, getFreq()))
@@ -3968,15 +4048,39 @@ public class MainWindow extends javax.swing.JFrame
         setForeground(Color.black);    
       }
       
-//      // Show which callsigns should be worked by marking them in BLUE
-//      if(bandmapQsoTableModel.containsExpiredCallsign(row, column))
-//      {
-//        setForeground(Color.BLUE);
-//      }
-//      else
-//      {
-//        setForeground(Color.BLACK);
-//      }
+      // Set row height
+      FontMetrics fm = comp.getFontMetrics(comp.getFont());
+      
+      if(table.getRowHeight() != fm.getHeight())
+      {
+        table.setRowHeight(fm.getHeight());
+      }
+      
+      return this;
+    }
+  }
+  
+  /**
+   * Used for coloring the cells within the IncomingQso table
+   */
+  class LogTableCellRender extends DefaultTableCellRenderer
+  {
+    
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+            boolean isSelected, boolean hasFocus, int row, int column)
+    {
+      Component comp = super.getTableCellRendererComponent(table, value,isSelected, hasFocus, row, column);
+      //SJComponent jc = (JComponent) comp;
+          
+      // Set row height
+      FontMetrics fm = comp.getFontMetrics(comp.getFont());
+      
+      if(table.getRowHeight() != fm.getHeight())
+      {
+        table.setRowHeight(fm.getHeight());
+      }
+
       return this;
     }
   }

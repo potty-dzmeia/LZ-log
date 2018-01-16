@@ -5,8 +5,10 @@
 	<title></title>
 	<meta name="generator" content="LibreOffice 4.3.3.2 (Linux)"/>
 	<meta name="created" content="00:00:00"/>
-	<meta name="changed" content="2018-01-07T22:50:21.812798627"/>
+	<meta name="changed" content="2018-01-16T19:54:47.692697675"/>
 	<meta name="" content=""/>
+	<meta name="created" content="00:00:00">
+	<meta name="changed" content="2018-01-07T22:50:21.812798627">
 	<meta name="created" content="00:00:00">
 	<meta name="changed" content="2018-01-02T15:48:33.166960183">
 	<meta name="created" content="00:00:00">
@@ -32,6 +34,23 @@ help</b></font></font></p>
 	<li/>
 <p>Make sure you have installed Java Runtime Environment (JRE)
 	version 1.7 or later.</p>
+	<li/>
+<p><b>Important</b>! Extract the program into a directory
+	which path does not contain Unicode characters or empty spaces (only
+	ASCII). Make sure also that the directory name is not super long.</p>
+</ol>
+<ul>
+	<ul>
+		<li/>
+<p>Example of a good dir: <a href="/C:/log/Lz-log">C:/log/Lz-log</a></p>
+		<li/>
+<p>Example of bad dirs: <a href="/C:/my">C:/my</a>
+		logs/lz-log; <a href="/C:/Щраус">C:/Щраус</a>
+		логове/lz-log; <a href="/C:/Program">C:/Program</a>
+		Files/lz-log</p>
+	</ul>
+</ul>
+<ol start="3">
 	<li/>
 <p>Start the program by using the <b>startup.bat</b> (for
 	Windows) or the <b>starup.sh </b>(for Linux)</p>
@@ -152,15 +171,15 @@ Open the file using the a text editor and edit the line CIV_ADDRESS =
 0x5C The value 0x5C is good for Icom 756PRO. If for example you have
 IC-7000 you need to edit it so that CIV_ADDRESS = 0x70 After this is
 done open the program and connect using the Connect button.</span></p>
-<p><b>For </b><b>Yaesu</b><b> rigs only</b><span style="font-weight: normal">:
-</span><span style="font-weight: normal">In ft-450d (and maybe other
-Yaesu rigs) there is a bug in the CAT protocol so that after
-switching between VFO A and B the rig first send the mode for the new
-VFO and then sends the info that the VFO has changed. This leads to
-inability of this software to display the mode for the current VFO
-reliably. If you see that the current Mode in the program does not
-represent correctly the Mode of the radio you have to options: A)
-Toggle between Modes on your radio.  B) Turn polling on. </span>
+<p><b>For Yaesu</b> <b>rigs only</b><span style="font-weight: normal">:
+In ft-450d (and maybe other Yaesu rigs) there is a bug in the CAT
+protocol so that after switching between VFO A and B the rig first
+send the mode for the new VFO and then sends the info that the VFO
+has changed. This leads to inability of this software to display the
+mode for the current VFO reliably. If you see that the current Mode
+in the program does not represent correctly the Mode of the radio you
+have to options: A) Toggle between Modes on your radio. B) Turn
+polling on. </span>
 </p>
 <p><b>Polling: </b>If you transceiver does not send data
 automatically when changing frequency or mode you need to set the

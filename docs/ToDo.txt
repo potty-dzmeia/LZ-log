@@ -1,10 +1,9 @@
 High priority:
-- when EMS and S&P are enabled - when pressing enter should send serial number
-- support Icom CAT
-- create help
+- Add all the SerialPort settings inside the Java app
+- Bandmap should be changing when the freq/mode changes (allow to set bandmap start for SSB and CW)
+- Add option to disable exchange validation (important for contests where strings are exchanged)
+- create help in Bulgarian
 - there should be an option for entering worked frequency for people that do not use CAT
-- Add support for Yeasu transceivers
-- band map should be updated depending on the current freq and mode
 - show qso rate
 - show hints when hovering over controls
 - all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
@@ -19,9 +18,9 @@ High priority:
 
 
 Low priority:
+- If default prefix is used it should always stay in the entry window
 - For some reason F10 is activating the Menu
 - when correcting callsign in the log the call is written with small letters
-- adjust row sizes depending on the font
 - delete callsign when moving away from freq and enter into bandmap
 - enter frequency in callsign
 - note za wsqka vruzka 
@@ -30,9 +29,15 @@ Low priority:
 - alt+k = 
 - first part of sent serial number is not updated (e.g. when changing the serial number from the table)
 - remember which windows are maximized/minimized
+- Time to next qso: CQ entries to be in green (tested and it does not look good)
 
 
 Solved:
+- Time to next qso: the distance between the rows should be dynamic (adjust row sizes depending on the font)
+- update help so that it mentions the path problem
+- when EMS and S&P are enabled - pressing enter should send serial number
+- support Yaesu CAT
+- support Icom CAT
 - continious CQ interval should work 
 - serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
 - Baud rate settings to be done from the App.
