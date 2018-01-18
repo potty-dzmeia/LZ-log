@@ -59,7 +59,8 @@ public final class ApplicationSettings
   static final String PROPERTY_SEND_ZERO_AS_T = "zero_as_t";
   static final String PROPERTY_AUTO_CQ_FREQ_JUMP = "auto_cq_freq_jump";
   static final String PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS = "bandmap_show_freq_columns";
-  
+  static final String PROPERTY_BANDMAP_AUTO_FREQ = "bandmap_auto_freq";
+    
   public static final int FUNCTION_KEYS_COUNT = 12; // The number of function keys
   
   public enum FrameIndex
@@ -112,7 +113,9 @@ public final class ApplicationSettings
   private int bandmapStepInHz;
   private int bandmapRowCount;
   private int bandmapColumnCount;
-  private boolean showBandmapFreqColumnsEnabled;
+  private boolean isShowBandmapFreqColumnsEnabled;
+  private boolean isBandmapAutoFreq;
+  
   
   private final Properties prop;
 
@@ -183,13 +186,25 @@ public final class ApplicationSettings
   
   public boolean isShowBandmapFreqColumns()
   {
-    return showBandmapFreqColumnsEnabled;
+    return isShowBandmapFreqColumnsEnabled;
   }
   
   public void setShowBandmapFreqColumns(boolean isEnabled)
   {
-    showBandmapFreqColumnsEnabled = isEnabled;
+    isShowBandmapFreqColumnsEnabled = isEnabled;
   }
+  
+  public boolean isBandmapAutoFreq()
+  {
+    return isBandmapAutoFreq;
+  }
+  
+  public void setBandmapAutoFreq(boolean isEnabled)
+  {
+    isBandmapAutoFreq = isEnabled;
+  }
+  
+  
   
   public String getRadioComPort()
   {
@@ -512,8 +527,9 @@ public final class ApplicationSettings
     prop.setProperty(PROPERTY_BANDMAP_COLUMN_COUNT, Integer.toString(bandmapColumnCount));
     prop.setProperty(PROPERTY_BANDMAP_ROW_COUNT, Integer.toString(bandmapRowCount));
     prop.setProperty(PROPERTY_BANDMAP_STEP, Integer.toString(bandmapStepInHz));
-    prop.setProperty(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS, Boolean.toString(showBandmapFreqColumnsEnabled));
-
+    prop.setProperty(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS, Boolean.toString(isShowBandmapFreqColumnsEnabled));
+    prop.setProperty(PROPERTY_BANDMAP_AUTO_FREQ, Boolean.toString(isBandmapAutoFreq));
+    
     try
     {
       prop.store(new FileOutputStream(SETTINGS_FILE_NAME), null);
@@ -666,7 +682,13 @@ public final class ApplicationSettings
       if(temp == null)
         SetSettingToDefault(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS);
       else
-        showBandmapFreqColumnsEnabled = Boolean.parseBoolean(temp);
+        isShowBandmapFreqColumnsEnabled = Boolean.parseBoolean(temp);
+      
+      temp = prop.getProperty(PROPERTY_BANDMAP_AUTO_FREQ);
+      if(temp == null)
+        SetSettingToDefault(PROPERTY_BANDMAP_AUTO_FREQ);
+      else
+        isBandmapAutoFreq = Boolean.parseBoolean(temp);
       
     }
     catch (Exception ex)
@@ -745,7 +767,8 @@ public final class ApplicationSettings
 
     autoCqJumpEnabled = false;
 
-    showBandmapFreqColumnsEnabled = true;
+    isShowBandmapFreqColumnsEnabled = true;
+    isBandmapAutoFreq = false;
   }
     
   /**
@@ -867,9 +890,13 @@ public final class ApplicationSettings
         break;
         
       case PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS:
-        showBandmapFreqColumnsEnabled = true;
+        isShowBandmapFreqColumnsEnabled = true;
         break;
       
+      case PROPERTY_BANDMAP_AUTO_FREQ:
+        isBandmapAutoFreq = true;
+        break;
+        
       default:
         Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, "Property has no default settings");
         break;

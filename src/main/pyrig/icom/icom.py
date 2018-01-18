@@ -338,18 +338,16 @@ class Icom(radio.Radio):
         try:
             result_json = DecodedTransaction.toJson(result_dic)
         except:
-            # something went wrong during converting to json string. Return not supported...
+            # something went wrong during parsing. Return not supported...
             result_dic = dict()
             DecodedTransaction.insertNotSupported(result_dic, "Unknown character found in the data coming from the radio.")
-            result_json = DecodedTransaction.toJson(result_dic)
-            return result_json
-
+            return DecodedTransaction(result_json, trans_end_index + 1)
 
         # logger.debug("input bytes: {0}".format(misc_utils.getListInHex(bytearray(data))))
         logger.debug("returns: {0}; bytes removed: {1}".format(result_json, trans_end_index+1))
 
         # return the object with the decoded transaction and the amount of bytes that we have read from the supplied buffer(string)
-        return DecodedTransaction(result_json, trans_end_index+1)
+        return DecodedTransaction(result_json, trans_end_index + 1)
 
 
     #+--------------------------------------------------------------------------+

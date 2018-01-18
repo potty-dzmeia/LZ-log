@@ -53,8 +53,8 @@ public class RadioController
   private boolean isConnected = false;
   private int freqVfoA = 14000000;
   private int freqVfoB = 14000000; 
-  private RadioModes modeVfoA = RadioModes.NONE;
-  private RadioModes modeVfoB = RadioModes.NONE;
+  private RadioModes modeVfoA = RadioModes.CW;
+  private RadioModes modeVfoB = RadioModes.CW;
   private RadioVfos activeVfo = RadioVfos.A;
   private final CopyOnWriteArrayList<RadioControllerListener>  eventListeners;
   private Radio         radio;
@@ -118,10 +118,10 @@ public class RadioController
       eventListeners.add(listener);
       
       
-      radio.getFrequency(RadioVfos.A.getCode());
-      radio.getMode(RadioVfos.A.getCode());
-      radio.getFrequency(RadioVfos.B.getCode());
-      radio.getMode(RadioVfos.B.getCode());
+      radio.getFrequency(RadioVfos.A);
+      radio.getMode(RadioVfos.A);
+      radio.getFrequency(RadioVfos.B);
+      radio.getMode(RadioVfos.B);
       radio.getActiveVfo();
     }
     catch(SerialPortException exc)
@@ -195,7 +195,7 @@ public class RadioController
   
   
   /**
-   *  Set the frequency of the currently active VFO
+   *  Set the Frequency of the currently active VFO
    * @param freq
    */
   public void setFrequency(long freq)
@@ -208,20 +208,49 @@ public class RadioController
     {
       if(activeVfo == RadioVfos.A)
       {
-        radio.setFrequency(freq, RadioVfos.A.getCode());
+        radio.setFrequency(freq, RadioVfos.A);
+        radio.getFrequency(RadioVfos.A); // workaround for Icom/Yeasu transcievers. They don't send update when frequency is changed through the CAT
       }
       else
       {
-        radio.setFrequency(freq, RadioVfos.B.getCode());
+        radio.setFrequency(freq, RadioVfos.B);
+        radio.getFrequency(RadioVfos.B); // workaround for Icom/Yeasu transcievers. They don't send update when frequency is changed through the CAT
       }
       
-      radio.getFrequency(RadioVfos.A.getCode()); // workaround for Icom transcievers. They don't send update when frequency is changed through the CAT
+      
     }catch (Exception ex) 
     {
       Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
     }
+  }
+  
+   /**
+   *  Set the Mode of the currently active VFO
+   * @param mode 
+   */
+  public void setMode(RadioModes mode)
+  {
+    if (!isConnected())
+      return;
     
-    ;
+    try
+    {
+      if(activeVfo == RadioVfos.A)
+      {
+        radio.setMode(mode, RadioVfos.A);
+        radio.getMode(RadioVfos.A); // workaround for Icom/Yaesu transcievers. They don't send update when frequency is changed through the CAT
+      }
+      else
+      {
+        radio.setMode(mode, RadioVfos.B);
+        radio.getMode(RadioVfos.B); // workaround for Icom/Yaesu transcievers. They don't send update when frequency is changed through the CAT
+      }
+      
+      
+    }catch (Exception ex) 
+    {
+      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+    }
   }
   
   
@@ -405,7 +434,7 @@ public class RadioController
         try
         {
           // frequency data was damaged - request the data again
-          radio.getFrequency(e.getVfo().getCode());
+          radio.getFrequency(e.getVfo());
         }
         catch (Exception ex)
         {

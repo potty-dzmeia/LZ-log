@@ -26,6 +26,7 @@ import java.util.Collections;
 import javax.swing.table.AbstractTableModel;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.Qso;
+import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.Misc;
 import org.lz1aq.utils.TimeUtils;
 
@@ -71,11 +72,11 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     switch(col)
       {
         case 0:
-          return "hisCall";
+          return "hisCall";    
         case 1:
-          return "type";
-        case 2:
           return "freq";
+        case 2:
+          return "type";
         case 3:
           return "time left";
         default:
@@ -91,10 +92,10 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     {
       case 0:
         return incomingQsoArrayList.get(rowIndex).hisCall;
-      case 1:
-        return incomingQsoArrayList.get(rowIndex).typeOfWork;
-      case 2: 
+      case 1: 
         return Misc.toIncomingQsoFreq(incomingQsoArrayList.get(rowIndex).frequency);
+      case 2:
+        return incomingQsoArrayList.get(rowIndex).typeOfWork; // CQ or S&P
       case 3: 
         return TimeUtils.getTimeLeftFormatted(incomingQsoArrayList.get(rowIndex).getSecondsLeft());
       default:
@@ -115,6 +116,11 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     return Integer.parseInt(incomingQsoArrayList.get(row).frequency);
   }
   
+  public RadioModes getMode(int row) throws Exception
+  {
+    return incomingQsoArrayList.get(row).mode;
+  }
+   
   public String getCallsign(int row) throws Exception
   {
     return incomingQsoArrayList.get(row).hisCall;
@@ -158,6 +164,7 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
       IncomingQso incoming = new IncomingQso(lastQso.getHisCallsign(),
                                             lastQso.getType(),
                                             lastQso.getFrequency(),
+                                            lastQso.getMode(),
                                             lastQso.getElapsedSeconds(),
                                             log.getSecondsLeft(lastQso, appsettings.getQsoRepeatPeriod()));
       incomingQsoArrayList.add(incoming);
@@ -177,19 +184,26 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     private String  hisCall;
     private String  typeOfWork; // CQ or SP
     private String  frequency;
+    private RadioModes  mode;
     //private String  timeLeftFormatted;
     private long    secondsLeft;
     private long    elapsedSeconds; // How many seconds before being able to work the station again
 
    
     
-    public IncomingQso(String hisCall, String typeOfWork, String freq, long secondsElapsed, long secondsLeft)
+    public IncomingQso(String hisCall, 
+                       String typeOfWork, 
+                       String freq, 
+                       RadioModes mode,
+                       long secondsElapsed, 
+                       long secondsLeft)
     {
       this.hisCall = hisCall;
       this.typeOfWork = typeOfWork;
       this.frequency = freq;
       this.elapsedSeconds = secondsElapsed;
       this.secondsLeft = secondsLeft;
+      this.mode = mode;
     }
    
    

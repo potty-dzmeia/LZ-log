@@ -229,7 +229,7 @@ class JsonMsgParser
    */
   private static ModeEvent parseModeMsg(JSONObject jso)
   {
-    RadioModes  mode = RadioModes.NONE;
+    RadioModes  mode = RadioModes.CW;
     
     if(jso.has(MODE_PAR))
     {    

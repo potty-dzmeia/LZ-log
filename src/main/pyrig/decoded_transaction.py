@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 class DecodedTransaction(I_DecodedTransaction):
     """
-    Contains the decoded transaction coming from the rig together with some additional control information
+    This object is send to the Java Application.
+    Contains the decoded transaction which was coming from the rig together with some additional control information.
     """
 
     # Supported commands that can be found inside the decoded transaction

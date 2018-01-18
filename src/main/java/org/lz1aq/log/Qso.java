@@ -21,7 +21,11 @@ package org.lz1aq.log;
 
 import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.joda.time.DateTime;
+import org.lz1aq.lzlog.MainWindow;
+import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.TimeUtils;
 
 /**
@@ -110,7 +114,7 @@ public class Qso
   
   
   
-  public Qso(long freq, String mode, String myCall, String hisCall)
+  public Qso(long freq, RadioModes mode, String myCall, String hisCall)
   {  
     this.utc = TimeUtils.getUTC();
     
@@ -118,13 +122,13 @@ public class Qso
     qsoParams.add(new QsoParameter(DATE_TXT, TimeUtils.toQsoDate(utc)));
     qsoParams.add(new QsoParameter(TIME_TXT, TimeUtils.toQsoTime(utc)));
     qsoParams.add(new QsoParameter(FREQ_TXT, Long.toString(freq)));
-    qsoParams.add(new QsoParameter(MODE_TXT, mode));
+    qsoParams.add(new QsoParameter(MODE_TXT, mode.toString()));
     qsoParams.add(new QsoParameter(MYCALL_TXT, myCall));
     qsoParams.add(new QsoParameter(HISCALL_TXT, hisCall));
   }
 
   
-  public Qso(long freq, String mode, String myCall, String hisCall, ArrayList<QsoParameter> extraQsoParams)
+  public Qso(long freq, RadioModes mode, String myCall, String hisCall, ArrayList<QsoParameter> extraQsoParams)
   {
     this.utc = TimeUtils.getUTC();
     
@@ -132,7 +136,7 @@ public class Qso
     qsoParams.add(new QsoParameter(DATE_TXT, TimeUtils.toQsoDate(utc)));
     qsoParams.add(new QsoParameter(TIME_TXT, TimeUtils.toQsoTime(utc)));
     qsoParams.add(new QsoParameter(FREQ_TXT, Long.toString(freq)));
-    qsoParams.add(new QsoParameter(MODE_TXT, mode));
+    qsoParams.add(new QsoParameter(MODE_TXT, mode.toString()));
     qsoParams.add(new QsoParameter(MYCALL_TXT, myCall));
     qsoParams.add(new QsoParameter(HISCALL_TXT, hisCall));
     qsoParams.add(new QsoParameter(HISCALL_TXT, hisCall));  }
@@ -150,11 +154,11 @@ public class Qso
    * @param type - specifies the type of work CQ or S&P
    * @throws java.lang.Exception In case the input data contains invalid fields
    */
-  public Qso(long freq, String mode, String myCall, String hisCall, String snt, String rcv, String type) throws Exception
+  public Qso(long freq, RadioModes mode, String myCall, String hisCall, String snt, String rcv, String type) throws Exception
   {
     try
     {
-      isValidEntry(freq, mode, myCall, hisCall, snt, rcv, type);
+      isValidEntry(freq, myCall, hisCall, snt, rcv, type);
     }catch(Exception exc)
     {
       throw exc;
@@ -167,7 +171,7 @@ public class Qso
     qsoParams.add(new QsoParameter(DATE_TXT, TimeUtils.toQsoDate(utc)));
     qsoParams.add(new QsoParameter(TIME_TXT, TimeUtils.toQsoTime(utc)));
     qsoParams.add(new QsoParameter(FREQ_TXT, Long.toString(freq)));
-    qsoParams.add(new QsoParameter(MODE_TXT, mode));
+    qsoParams.add(new QsoParameter(MODE_TXT, mode.toString()));
     qsoParams.add(new QsoParameter(MYCALL_TXT, myCall.toUpperCase()));
     qsoParams.add(new QsoParameter(HISCALL_TXT, hisCall.toUpperCase()));
     snt = snt.replaceAll("\\s", ""); // Remove any empty spaces
@@ -270,9 +274,9 @@ public class Qso
   /**
    * @return see class RadioModes for valid strings
    */
-  public synchronized String getMode()
+  public synchronized RadioModes getMode()
   {
-    return qsoParams.get(MODE_INDEX).value;
+    return RadioModes.valueOf(qsoParams.get(MODE_INDEX).value);
   }
 
   /**
@@ -285,7 +289,11 @@ public class Qso
        qsoParams.get(MODE_INDEX).value.equals("SSB")||
        qsoParams.get(MODE_INDEX).value.equals("PH")   )
       return "PH";
-    else 
+    else if(qsoParams.get(MODE_INDEX).value.equals("CW")||
+            qsoParams.get(MODE_INDEX).value.equals("CWR"))
+      return "CW";
+    else
+      Logger.getLogger(Qso.class.getName()).log(Level.SEVERE, null, "Unknown Mode. Returning CW by default.");
       return "CW";
   }
   
@@ -450,7 +458,7 @@ public class Qso
    * @return
    * @throws Exception exception describing the issue
    */
-  private void isValidEntry(long freq, String mode, String myCall, String hisCall, String snt, String rcv, String type) throws Exception
+  private void isValidEntry(long freq, String myCall, String hisCall, String snt, String rcv, String type) throws Exception
   {
     if(!isValidFrequency(freq))
       throw new Exception("Invalid frequency");

@@ -21,7 +21,6 @@ package org.lz1aq.radio;
 
 public enum RadioModes
 {
-  NONE,
   AM,       // AM -- Amplitude Modulation 
   CW,       // CW - CW "normal" sideband
   USB,      // USB - Upper Side Band

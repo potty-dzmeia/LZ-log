@@ -178,7 +178,7 @@ public class MainWindow extends javax.swing.JFrame
     // Open log database
     try
     {
-      Qso example = new Qso(14190000, "cw", "lz1abc", "lz0fs", "200 091", "200 091", "cq"); // We need to supply an example QSO whwn creating/opening new
+      Qso example = new Qso(14190000, RadioModes.CW, "lz1abc", "lz0fs", "200 091", "200 091", "cq"); // We need to supply an example QSO whwn creating/opening new
       log = new Log(new LogDatabase(logDbFile), example);
     }
     catch (Exception ex)
@@ -281,7 +281,7 @@ public class MainWindow extends javax.swing.JFrame
   
   private DefaultComboBoxModel getModeComboboxModel()
   {
-    return new DefaultComboBoxModel(new String[] { "SSB", "CW" });
+    return new DefaultComboBoxModel(new String[] { "CW", "LSB", "USB" });
   }
   
   private DefaultComboBoxModel getBandmapStepInHzComboboxModel()
@@ -299,12 +299,6 @@ public class MainWindow extends javax.swing.JFrame
   {
     return new DefaultComboBoxModel(new String[] {"8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66", "68", "70", "72", "74", "76", "78", "80", "82", "84", "86", "88"});
   }
-  
-  private DefaultComboBoxModel getBandmapShowFreqColumnsComboboxModel()
-  {
-    return new DefaultComboBoxModel(new String[] { "true", "false" });
-  }
-  
   
   private class LogSelectionDialog extends JDialog
   {
@@ -403,6 +397,7 @@ public class MainWindow extends javax.swing.JFrame
     checkboxESM = new javax.swing.JCheckBox();
     jLabel10 = new javax.swing.JLabel();
     jTextField1 = new javax.swing.JTextField();
+    jCheckBoxAutoBandmapStartFreq = new javax.swing.JCheckBox();
     jDialogFontChooser = new javax.swing.JDialog();
     jPanel10 = new javax.swing.JPanel();
     jButton13 = new javax.swing.JButton();
@@ -432,7 +427,6 @@ public class MainWindow extends javax.swing.JFrame
     jcomboboxStepInHz = new javax.swing.JComboBox<String>();
     jcomboboxColumnCount = new javax.swing.JComboBox<String>();
     jcomboboxRowCount = new javax.swing.JComboBox<String>();
-    jlabelShowFreqColumns = new javax.swing.JLabel();
     jLabel13 = new javax.swing.JLabel();
     jLabel14 = new javax.swing.JLabel();
     jLabel15 = new javax.swing.JLabel();
@@ -441,7 +435,7 @@ public class MainWindow extends javax.swing.JFrame
     jLabel18 = new javax.swing.JLabel();
     jtextfieldBandmapStartFreq = new javax.swing.JTextField();
     jlabelBandmapFreeSpace = new javax.swing.JLabel();
-    jcomboboxShowFreqColumns = new javax.swing.JComboBox();
+    jCheckBoxShowFreq = new javax.swing.JCheckBox();
     intframeLog = new javax.swing.JInternalFrame();
     jpanelCompleteLog = new javax.swing.JPanel();
     jScrollPane1 = new javax.swing.JScrollPane();
@@ -578,6 +572,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
     jPanel1.add(jPanel5, gridBagConstraints);
 
+    jTabbedPane1.setToolTipText("");
     jTabbedPane1.setMinimumSize(new java.awt.Dimension(0, 0));
 
     jPanelCallSign.setLayout(new java.awt.GridBagLayout());
@@ -708,6 +703,7 @@ public class MainWindow extends javax.swing.JFrame
 
     buttonGroupKeyer.add(jRadioButtonWinkeyer);
     jRadioButtonWinkeyer.setText("WinKeyer");
+    jRadioButtonWinkeyer.setToolTipText("See http://k1el.tripod.com/WK3Serial.html");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -718,6 +714,7 @@ public class MainWindow extends javax.swing.JFrame
 
     buttonGroupKeyer.add(jRadioButtonDtrKeyer);
     jRadioButtonDtrKeyer.setText("DTR");
+    jRadioButtonDtrKeyer.setToolTipText("If set the DTR pin will be used to generate CW");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -728,6 +725,7 @@ public class MainWindow extends javax.swing.JFrame
 
     buttonGroupKeyer.add(jRadioButtonRtsKeyer);
     jRadioButtonRtsKeyer.setText("RTS");
+    jRadioButtonRtsKeyer.setToolTipText("If set, the RTS pin will be used to generate CW");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
@@ -816,6 +814,7 @@ public class MainWindow extends javax.swing.JFrame
 
     jtextfieldQsoRepeatPeriod.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
     jtextfieldQsoRepeatPeriod.setText("1800");
+    jtextfieldQsoRepeatPeriod.setToolTipText("Usually is 30 minutes - i.e. 1800 seconds.");
     jtextfieldQsoRepeatPeriod.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -905,7 +904,8 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jPanelOther.add(checkboxSendLeadingZeroAsT, gridBagConstraints);
 
-    checkboxESM.setText("\"Enter\" sends message");
+    checkboxESM.setText("\"Enter\" sends mesage");
+    checkboxESM.setToolTipText("When Enter is pressed in the EntryWindow exchange will be transmitted");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -916,6 +916,7 @@ public class MainWindow extends javax.swing.JFrame
     jPanelOther.add(checkboxESM, gridBagConstraints);
 
     jLabel10.setText("TimeToNextQso - Do not show after [sec]");
+    jLabel10.setToolTipText("Set how long should be a callsing kept in the TimeToNextQso window after expiration of the repeat period.");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -935,6 +936,23 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanelOther.add(jTextField1, gridBagConstraints);
+
+    jCheckBoxAutoBandmapStartFreq.setText("Automatic bandmap start frequency");
+    jCheckBoxAutoBandmapStartFreq.setToolTipText("If enabled your bandmap start frequency will change depending on the Selected Frequency and Band.");
+    jCheckBoxAutoBandmapStartFreq.addItemListener(new java.awt.event.ItemListener()
+    {
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
+      {
+        jCheckBoxAutoBandmapStartFreqItemStateChanged(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(jCheckBoxAutoBandmapStartFreq, gridBagConstraints);
 
     jTabbedPane1.addTab("Other", jPanelOther);
 
@@ -1144,7 +1162,6 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.setVisible(true);
 
     jtableIncomingQso.setFont(new java.awt.Font("Liberation Mono", 0, 18)); // NOI18N
-    jtableIncomingQso.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
     jtableIncomingQso.setRowHeight(30);
     jtableIncomingQso.addMouseListener(new java.awt.event.MouseAdapter()
     {
@@ -1163,6 +1180,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setResizable(true);
     intframeBandmap.setTitle("Bandmap");
+    intframeBandmap.setToolTipText("If enabled your bandmap frequency will follow the frequency and the mode of the radio.");
     intframeBandmap.setVisible(true);
     intframeBandmap.getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -1187,6 +1205,7 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.setLayout(new java.awt.GridBagLayout());
 
     jcomboboxStepInHz.setModel(getBandmapStepInHzComboboxModel());
+    jcomboboxStepInHz.setToolTipText("Bandmap resolution");
     jcomboboxStepInHz.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -1205,6 +1224,7 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jcomboboxStepInHz, gridBagConstraints);
 
     jcomboboxColumnCount.setModel(getBandmapColumnCountComboboxModel());
+    jcomboboxColumnCount.setToolTipText("Number of columns");
     jcomboboxColumnCount.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -1223,6 +1243,7 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jcomboboxColumnCount, gridBagConstraints);
 
     jcomboboxRowCount.setModel(getBandmapRowCountComboboxModel());
+    jcomboboxRowCount.setToolTipText("Number of rows");
     jcomboboxRowCount.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -1239,16 +1260,6 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
     jPanel8.add(jcomboboxRowCount, gridBagConstraints);
-
-    jlabelShowFreqColumns.setText("Show freq");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 8;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 0.01;
-    gridBagConstraints.weighty = 1.0;
-    jPanel8.add(jlabelShowFreqColumns, gridBagConstraints);
 
     jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
     jLabel13.setText("Step:");
@@ -1288,6 +1299,7 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jLabel15, gridBagConstraints);
 
     jtextfieldFreqWidth.setText("20");
+    jtextfieldFreqWidth.setToolTipText("Width of the frequency columns ");
     jtextfieldFreqWidth.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -1296,10 +1308,10 @@ public class MainWindow extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 11;
+    gridBagConstraints.gridx = 10;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.01;
+    gridBagConstraints.weightx = 0.1;
     gridBagConstraints.weighty = 1.0;
     jPanel8.add(jtextfieldFreqWidth, gridBagConstraints);
 
@@ -1307,7 +1319,7 @@ public class MainWindow extends javax.swing.JFrame
     jLabel11.setText("Width of freq cols:");
     jLabel11.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 10;
+    gridBagConstraints.gridx = 9;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.01;
@@ -1324,11 +1336,12 @@ public class MainWindow extends javax.swing.JFrame
     jPanel8.add(jLabel18, gridBagConstraints);
 
     jtextfieldBandmapStartFreq.setText("3500");
+    jtextfieldBandmapStartFreq.setToolTipText("The start freq of the bandmap (in KHz)");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.01;
+    gridBagConstraints.weightx = 0.1;
     gridBagConstraints.weighty = 1.0;
     jPanel8.add(jtextfieldBandmapStartFreq, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1339,23 +1352,23 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jPanel8.add(jlabelBandmapFreeSpace, gridBagConstraints);
 
-    jcomboboxShowFreqColumns.setModel(getBandmapShowFreqColumnsComboboxModel());
-    jcomboboxShowFreqColumns.addItemListener(new java.awt.event.ItemListener()
+    jCheckBoxShowFreq.setText("Show freq. ");
+    jCheckBoxShowFreq.setToolTipText("If the frequency columns should be visible");
+    jCheckBoxShowFreq.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jcomboboxShowFreqColumnsItemStateChanged(evt);
+        jCheckBoxShowFreqItemStateChanged(evt);
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 9;
+    gridBagConstraints.gridx = 8;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 0.01;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
-    jPanel8.add(jcomboboxShowFreqColumns, gridBagConstraints);
+    jPanel8.add(jCheckBoxShowFreq, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -1367,7 +1380,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 637, 459);
+    intframeBandmap.setBounds(500, 520, 528, 482);
 
     intframeLog.setIconifiable(true);
     intframeLog.setResizable(true);
@@ -2718,7 +2731,9 @@ public class MainWindow extends javax.swing.JFrame
 
     try
     {
-      radioController.setFrequency(jtablemodelIncomingQso.getFrequency(row)); // jump to freq
+      radioController.setMode(jtablemodelIncomingQso.getMode(row)); //set the mode used for this contact
+      radioController.setFrequency(jtablemodelIncomingQso.getFrequency(row)); // jump to the freq
+      
       initEntryFields();  // clear the fields
       
       // Add the callsign into the Entry field if this is a S&P contact
@@ -2746,23 +2761,6 @@ public class MainWindow extends javax.swing.JFrame
     // Return focus to callsign field
     jtextfieldCallsign.requestFocusInWindow();
   }//GEN-LAST:event_jtableIncomingQsoMousePressed
-
-  private void jcomboboxShowFreqColumnsItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcomboboxShowFreqColumnsItemStateChanged
-  {//GEN-HEADEREND:event_jcomboboxShowFreqColumnsItemStateChanged
-     if (evt.getStateChange() == ItemEvent.SELECTED) 
-     {
-       if( ((String)jcomboboxShowFreqColumns.getSelectedItem()).equals("true") )
-       {
-         applicationSettings.setShowBandmapFreqColumns(true);
-       }
-       else
-       {
-         applicationSettings.setShowBandmapFreqColumns(false);
-       }
-       
-       jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
-     }
-  }//GEN-LAST:event_jcomboboxShowFreqColumnsItemStateChanged
 
   private void jtogglebuttonConnectToKeyerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToKeyerActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
@@ -2894,6 +2892,32 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jButton20ActionPerformed
     jDialogAbout.setVisible(false);
   }//GEN-LAST:event_jButton20ActionPerformed
+
+  private void jCheckBoxShowFreqItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jCheckBoxShowFreqItemStateChanged
+  {//GEN-HEADEREND:event_jCheckBoxShowFreqItemStateChanged
+    if(jCheckBoxShowFreq.isSelected())
+    {
+      applicationSettings.setShowBandmapFreqColumns(true);
+    }
+    else
+    {
+      applicationSettings.setShowBandmapFreqColumns(false);
+    }
+
+    jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
+  }//GEN-LAST:event_jCheckBoxShowFreqItemStateChanged
+
+  private void jCheckBoxAutoBandmapStartFreqItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
+  {//GEN-HEADEREND:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
+    if(jCheckBoxAutoBandmapStartFreq.isSelected())
+    {
+      applicationSettings.setBandmapAutoFreq(true);
+    }
+    else
+    {
+      applicationSettings.setBandmapAutoFreq(false);
+    }
+  }//GEN-LAST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
   
   
   private void increaseKeyerSpeed()
@@ -3119,20 +3143,18 @@ public class MainWindow extends javax.swing.JFrame
    * to the radio or not.
    * @return - String describing the mode (e.g. "cw", "ssb")
    */
-  private String getMode()
+  private RadioModes getMode()
   {
     // If radio is connected get the frequency from there
     if(radioController.isConnected())
     {
-      RadioModes mode;
-      mode = radioController.getMode();
-      return mode.toString();
+      return radioController.getMode();
     }
     // If no radio is connected - read the mode from the combobox model
     else
     {
-      String temp = jcomboboxMode.getSelectedItem().toString();
-      return temp;
+      String md = jcomboboxMode.getSelectedItem().toString();
+      return RadioModes.valueOf(md);
     }
   }
   
@@ -3296,7 +3318,9 @@ public class MainWindow extends javax.swing.JFrame
       jcomboboxStepInHz.setSelectedItem(Integer.toString(applicationSettings.getBandmapStepInHz()));
       jcomboboxColumnCount.setSelectedItem(Integer.toString(applicationSettings.getBandmapColumnCount()));
       jcomboboxRowCount.setSelectedItem(Integer.toString(applicationSettings.getBandmapRowCount()));
-
+      jCheckBoxShowFreq.setSelected(applicationSettings.isShowBandmapFreqColumns());
+      //jtextfieldFreqWidth.setText(applicationSettings.get);
+      
       restoreFonts();
     }
     
@@ -3377,6 +3401,8 @@ public class MainWindow extends javax.swing.JFrame
     // Incoming qso hide after
     jTextField1.setText(Integer.toString(applicationSettings.getIncomingQsoHiderAfter()));
 
+    // Bandmap auto set start frequncy
+    jCheckBoxAutoBandmapStartFreq.setSelected(applicationSettings.isBandmapAutoFreq());
     // Incoming qso max entries
     //jTextField2.setText(Integer.toString(applicationSettings.getIncomingQsoMaxEntries()));
   }
@@ -3552,7 +3578,7 @@ public class MainWindow extends javax.swing.JFrame
     String text = applicationSettings.getFunctionKeyMessage(0);  // Get the text for the F1 key
     text = text.replaceAll("\\{mycall\\}", applicationSettings.getMyCallsign()); // Substitute {mycall} with my callsign
     text = text + " ";
-    keyer.sendCw(text); // Send to keyer
+    sendCw(text); // Send to keyer
    
     // Select the CQ radio button
     jradiobuttonCQ.setSelected(true);
@@ -3590,42 +3616,42 @@ public class MainWindow extends javax.swing.JFrame
   
   private void pressedF3()
   {
-    keyer.sendCw(applicationSettings.getFunctionKeyMessage(2)+" ");
+    sendCw(applicationSettings.getFunctionKeyMessage(2)+" ");
   }
   
   private void pressedF4()
   {
-    keyer.sendCw(applicationSettings.getMyCallsign()+" ");
+    sendCw(applicationSettings.getMyCallsign()+" ");
   }
   
   private void pressedF5()
   {
-    keyer.sendCw(getCallsignFromTextField()+" ");
+    sendCw(getCallsignFromTextField()+" ");
   }
   
   private void pressedF6()
   {
-    keyer.sendCw(applicationSettings.getFunctionKeyMessage(5)+" ");
+    sendCw(applicationSettings.getFunctionKeyMessage(5)+" ");
   }
   
   private void pressedF7()
   {
-    keyer.sendCw(applicationSettings.getFunctionKeyMessage(6)+" ");
+    sendCw(applicationSettings.getFunctionKeyMessage(6)+" ");
   }
   
   private void pressedF8()
   {
-    keyer.sendCw(applicationSettings.getFunctionKeyMessage(7)+" ");
+    sendCw(applicationSettings.getFunctionKeyMessage(7)+" ");
   }
   
   private void pressedF9()
   {
-    keyer.sendCw(applicationSettings.getFunctionKeyMessage(8)+" ");
+    sendCw(applicationSettings.getFunctionKeyMessage(8)+" ");
   }
   
   private void pressedF10()
   {
-    keyer.sendCw(applicationSettings.getFunctionKeyMessage(9)+" ");
+    sendCw(applicationSettings.getFunctionKeyMessage(9)+" ");
   }
   
   private void pressedF11()
@@ -3674,11 +3700,21 @@ public class MainWindow extends javax.swing.JFrame
       serial = Misc.leadingZerosToT(serial);
     }
    
-    keyer.sendCw(serial.substring(0, 3)+ " " +serial.substring(3, 6)+" ");
-    
-    
+    sendCw(serial.substring(0, 3)+ " " +serial.substring(3, 6)+" ");
   }
   
+  
+  /**
+   * Will try to transmit CW is mode is CW or CWR
+   */
+  void sendCw(String msg)
+  {
+    if(getMode() == RadioModes.CW || getMode() == RadioModes.CWR)
+    {
+      sendCw(msg);
+    }
+    
+  }
   
   class LocalRadioControllerListener implements RadioController.RadioControllerListener
   {
@@ -3688,14 +3724,30 @@ public class MainWindow extends javax.swing.JFrame
       {
         case LSB:
         case USB:
-          if(freq>1800000 && freq<2000000)
+          if(freq>1800000 && freq<2500000)
             setBandmapStartFreq(1800000);
-          else if(freq>3000000 && freq<3800000)
+          else if(freq>2500000 && freq<3900000)
             setBandmapStartFreq(3600000);
-           else if(freq>7000000 && freq<7200000)
+           else if(freq>6900000 && freq<7300000)
             setBandmapStartFreq(7060000);
-          else if(freq>14000000 && freq<14400000)
+          else if(freq>13900000 && freq<14500000)
             setBandmapStartFreq(14100000);
+          else if(freq>20000000 && freq<22000000)
+            setBandmapStartFreq(21150000);
+          break;
+          
+        case CW:
+        case CWR:
+          if(freq>1800000 && freq<2500000)
+            setBandmapStartFreq(1800000);
+          else if(freq>2500000 && freq<3900000)
+            setBandmapStartFreq(3500000);
+           else if(freq>6900000 && freq<7300000)
+            setBandmapStartFreq(7000000);
+          else if(freq>13900000 && freq<14500000)
+            setBandmapStartFreq(14000000);
+          else if(freq>20000000 && freq<22000000)
+            setBandmapStartFreq(21000000);
           break;
       }
     }
@@ -3722,7 +3774,11 @@ public class MainWindow extends javax.swing.JFrame
           // We need to repaint the bandmap table so that the fequency marker is updated
           jtableBandmap.repaint();
           
-          //updateBandmapStartFreq(radioController.getFrequency(), radioController.getMode());
+          
+          if(applicationSettings.isBandmapAutoFreq())
+          {
+            updateBandmapStartFreq(radioController.getFrequency(), radioController.getMode());
+          }
         }
       });
      
@@ -4210,6 +4266,8 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JButton jButton9;
   private javax.swing.JButton jButtonCancel;
   private javax.swing.JButton jButtonSave;
+  private javax.swing.JCheckBox jCheckBoxAutoBandmapStartFreq;
+  private javax.swing.JCheckBox jCheckBoxShowFreq;
   private javax.swing.JComboBox jComboBoxKeyerComPort;
   private javax.swing.JComboBox jComboBoxRadioComPort;
   private javax.swing.JComboBox jComboBoxRadioComPortBaudRate;
@@ -4295,14 +4353,12 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JComboBox<String> jcomboboxColumnCount;
   private javax.swing.JComboBox jcomboboxMode;
   private javax.swing.JComboBox<String> jcomboboxRowCount;
-  private javax.swing.JComboBox jcomboboxShowFreqColumns;
   private javax.swing.JComboBox<String> jcomboboxStepInHz;
   private javax.swing.JDialog jdialogLogSelection;
   private javax.swing.JLabel jlabelBandmapFreeSpace;
   private javax.swing.JLabel jlabelCallsignStatus;
   private javax.swing.JLabel jlabelCqFreq;
   private javax.swing.JLabel jlabelKeyerSpeed;
-  private javax.swing.JLabel jlabelShowFreqColumns;
   private javax.swing.JMenuItem jmenuFonts;
   private javax.swing.JMenuItem jmenuGenerateCabrillo;
   private javax.swing.JMenuItem jmenuSettings;

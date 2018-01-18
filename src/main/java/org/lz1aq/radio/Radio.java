@@ -176,9 +176,9 @@ public class Radio
    * @param vfo - VFO which frequency will be changed
    * @throws Exception 
    */
-  public void setFrequency(long freq, int vfo) throws Exception
+  public void setFrequency(long freq, RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeSetFreq(freq, vfo));
+    this.queueTransactions(radioProtocolParser.encodeSetFreq(freq, vfo.getCode()));
   }
   
   
@@ -191,9 +191,9 @@ public class Radio
    * @param vfo - for which VFO we would like to get the frequency
    * @throws Exception 
    */
-  public void getFrequency(int vfo) throws Exception
+  public void getFrequency(RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeGetFreq(vfo));
+    this.queueTransactions(radioProtocolParser.encodeGetFreq(vfo.getCode()));
   }
   
     
@@ -203,9 +203,9 @@ public class Radio
    * @param vfo - VFO which mode will be changed
    * @throws Exception 
    */
-  public void setMode(String mode, int vfo) throws Exception
+  public void setMode(RadioModes mode, RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeSetMode(mode, vfo));
+    this.queueTransactions(radioProtocolParser.encodeSetMode(mode.toString(), vfo.getCode()));
   }
   
     
@@ -217,9 +217,9 @@ public class Radio
    * @param vfo - VFO of which we want to read the mode
    * @throws Exception 
    */
-  public void getMode(int vfo) throws Exception
+  public void getMode(RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeGetMode(vfo));
+    this.queueTransactions(radioProtocolParser.encodeGetMode(vfo.getCode()));
   }
   
   

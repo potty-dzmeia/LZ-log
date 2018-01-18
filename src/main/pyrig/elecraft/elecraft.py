@@ -354,20 +354,20 @@ class Elecraft(Radio):
         """
         logger.debug("input data: {0}".format(trans))
 
-        result_dic = None
-        for s in cls.parsers:
-            if trans.startswith(s):  # if we have parser for the current command...
-                fn = cls.parsers[s]
-                result_dic = getattr(fn, '__func__')(cls, trans) # call the responsible parser
-                break
-
-        # logger.debug(result_dic.__str__())
-
-        if result_dic is None:
-            result_dic = dict()
-            DecodedTransaction.insertNotSupported(result_dic, trans)
 
         try:
+            result_dic = None
+            for s in cls.parsers:
+                if trans.startswith(s):  # if we have parser for the current command...
+                    fn = cls.parsers[s]
+                    result_dic = getattr(fn, '__func__')(cls, trans) # call the responsible parser
+                    break
+
+            # logger.debug(result_dic.__str__())
+            if result_dic is None:
+                result_dic = dict()
+                DecodedTransaction.insertNotSupported(result_dic, trans)
+
             result_json = DecodedTransaction.toJson(result_dic)
         except:
             # something went wrong during converting to json string. Return not supported...

@@ -1,8 +1,8 @@
 High priority:
-- Add all the SerialPort settings inside the Java app
-- Bandmap should be changing when the freq/mode changes (allow to set bandmap start for SSB and CW)
 - Add option to disable exchange validation (important for contests where strings are exchanged)
 - create help in Bulgarian
+- Add all the SerialPort settings inside the Java app
+- add validation for the Log Window (now is possible to add invalid data)
 - there should be an option for entering worked frequency for people that do not use CAT
 - show qso rate
 - show hints when hovering over controls
@@ -33,6 +33,7 @@ Low priority:
 
 
 Solved:
+- Bandmap should be changing when the freq/mode changes (allow to set bandmap start for SSB and CW)
 - Time to next qso: the distance between the rows should be dynamic (adjust row sizes depending on the font)
 - update help so that it mentions the path problem
 - when EMS and S&P are enabled - pressing enter should send serial number
