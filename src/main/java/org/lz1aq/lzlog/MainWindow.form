@@ -553,7 +553,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="jCheckBoxAutoBandmapStartFreq">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Automatic bandmap start frequency"/>
+                        <Property name="text" type="java.lang.String" value="Automatic bandmap frequency change"/>
                         <Property name="toolTipText" type="java.lang.String" value="If enabled your bandmap start frequency will change depending on the Selected Frequency and Band."/>
                       </Properties>
                       <Events>

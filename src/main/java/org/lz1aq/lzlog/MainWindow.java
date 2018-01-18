@@ -24,8 +24,6 @@ import java.awt.FontMetrics;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
@@ -80,7 +78,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.4.1";
+  static final String PROGRAM_VERSION = "1.5";
   static final String PROGRAM_NAME    = "LZ-Log";
   static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
@@ -937,7 +935,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jPanelOther.add(jTextField1, gridBagConstraints);
 
-    jCheckBoxAutoBandmapStartFreq.setText("Automatic bandmap start frequency");
+    jCheckBoxAutoBandmapStartFreq.setText("Automatic bandmap frequency change");
     jCheckBoxAutoBandmapStartFreq.setToolTipText("If enabled your bandmap start frequency will change depending on the Selected Frequency and Band.");
     jCheckBoxAutoBandmapStartFreq.addItemListener(new java.awt.event.ItemListener()
     {
