@@ -352,22 +352,31 @@ public class MainWindow extends javax.swing.JFrame
 
     buttonGroupTypeOfWork = new javax.swing.ButtonGroup();
     jDialogSettings = new javax.swing.JDialog();
-    jScrollPane4 = new javax.swing.JScrollPane();
     jPanel1 = new javax.swing.JPanel();
-    jPanel4 = new javax.swing.JPanel();
+    jPanel5 = new javax.swing.JPanel();
+    jButtonCancel = new javax.swing.JButton();
+    jButtonSave = new javax.swing.JButton();
+    jTabbedPane1 = new javax.swing.JTabbedPane();
+    jPanelCallSign = new javax.swing.JPanel();
+    textfieldSettingsMyCallsign = new javax.swing.JTextField();
+    jLabel21 = new javax.swing.JLabel();
+    jLabel22 = new javax.swing.JLabel();
+    jPanelRadio = new javax.swing.JPanel();
     jComboBoxRadioComPort = new javax.swing.JComboBox();
     jLabel12 = new javax.swing.JLabel();
     jComboBoxRadioComPortBaudRate = new javax.swing.JComboBox();
     jLabel20 = new javax.swing.JLabel();
-    jPanel12 = new javax.swing.JPanel();
+    jLabel23 = new javax.swing.JLabel();
+    jLabel24 = new javax.swing.JLabel();
+    jPanelKeyer = new javax.swing.JPanel();
     jLabel19 = new javax.swing.JLabel();
     jComboBoxKeyerComPort = new javax.swing.JComboBox();
     jRadioButtonWinkeyer = new javax.swing.JRadioButton();
     jRadioButtonDtrKeyer = new javax.swing.JRadioButton();
     jRadioButtonRtsKeyer = new javax.swing.JRadioButton();
-    jPanel3 = new javax.swing.JPanel();
-    textfieldSettingsMyCallsign = new javax.swing.JTextField();
-    jPanel7 = new javax.swing.JPanel();
+    jLabel25 = new javax.swing.JLabel();
+    jLabel26 = new javax.swing.JLabel();
+    jPanelFunctionKeys = new javax.swing.JPanel();
     jLabel3 = new javax.swing.JLabel();
     jtextfieldf1 = new javax.swing.JTextField();
     jLabel9 = new javax.swing.JLabel();
@@ -382,20 +391,18 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldf9 = new javax.swing.JTextField();
     jLabel7 = new javax.swing.JLabel();
     jtextfieldf10 = new javax.swing.JTextField();
-    jPanel6 = new javax.swing.JPanel();
+    jPanelContestRules = new javax.swing.JPanel();
+    jtextfieldQsoRepeatPeriod = new javax.swing.JTextField();
+    jLabel2 = new javax.swing.JLabel();
+    jLabel27 = new javax.swing.JLabel();
+    jLabel28 = new javax.swing.JLabel();
+    jPanelOther = new javax.swing.JPanel();
     checkboxSettingsQuickMode = new javax.swing.JCheckBox();
     textfieldSettingsDefaultPrefix = new javax.swing.JTextField();
     checkboxSendLeadingZeroAsT = new javax.swing.JCheckBox();
     checkboxESM = new javax.swing.JCheckBox();
-    jPanel2 = new javax.swing.JPanel();
-    jtextfieldQsoRepeatPeriod = new javax.swing.JTextField();
-    jLabel2 = new javax.swing.JLabel();
-    jPanel9 = new javax.swing.JPanel();
     jLabel10 = new javax.swing.JLabel();
     jTextField1 = new javax.swing.JTextField();
-    jPanel5 = new javax.swing.JPanel();
-    jButtonCancel = new javax.swing.JButton();
-    jButtonSave = new javax.swing.JButton();
     jDialogFontChooser = new javax.swing.JDialog();
     jPanel10 = new javax.swing.JPanel();
     jButton13 = new javax.swing.JButton();
@@ -523,340 +530,8 @@ public class MainWindow extends javax.swing.JFrame
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
 
-    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Radio"));
-    jPanel4.setLayout(new java.awt.GridBagLayout());
-
-    jComboBoxRadioComPort.setModel(getComportsComboboxModel());
-    jComboBoxRadioComPort.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        jComboBoxRadioComPortActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-    jPanel4.add(jComboBoxRadioComPort, gridBagConstraints);
-
-    jLabel12.setText("CommPort");
-    jLabel12.setToolTipText("");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    jPanel4.add(jLabel12, gridBagConstraints);
-
-    jComboBoxRadioComPortBaudRate.setModel(getBaudRates());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-    jPanel4.add(jComboBoxRadioComPortBaudRate, gridBagConstraints);
-
-    jLabel20.setText("Baud rate");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.ipadx = 1;
-    gridBagConstraints.ipady = 1;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    jPanel4.add(jLabel20, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    jPanel1.add(jPanel4, gridBagConstraints);
-
-    jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder("Keyer"));
-    jPanel12.setLayout(new java.awt.GridBagLayout());
-
-    jLabel19.setText("CommPort");
-    jLabel19.setToolTipText("");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    jPanel12.add(jLabel19, gridBagConstraints);
-
-    jComboBoxKeyerComPort.setModel(getComportsComboboxModel());
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-    jPanel12.add(jComboBoxKeyerComPort, gridBagConstraints);
-
-    buttonGroupKeyer.add(jRadioButtonWinkeyer);
-    jRadioButtonWinkeyer.setText("WinKeyer");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel12.add(jRadioButtonWinkeyer, gridBagConstraints);
-
-    buttonGroupKeyer.add(jRadioButtonDtrKeyer);
-    jRadioButtonDtrKeyer.setText("DTR");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel12.add(jRadioButtonDtrKeyer, gridBagConstraints);
-
-    buttonGroupKeyer.add(jRadioButtonRtsKeyer);
-    jRadioButtonRtsKeyer.setText("RTS");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel12.add(jRadioButtonRtsKeyer, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    jPanel1.add(jPanel12, gridBagConstraints);
-
-    jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("My callsign"));
-    jPanel3.setLayout(new java.awt.GridBagLayout());
-
-    textfieldSettingsMyCallsign.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
-    textfieldSettingsMyCallsign.setText("Your callsign here");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 20);
-    jPanel3.add(textfieldSettingsMyCallsign, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    jPanel1.add(jPanel3, gridBagConstraints);
-
-    jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder("Function keys"));
-    jPanel7.setLayout(new java.awt.GridLayout(0, 2));
-
-    jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    jLabel3.setText("F1 Cq");
-    jPanel7.add(jLabel3);
-
-    jtextfieldf1.setText("jTextField1");
-    jPanel7.add(jtextfieldf1);
-
-    jLabel9.setText("F3 Tu");
-    jPanel7.add(jLabel9);
-
-    jtextfieldf3.setText("jTextField2");
-    jPanel7.add(jtextfieldf3);
-
-    jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    jLabel4.setText("F6");
-    jPanel7.add(jLabel4);
-
-    jtextfieldf6.setText("jTextField3");
-    jPanel7.add(jtextfieldf6);
-
-    jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    jLabel5.setText("F7");
-    jPanel7.add(jLabel5);
-
-    jtextfieldf7.setText("jTextField4");
-    jPanel7.add(jtextfieldf7);
-
-    jLabel8.setText("F8");
-    jPanel7.add(jLabel8);
-
-    jtextfieldf8.setText("jTextField5");
-    jPanel7.add(jtextfieldf8);
-
-    jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    jLabel6.setText("F9");
-    jPanel7.add(jLabel6);
-
-    jtextfieldf9.setText("jTextField6");
-    jPanel7.add(jtextfieldf9);
-
-    jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    jLabel7.setText("F10 ");
-    jPanel7.add(jLabel7);
-
-    jtextfieldf10.setEditable(false);
-    jtextfieldf10.setText("jTextField7");
-    jtextfieldf10.setEnabled(false);
-    jPanel7.add(jtextfieldf10);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    jPanel1.add(jPanel7, gridBagConstraints);
-
-    jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Other"));
-    jPanel6.setLayout(new java.awt.GridBagLayout());
-
-    checkboxSettingsQuickMode.setText("Enable quick callsign entry");
-    checkboxSettingsQuickMode.setToolTipText("If enabled will allow to enter callsign by using only the sufix");
-    checkboxSettingsQuickMode.addChangeListener(new javax.swing.event.ChangeListener()
-    {
-      public void stateChanged(javax.swing.event.ChangeEvent evt)
-      {
-        checkboxSettingsQuickModeStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel6.add(checkboxSettingsQuickMode, gridBagConstraints);
-
-    textfieldSettingsDefaultPrefix.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-    textfieldSettingsDefaultPrefix.setText("LZ0");
-    textfieldSettingsDefaultPrefix.setToolTipText("The default prefix which will be added");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.weighty = 1.0;
-    jPanel6.add(textfieldSettingsDefaultPrefix, gridBagConstraints);
-
-    checkboxSendLeadingZeroAsT.setText("Send leading zeros as 'T'");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel6.add(checkboxSendLeadingZeroAsT, gridBagConstraints);
-
-    checkboxESM.setText("\"Enter\" sends message");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel6.add(checkboxESM, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.weighty = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    jPanel1.add(jPanel6, gridBagConstraints);
-
-    jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Contest rules"));
-    jPanel2.setToolTipText("");
-    jPanel2.setLayout(new java.awt.GridBagLayout());
-
-    jtextfieldQsoRepeatPeriod.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-    jtextfieldQsoRepeatPeriod.setText("1800");
-    jtextfieldQsoRepeatPeriod.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        jtextfieldQsoRepeatPeriodActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.weighty = 1.0;
-    jPanel2.add(jtextfieldQsoRepeatPeriod, gridBagConstraints);
-
-    jLabel2.setText("QSO repeat period in seconds:");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel2.add(jLabel2, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.weighty = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    jPanel1.add(jPanel2, gridBagConstraints);
-
-    jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Time to next QSO"));
-    jPanel9.setLayout(new java.awt.GridBagLayout());
-
-    jLabel10.setText("Do not show after [sec]");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel9.add(jLabel10, gridBagConstraints);
-
-    jTextField1.setText("jTextField1");
-    jTextField1.setToolTipText("This should be a negative value!");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel9.add(jTextField1, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    jPanel1.add(jPanel9, gridBagConstraints);
-
+    jPanel5.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+    jPanel5.setMinimumSize(new java.awt.Dimension(0, 0));
     jPanel5.setLayout(new java.awt.GridBagLayout());
 
     jButtonCancel.setText("Cancel");
@@ -895,20 +570,387 @@ public class MainWindow extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.weighty = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
     jPanel1.add(jPanel5, gridBagConstraints);
 
-    jScrollPane4.setViewportView(jPanel1);
+    jTabbedPane1.setMinimumSize(new java.awt.Dimension(0, 0));
+
+    jPanelCallSign.setLayout(new java.awt.GridBagLayout());
+
+    textfieldSettingsMyCallsign.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+    textfieldSettingsMyCallsign.setText("Your callsign here");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.5;
+    gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 20);
+    jPanelCallSign.add(textfieldSettingsMyCallsign, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelCallSign.add(jLabel21, gridBagConstraints);
+
+    jLabel22.setText(" ");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelCallSign.add(jLabel22, gridBagConstraints);
+
+    jTabbedPane1.addTab("Callsign", jPanelCallSign);
+
+    jPanelRadio.setLayout(new java.awt.GridBagLayout());
+
+    jComboBoxRadioComPort.setModel(getComportsComboboxModel());
+    jComboBoxRadioComPort.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jComboBoxRadioComPortActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+    jPanelRadio.add(jComboBoxRadioComPort, gridBagConstraints);
+
+    jLabel12.setText("CommPort");
+    jLabel12.setToolTipText("");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    jPanelRadio.add(jLabel12, gridBagConstraints);
+
+    jComboBoxRadioComPortBaudRate.setModel(getBaudRates());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+    jPanelRadio.add(jComboBoxRadioComPortBaudRate, gridBagConstraints);
+
+    jLabel20.setText("Baud rate");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.ipadx = 1;
+    gridBagConstraints.ipady = 1;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    jPanelRadio.add(jLabel20, gridBagConstraints);
+
+    jLabel23.setText(" ");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelRadio.add(jLabel23, gridBagConstraints);
+
+    jLabel24.setText(" ");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelRadio.add(jLabel24, gridBagConstraints);
+
+    jTabbedPane1.addTab("Radio", jPanelRadio);
+
+    jPanelKeyer.setLayout(new java.awt.GridBagLayout());
+
+    jLabel19.setText("CommPort");
+    jLabel19.setToolTipText("");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    jPanelKeyer.add(jLabel19, gridBagConstraints);
+
+    jComboBoxKeyerComPort.setModel(getComportsComboboxModel());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    jPanelKeyer.add(jComboBoxKeyerComPort, gridBagConstraints);
+
+    buttonGroupKeyer.add(jRadioButtonWinkeyer);
+    jRadioButtonWinkeyer.setText("WinKeyer");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    jPanelKeyer.add(jRadioButtonWinkeyer, gridBagConstraints);
+
+    buttonGroupKeyer.add(jRadioButtonDtrKeyer);
+    jRadioButtonDtrKeyer.setText("DTR");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    jPanelKeyer.add(jRadioButtonDtrKeyer, gridBagConstraints);
+
+    buttonGroupKeyer.add(jRadioButtonRtsKeyer);
+    jRadioButtonRtsKeyer.setText("RTS");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    jPanelKeyer.add(jRadioButtonRtsKeyer, gridBagConstraints);
+
+    jLabel25.setText(" ");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelKeyer.add(jLabel25, gridBagConstraints);
+
+    jLabel26.setText(" ");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelKeyer.add(jLabel26, gridBagConstraints);
+
+    jTabbedPane1.addTab("Keyer", jPanelKeyer);
+
+    jPanelFunctionKeys.setLayout(new java.awt.GridLayout(0, 2));
+
+    jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    jLabel3.setText("F1 Cq");
+    jPanelFunctionKeys.add(jLabel3);
+
+    jtextfieldf1.setText("jTextField1");
+    jPanelFunctionKeys.add(jtextfieldf1);
+
+    jLabel9.setText("F3 Tu");
+    jPanelFunctionKeys.add(jLabel9);
+
+    jtextfieldf3.setText("jTextField2");
+    jPanelFunctionKeys.add(jtextfieldf3);
+
+    jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    jLabel4.setText("F6");
+    jPanelFunctionKeys.add(jLabel4);
+
+    jtextfieldf6.setText("jTextField3");
+    jPanelFunctionKeys.add(jtextfieldf6);
+
+    jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    jLabel5.setText("F7");
+    jPanelFunctionKeys.add(jLabel5);
+
+    jtextfieldf7.setText("jTextField4");
+    jPanelFunctionKeys.add(jtextfieldf7);
+
+    jLabel8.setText("F8");
+    jPanelFunctionKeys.add(jLabel8);
+
+    jtextfieldf8.setText("jTextField5");
+    jPanelFunctionKeys.add(jtextfieldf8);
+
+    jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    jLabel6.setText("F9");
+    jPanelFunctionKeys.add(jLabel6);
+
+    jtextfieldf9.setText("jTextField6");
+    jPanelFunctionKeys.add(jtextfieldf9);
+
+    jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+    jLabel7.setText("F10 ");
+    jPanelFunctionKeys.add(jLabel7);
+
+    jtextfieldf10.setEditable(false);
+    jtextfieldf10.setText("jTextField7");
+    jtextfieldf10.setEnabled(false);
+    jPanelFunctionKeys.add(jtextfieldf10);
+
+    jTabbedPane1.addTab("Function Keys", jPanelFunctionKeys);
+
+    jPanelContestRules.setToolTipText("");
+    jPanelContestRules.setLayout(new java.awt.GridBagLayout());
+
+    jtextfieldQsoRepeatPeriod.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+    jtextfieldQsoRepeatPeriod.setText("1800");
+    jtextfieldQsoRepeatPeriod.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jtextfieldQsoRepeatPeriodActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.3;
+    gridBagConstraints.weighty = 0.8;
+    jPanelContestRules.add(jtextfieldQsoRepeatPeriod, gridBagConstraints);
+
+    jLabel2.setText("QSO repeat period in seconds:");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.8;
+    jPanelContestRules.add(jLabel2, gridBagConstraints);
+
+    jLabel27.setText(" ");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelContestRules.add(jLabel27, gridBagConstraints);
+
+    jLabel28.setText(" ");
+    jLabel28.setToolTipText("");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelContestRules.add(jLabel28, gridBagConstraints);
+
+    jTabbedPane1.addTab("Contest Rules", jPanelContestRules);
+
+    jPanelOther.setLayout(new java.awt.GridBagLayout());
+
+    checkboxSettingsQuickMode.setText("Enable quick callsign entry");
+    checkboxSettingsQuickMode.setToolTipText("If enabled will allow to enter callsign by using only the sufix");
+    checkboxSettingsQuickMode.addChangeListener(new javax.swing.event.ChangeListener()
+    {
+      public void stateChanged(javax.swing.event.ChangeEvent evt)
+      {
+        checkboxSettingsQuickModeStateChanged(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(checkboxSettingsQuickMode, gridBagConstraints);
+
+    textfieldSettingsDefaultPrefix.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+    textfieldSettingsDefaultPrefix.setText("LZ0");
+    textfieldSettingsDefaultPrefix.setToolTipText("The default prefix which will be added");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 0.3;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(textfieldSettingsDefaultPrefix, gridBagConstraints);
+
+    checkboxSendLeadingZeroAsT.setText("Send leading zeros as 'T'");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(checkboxSendLeadingZeroAsT, gridBagConstraints);
+
+    checkboxESM.setText("\"Enter\" sends message");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(checkboxESM, gridBagConstraints);
+
+    jLabel10.setText("TimeToNextQso - Do not show after [sec]");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(jLabel10, gridBagConstraints);
+
+    jTextField1.setText("jTextField1");
+    jTextField1.setToolTipText("This should be a negative value!");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(jTextField1, gridBagConstraints);
+
+    jTabbedPane1.addTab("Other", jPanelOther);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
+    jPanel1.add(jTabbedPane1, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jDialogSettings.getContentPane().add(jScrollPane4, gridBagConstraints);
+    jDialogSettings.getContentPane().add(jPanel1, gridBagConstraints);
 
     jDialogFontChooser.setTitle("Choose fonts...");
     jDialogFontChooser.setAlwaysOnTop(true);
@@ -4188,6 +4230,14 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel19;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel20;
+  private javax.swing.JLabel jLabel21;
+  private javax.swing.JLabel jLabel22;
+  private javax.swing.JLabel jLabel23;
+  private javax.swing.JLabel jLabel24;
+  private javax.swing.JLabel jLabel25;
+  private javax.swing.JLabel jLabel26;
+  private javax.swing.JLabel jLabel27;
+  private javax.swing.JLabel jLabel28;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
@@ -4210,16 +4260,15 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel10;
   private javax.swing.JPanel jPanel11;
-  private javax.swing.JPanel jPanel12;
   private javax.swing.JPanel jPanel13;
-  private javax.swing.JPanel jPanel2;
-  private javax.swing.JPanel jPanel3;
-  private javax.swing.JPanel jPanel4;
   private javax.swing.JPanel jPanel5;
-  private javax.swing.JPanel jPanel6;
-  private javax.swing.JPanel jPanel7;
   private javax.swing.JPanel jPanel8;
-  private javax.swing.JPanel jPanel9;
+  private javax.swing.JPanel jPanelCallSign;
+  private javax.swing.JPanel jPanelContestRules;
+  private javax.swing.JPanel jPanelFunctionKeys;
+  private javax.swing.JPanel jPanelKeyer;
+  private javax.swing.JPanel jPanelOther;
+  private javax.swing.JPanel jPanelRadio;
   private javax.swing.JPanel jPanelStatusBar;
   private javax.swing.JRadioButton jRadioButtonDtrKeyer;
   private javax.swing.JRadioButton jRadioButtonRtsKeyer;
@@ -4227,9 +4276,9 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JScrollPane jScrollPane3;
-  private javax.swing.JScrollPane jScrollPane4;
   private javax.swing.JScrollPane jScrollPane5;
   private javax.swing.JScrollPane jScrollPane6;
+  private javax.swing.JTabbedPane jTabbedPane1;
   private javax.swing.JTextArea jTextArea1;
   private javax.swing.JTextField jTextField1;
   private javax.swing.JButton jbuttonCreateNewLog;
