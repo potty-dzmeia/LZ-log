@@ -24,6 +24,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.Qso;
+import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.Misc;
 
 /**
@@ -103,7 +104,7 @@ public class BandmapTableModel extends AbstractTableModel
   }
   
  
-  public void addSpot(String callsign, int freq)
+  public void addSpot(String callsign, int freq, RadioModes mode)
   {
      
     for(BandmapSpot spot : manualSpots)
@@ -121,7 +122,8 @@ public class BandmapTableModel extends AbstractTableModel
   
   
   /**
-   * Updates the content of the table.
+   * Updates content of the table.
+   * 
    * @param appSettings
    * @param startFreq
    */

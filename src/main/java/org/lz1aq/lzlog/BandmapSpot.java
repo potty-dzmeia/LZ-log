@@ -64,7 +64,7 @@ public class BandmapSpot
       return false;
     }
     BandmapSpot sp = (BandmapSpot) obj;
-    return Objects.equals(callsign, sp.callsign);     
+    return Objects.equals(callsign, sp.callsign) && ;     
   }
 
   @Override
