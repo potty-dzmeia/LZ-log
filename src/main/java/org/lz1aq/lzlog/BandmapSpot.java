@@ -20,6 +20,8 @@
 package org.lz1aq.lzlog;
 
 import java.util.Objects;
+import org.lz1aq.radio.RadioModes;
+import org.lz1aq.utils.Misc;
 
 /**
  *
@@ -30,6 +32,8 @@ public class BandmapSpot
 
   private final String callsign;
   private int freq = 3500000;
+  private RadioModes mode = RadioModes.CW;
+  private String band = "80"; // Band (e.g. 160, 80, 40 and so on...)
 
   
   public BandmapSpot(String callsign)
@@ -37,14 +41,20 @@ public class BandmapSpot
     this.callsign = callsign;
   }
   
-  public BandmapSpot(String callsign, int freq)
+  public BandmapSpot(String callsign, int freq, RadioModes mode)
   {
     this.callsign = callsign;
     this.freq = freq;
+    this.mode = mode;
+    
+    this.band = Misc.freqToBand(freq);
   }
   
 
   @Override
+  /**
+   * Spot is considered equal if the Callsign, Band and Mode are the same
+   */
   public boolean equals(Object obj)
   {
     if (obj == this) return true;
@@ -53,14 +63,14 @@ public class BandmapSpot
     {
       return false;
     }
-    BandmapSpot user = (BandmapSpot) obj;
-    return Objects.equals(callsign, user.callsign);     
+    BandmapSpot sp = (BandmapSpot) obj;
+    return Objects.equals(callsign, sp.callsign);     
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(callsign);
+    return Objects.hash(callsign, mode, band);
   }
   
   
@@ -77,5 +87,10 @@ public class BandmapSpot
   public void setFreq(int freq)
   {
     this.freq = freq;
+  }
+  
+  public RadioModes getMode()
+  {
+      return this.mode;
   }
 }

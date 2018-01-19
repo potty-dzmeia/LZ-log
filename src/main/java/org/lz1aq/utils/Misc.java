@@ -159,4 +159,35 @@ public class Misc
     }
     return stack.toString();
   }
+  
+
+      /**
+     * Converts frequency [Hz] to band [m].E.g.7100000 => "40"
+     * @param freq
+     * @return
+     */
+    public static String freqToBand(int freq)
+  {
+       if(freq>1700000 && freq<2500000)
+            return "160";
+       else if(freq> 2500000 && freq<=5000000)
+            return "80";
+       else if(freq> 5000000 && freq<=8400000)
+           return "40";
+       else if(freq> 8400000 && freq<=12000000)
+            return "30";
+       else if(freq>12000000 && freq<=15000000)
+            return "20";
+       else if(freq>15000000 && freq<=19500000)
+            return "17";
+       else if(freq>19500000 && freq<=22000000)
+           return "15";
+       else if(freq>22000000 && freq<=25000000)
+           return "12";
+       else if(freq>25000000 && freq<=30000000)
+           return "10";
+       
+       else 
+           return "160";
+  }
 }

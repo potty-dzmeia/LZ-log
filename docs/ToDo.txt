@@ -18,6 +18,7 @@ High priority:
 
 
 Low priority:
+- add F2 to settings window - and allow change of the CW speed in single message.
 - If default prefix is used it should always stay in the entry window
 - For some reason F10 is activating the Menu
 - when correcting callsign in the log the call is written with small letters
