@@ -3,6 +3,7 @@ High priority:
 - Add ability to set bandmap start freq for different modes and bands (e.g. 3.700 instead of 3.600)
 - Remember the CQ frequency mode.
 - create help in Bulgarian
+- last S&P qso per band and mode should be visible on the bandmap
 - Add all the SerialPort settings inside the Java app
 - add validation for the Log Window (now is possible to add invalid data)
 - there should be an option for entering worked frequency for people that do not use CAT
