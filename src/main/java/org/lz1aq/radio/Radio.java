@@ -228,6 +228,12 @@ public class Radio
     this.queueTransactions(radioProtocolParser.encodeGetActiveVfo());
   }
   
+  
+  public String getManufacturer() throws Exception
+  {
+    return radioProtocolParser.getManufacturer();
+  }
+  
   /**
    * Send morse code
    * 

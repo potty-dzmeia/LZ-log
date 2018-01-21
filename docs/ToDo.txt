@@ -1,5 +1,7 @@
 High priority:
 - Add option to disable exchange validation (important for contests where strings are exchanged)
+- Add ability to set bandmap start freq for different modes and bands (e.g. 3.700 instead of 3.600)
+- Remember the CQ frequency mode.
 - create help in Bulgarian
 - Add all the SerialPort settings inside the Java app
 - add validation for the Log Window (now is possible to add invalid data)

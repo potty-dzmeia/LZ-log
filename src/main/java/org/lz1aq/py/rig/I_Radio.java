@@ -30,6 +30,15 @@ package org.lz1aq.py.rig;
  */
 public interface I_Radio extends I_Rig
 {
+  
+  /**
+   * Returns the name of the Manufacturer: e.g. "Yaesu"
+   * 
+   * @return A string with the Manufacturer name
+   */
+  @Override
+  public String getManufacturer();
+  
    /**
    * The function returns a string with all the modes that it supports.
    * Example: "cw ssb lsb"

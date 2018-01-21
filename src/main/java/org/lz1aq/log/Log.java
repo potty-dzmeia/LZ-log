@@ -20,6 +20,7 @@
 package org.lz1aq.log;
 
 import java.util.ArrayList;
+import org.lz1aq.radio.RadioModes;
 
 
 /**
@@ -281,7 +282,6 @@ public class Log
   }
   
   
-  
   /**
    * Returns time left till the next possible contact
    * 
@@ -344,6 +344,7 @@ public class Log
   
   /**
    * Returns any list of the last SP contacts for each unique callsign
+   * 
    * @return 
    */
   public synchronized  ArrayList<Qso> getLastSpContacts()
@@ -352,9 +353,8 @@ public class Log
     ArrayList<String> callsigns = getUniqueCallsigns();
     Qso qso;
     
-    //ArrayList<BandmapSpot> list = new ArrayList<>(0);
     
-    for (String call : callsigns)
+    for (String call : callsigns) // ToDo: get each SP contact with a station for Band and mode
     {
       qso = getLastSpQso(call);
       if(qso != null)

@@ -106,18 +106,19 @@ public class BandmapTableModel extends AbstractTableModel
  
   public void addSpot(String callsign, int freq, RadioModes mode)
   {
-     
+    BandmapSpot newspot = new BandmapSpot(callsign, freq, mode);
+    
     for(BandmapSpot spot : manualSpots)
     {
-      // If a manual spot is available update the frequency
-      if(spot.getCallsign().equals(callsign))
+      // Exists already - update only the frequency
+      if(spot.equals(newspot))
       {
         spot.setFreq(freq);
         return;
       }   
     }
     
-    manualSpots.add(new BandmapSpot(callsign, freq));
+    manualSpots.add(newspot);
   }
   
   
@@ -134,36 +135,46 @@ public class BandmapTableModel extends AbstractTableModel
     
     lastSpQsos = log.getLastSpContacts();
     
-    // Check if an SP contact is also in the manualSpots. 
-    // If yes and frequency is within 1Khz remove the manual spot
+
     for(Qso spQso : lastSpQsos)
     {
-      if(isManuallySpotOnSameFreq(spQso))
-      {
-        manualSpots.remove(new BandmapSpot(spQso.getHisCallsign()));
-      }
+      RemoveSpotOnSameFreq(spQso); // If S&P spot and Manual spot for the same station share the same frequency - remove the Manual spot
     }
     
     this.fireTableDataChanged();
   }
+  
   
   /**
    * Checks if there is a manual spot on the same frequency (+-100KHz)
    * @param qso
    * @return 
    */
-  private boolean isManuallySpotOnSameFreq(Qso qso)
+  private boolean RemoveSpotOnSameFreq(Qso qso)
   {  
+    
+    int delta;
+    
+    if(qso.getMode() == RadioModes.CW || qso.getMode() == RadioModes.CWR)
+    {
+      delta = 200; // For CW  we will consider frequency same if within 200Hz
+    }
+    else
+    {
+      delta = 1000; // For SSB  we will consider frequency same if within 1000Hz
+    }
+    
     for(int i=0; i<manualSpots.size(); i++)
     {
-      if(manualSpots.get(i).getCallsign().equals(qso.getHisCallsign()) && // if same callsign
-         Math.abs(manualSpots.get(i).getFreq() - qso.getFrequencyInt()) < 100 ) // if same freq (+-100Hz)
+      if(manualSpots.get(i).getCallsign().equals(qso.getHisCallsign())          &&   // if same callsign
+         Math.abs(manualSpots.get(i).getFreq() - qso.getFrequencyInt()) < delta    ) // if same freq
       {
         manualSpots.remove(i);
       }
     }    
     return false;
   }
+  
   
   /**
    * Used for getting the frequency represented by the cell. Could be e frequency cell or a callsign

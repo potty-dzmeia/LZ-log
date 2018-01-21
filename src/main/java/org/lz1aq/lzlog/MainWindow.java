@@ -3655,7 +3655,7 @@ public class MainWindow extends javax.swing.JFrame
   private void pressedF11()
   {
     if(Qso.isValidCallsign(getCallsignFromTextField()))
-      jtablemodelBandmap.addSpot(getCallsignFromTextField(), getFreq());
+      jtablemodelBandmap.addSpot(getCallsignFromTextField(), getFreq(), getMode());
     initEntryFields();
   }
   
@@ -3711,8 +3711,8 @@ public class MainWindow extends javax.swing.JFrame
     {
       keyer.sendCw(msg);
     }
-    
   }
+  
   
   class LocalRadioControllerListener implements RadioController.RadioControllerListener
   {
@@ -3720,32 +3720,60 @@ public class MainWindow extends javax.swing.JFrame
     {
       switch(mode)
       {
-        case LSB:
-        case USB:
-          if(freq>1800000 && freq<2500000)
-            setBandmapStartFreq(1800000);
-          else if(freq>2500000 && freq<3900000)
-            setBandmapStartFreq(3600000);
-           else if(freq>6900000 && freq<7300000)
-            setBandmapStartFreq(7060000);
-          else if(freq>13900000 && freq<14500000)
-            setBandmapStartFreq(14100000);
-          else if(freq>20000000 && freq<22000000)
-            setBandmapStartFreq(21150000);
-          break;
-          
         case CW:
         case CWR:
-          if(freq>1800000 && freq<2500000)
+          if(Misc.freqToBand(freq).equals("160"))
+          {
             setBandmapStartFreq(1800000);
-          else if(freq>2500000 && freq<3900000)
+          }
+          else if(Misc.freqToBand(freq).equals("80"))
+          {
             setBandmapStartFreq(3500000);
-           else if(freq>6900000 && freq<7300000)
+          }
+          else if(Misc.freqToBand(freq).equals("40"))
+          {
             setBandmapStartFreq(7000000);
-          else if(freq>13900000 && freq<14500000)
+          }
+          else if(Misc.freqToBand(freq).equals("20"))
+          {
             setBandmapStartFreq(14000000);
-          else if(freq>20000000 && freq<22000000)
+          }
+          else if(Misc.freqToBand(freq).equals("15"))
+          {
             setBandmapStartFreq(21000000);
+          }
+          else if(Misc.freqToBand(freq).equals("10"))
+          {
+            setBandmapStartFreq(28000000);
+          }
+          break;
+          
+        case LSB:
+        case USB:
+          if(Misc.freqToBand(freq).equals("160"))
+          {
+            setBandmapStartFreq(1800000);
+          }
+          else if(Misc.freqToBand(freq).equals("80"))
+          {
+            setBandmapStartFreq(3600000);
+          }
+          else if(Misc.freqToBand(freq).equals("40"))
+          {
+            setBandmapStartFreq(7060000);
+          }
+          else if(Misc.freqToBand(freq).equals("20"))
+          {
+            setBandmapStartFreq(14100000);
+          }
+          else if(Misc.freqToBand(freq).equals("15"))
+          {
+            setBandmapStartFreq(21150000);
+          }
+          else if(Misc.freqToBand(freq).equals("10"))
+          {
+            setBandmapStartFreq(28400000);
+          }
           break;
       }
     }

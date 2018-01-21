@@ -493,6 +493,21 @@ public class RadioController
       {
         listener.vfo();
       }
+      
+      try
+      {
+        // Work around for Yaesu
+        // Yaesu radios first are reporting Mode change and then VFO change.
+        // Thus, we need to get the Mode for the new VFO
+        if(radio.getManufacturer().equalsIgnoreCase("Yaesu"))
+        {
+          radio.getMode(activeVfo);
+        }
+      }
+      catch(Exception ex)
+      {
+        Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }
   }
   
