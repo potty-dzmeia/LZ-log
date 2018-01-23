@@ -1,6 +1,7 @@
 import json
 from org.lz1aq.py.rig import I_SerialSettings
 
+
 class SerialSettings(I_SerialSettings):
 
     PARITY_NONE, PARITY_EVEN, PARITY_ODD, PARITY_MARK, PARITY_SPACE = 'None', 'Even', 'Odd', 'Mark', 'Space'
@@ -11,7 +12,7 @@ class SerialSettings(I_SerialSettings):
     DTR_STATE_NONE, DTR_STATE_ON, DTR_STATE_OFF = 'None', 'On', 'Off'
 
     B_300, B_1200, B_2400, B_4800, B_9600, B_14400, B_19200, B_28800, B_38400, B_57600, B_115200, B_230400 = \
-    300, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400
+    300,   1200,   2400,   4800,   9600,   14400,   19200,   28800,   38400,   57600,   115200,   230400
 
 
     def __init__(self):
@@ -49,11 +50,19 @@ class SerialSettings(I_SerialSettings):
         jsonBlock = dict()
         jsonBlock["baudrate"] = "Check you app settings"
         jsonBlock["data_bits"] = self.data_bits_
-        jsonBlock["stop_bits"] = self.stop_bits_
         jsonBlock["parity"] = self.parity
         jsonBlock["handshake"] = self.handshake
         jsonBlock["rts"] = self.rts_
         jsonBlock["dtr"] = self.dtr_
+
+        if self.stop_bits_ == self.STOPBITS_ONE:
+            st_bits = 1
+        elif self.stop_bits_ == self.STOPBITS_ONE_POINT_FIVE:
+            st_bits = 1.5
+        else:
+            st_bits = 2
+        jsonBlock["stop_bits"] = st_bits
+
         return json.dumps(jsonBlock, indent=4)
 
     def getBauderateMin(self):
