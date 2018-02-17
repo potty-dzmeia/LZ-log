@@ -242,7 +242,7 @@ public class WinKeyer implements Keyer
     }
     catch(InterruptedException ex)
     {
-      logger.getLogger(WinKeyer.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
 }

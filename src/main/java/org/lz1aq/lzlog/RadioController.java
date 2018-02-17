@@ -103,7 +103,7 @@ public class RadioController
   }
   
   
-  public boolean connect(String commport, int baudRate, RadioControllerListener listener)
+  public boolean connect(String commport, int baudRate, RadioControllerListener listener, boolean dtr, boolean rts)
   {
     if(radioParser == null)
       return false;
@@ -112,7 +112,7 @@ public class RadioController
     try
     {
       //Create the radio object using the selected Com port
-      radio = new Radio(radioParser, commport, baudRate);
+      radio = new Radio(radioParser, commport, baudRate, dtr, rts);
       radio.addEventListener(new RadioController.LocalRadioListener());
       radio.connect(); // Let's not forget to call connect(). Calling disconnects() later will close the Com Port
       eventListeners.add(listener);

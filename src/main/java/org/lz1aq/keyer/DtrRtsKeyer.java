@@ -34,6 +34,7 @@ package org.lz1aq.keyer;
 
 
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -320,9 +321,10 @@ public class DtrRtsKeyer implements Keyer
         {
           try
           {
-            transmitText(queueWithTexts.take()); // Send it over the serial
+            //transmitText(queueWithTexts.take()); // Send it over the serial
+            transmitText(queueWithTexts.remove());
           }
-          catch(InterruptedException ex)
+          catch(InterruptedException | NoSuchElementException ex)
           {
             logger.info("CW transmit interrupted.");
             try

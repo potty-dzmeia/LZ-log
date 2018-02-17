@@ -19,8 +19,6 @@
 // ***************************************************************************
 package org.lz1aq.keyer;
 
-import jssc.SerialPort;
-
 /**
  *
  * @author potty

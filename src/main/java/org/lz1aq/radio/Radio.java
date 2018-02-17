@@ -56,6 +56,8 @@ public class Radio
   private final CopyOnWriteArrayList<RadioListener>  eventListeners;    
   private final String              serialPortName;       
   private final int                 baudRate;             
+  private final boolean             dtr;
+  private final boolean             rts;
   private       SerialPort          serialPort;           // Used for writing to serialPort
   private final I_Radio             radioProtocolParser;  // Used for decoding/encoding msg from/to the radio (jython object)
   private final Thread              threadPortWriter;     // Thread that writes transaction to the serial port
@@ -82,15 +84,18 @@ public class Radio
    * @param portName -  name of the serial port that will be used for communicating with the radio
    * @param baudRate -  baud rate to be used for the serial port
    */
-  public Radio(I_Radio protocolParser, String portName, int baudRate)
+  public Radio(I_Radio protocolParser, String portName, int baudRate, boolean dtr, boolean rts)
   {
     radioProtocolParser   = protocolParser;           // Store the reference to the jython object
     serialPortName        = portName;
     this.baudRate         = baudRate;
+    this.dtr              = dtr;
+    this.rts              = rts;
     queueWithTransactions = new LinkedBlockingQueue<>(); 
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
     receiveBuffer         = new DynamicByteArray(200);  // Set the initial size to some reasonable value
     eventListeners        = new CopyOnWriteArrayList<>();
+    
   }
   
   
@@ -120,6 +125,7 @@ public class Radio
     serialPort = new SerialPort(serialPortName);
     serialPort.openPort();
     setComPortParams(serialPort, radioProtocolParser.getSerialPortSettings());
+    
     
     // Register a local listener - this class is interested in the confirmation events
     eventListeners.add(new LocalRadioListener());
@@ -178,7 +184,7 @@ public class Radio
    */
   public void setFrequency(long freq, RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeSetFreq(freq, vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeSetFreq(freq, vfo.getValue()));
   }
   
   
@@ -193,7 +199,7 @@ public class Radio
    */
   public void getFrequency(RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeGetFreq(vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeGetFreq(vfo.getValue()));
   }
   
     
@@ -205,7 +211,7 @@ public class Radio
    */
   public void setMode(RadioModes mode, RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeSetMode(mode.toString(), vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeSetMode(mode.toString(), vfo.getValue()));
   }
   
     
@@ -219,7 +225,7 @@ public class Radio
    */
   public void getMode(RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeGetMode(vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeGetMode(vfo.getValue()));
   }
   
   
@@ -607,29 +613,21 @@ public class Radio
                    stopbits,
                    parity);
     
-    switch (settings.getDtr().toLowerCase())
+    
+    port.setDTR(this.dtr);
+    port.setRTS(this.rts);
+    
+    
+    switch (settings.getHandshake().toLowerCase())
     {
       case "none":
+        port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
         break;
-      case "on":
-        port.setDTR(true);
-        break;
-      case "off":
-        port.setDTR(false);
+      default:
+        logger.log(Level.SEVERE, "No flow controll is supported for the serial communication!");
         break;
     }
-
-    switch (settings.getRts().toLowerCase())
-    {
-      case "none":
-        break;
-      case "on":
-        port.setRTS(true);
-        break;
-      case "off":
-        port.setRTS(false);
-        break;
-    }
+    
   }
   
 }

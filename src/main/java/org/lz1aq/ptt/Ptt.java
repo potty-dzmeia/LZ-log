@@ -17,38 +17,19 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.radio;
+package org.lz1aq.ptt;
 
-import javax.swing.DefaultComboBoxModel;
+import jssc.SerialPort;
+import org.lz1aq.radio.Radio;
 
-public enum RadioModes
+/**
+ *
+ * @author potty
+ */
+public interface Ptt
 {
-  AM,       // AM -- Amplitude Modulation 
-  CW,       // CW - CW "normal" sideband
-  USB,      // USB - Upper Side Band
-  LSB,      // LSB - Lower Side Band 
-  RTTY,     // RTTY - Radio Teletype 
-  FM,       // FM - "narrow" band FM 
-  WFM,      // WFM - broadcast wide FM 
-  CWR,      // CWR - CW "reverse" sideband
-  RTTYR,    // RTTYR - RTTY "reverse" sideband
-  AMS,      // AMS - Amplitude Modulation Synchronous 
-  PKTLSB,   // PKTLSB - Packet/Digital LSB mode (dedicated port) 
-  PKTUSB,   // PKTUSB - Packet/Digital USB mode (dedicated port) 
-  PKTFM,    // PKTFM - Packet/Digital FM mode (dedicated port) 
-  ECSSUSB,  // ECSSUSB - Exalted Carrier Single Sideband USB 
-  ECSSLSB,  // ECSSLSB - Exalted Carrier Single Sideband LSB 
-  FAX,      // FAX - Facsimile Mode
-  SAM,      // SAM - Synchronous AM double sideband
-  SAL,      // SAL - Synchronous AM lower sideband
-  SAH,      // SAH - Synchronous AM upper (higher) sideband
-  DSB;      // DSB - Double sideband suppressed carrier
-  
-  static public DefaultComboBoxModel getComboxModel()
-  {
-    return new DefaultComboBoxModel(new String[]
-    {
-      CW.toString(), LSB.toString(), USB.toString(), RTTY.toString()
-    });
-  }
+  public boolean connect();
+  public void disconnect();
+  public void on();
+  public void off();
 }

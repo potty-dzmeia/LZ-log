@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.lz1aq.ptt.PttTypes;
 
 /**
  *
@@ -38,11 +39,19 @@ public final class ApplicationSettings
 
   static final String SETTINGS_FILE_NAME = "settings.properties";
 
-  static final String PROPERTY_RADIO_COMPORT = "radio_com_port";
-  static final String PROPERTY_RADIO_COMPORT_BAUDRATE = "radio_com_port_baudrate";
-  static final String PROPERTY_KEYER_COMPORT = "keyer_com_port";
-  //static final String PROPERTY_KEYER_COMPORT_BAUDRATE = "keyer_com_port_baudrate";
+  static final String PROPERTY_RADIO_COMPORT = "radio_comport";
+  static final String PROPERTY_RADIO_COMPORT_BAUDRATE = "radio_comport_baudrate";
+  static final String PROPERTY_RADIO_COMPORT_DTR = "radio_comport_dtr";
+  static final String PROPERTY_RADIO_COMPORT_RTS = "radio_comport_rts";
+  
   static final String PROPERTY_KEYER_TYPE = "keyer_type";
+  static final String PROPERTY_KEYER_COMPORT = "keyer_com_port";
+  
+  static final String PROPERTY_PTT_TYPE = "ptt_type";
+  static final String PROPERTY_PTT_COMPORT = "ptt_com_port";
+  static final String PROPERTY_PTT_DELAY = "ptt_delay";
+  
+  //static final String PROPERTY_KEYER_COMPORT_BAUDRATE = "keyer_com_port_baudrate";  
   static final String PROPERTY_MY_CALL_SIGN = "my_callsign";
   static final String PROPERTY_QUICK_CALLSIGN_MODE = "quick_callsign_mode";
   static final String PROPERTY_DEFAULT_PREFIX = "default_prefix";
@@ -93,11 +102,19 @@ public final class ApplicationSettings
   }
   
 
-  private String radioComPort;
-  private int    radioComPortBaudRate;
-  private String keyerComPort;
-  //private int    keyerComPortBaudRate;
+  private String  radioComportName;
+  private int     radioComportBaudrate;
+  private boolean radioComportDtr;
+  private boolean radioComportRts;
+    
   private KeyerTypes keyerType;
+  private String     keyerComportName;
+  //private int    keyerComPortBaudRate;
+
+  private PttTypes  pttType;
+  private String    pttComportName;
+  private int       pttDelayInMilliseconds;
+  
   private String myCallsign;
   private boolean isQuickCallsignModeEnabled;
   private boolean emsEnabled;
@@ -133,6 +150,57 @@ public final class ApplicationSettings
     this.LoadSettingsFromDisk();
   }
 
+  
+  public void setPttType(PttTypes pttType)
+  {
+    this.pttType = pttType;
+  }
+
+  public void setPttComportName(String pttComportName)
+  {
+    this.pttComportName = pttComportName;
+  }
+
+  public void setPttDelayInMilliseconds(int pttDelayInMs)
+  {
+    this.pttDelayInMilliseconds = pttDelayInMs;
+  }
+
+  public PttTypes getPttType()
+  {
+    return pttType;
+  }
+
+  public String getPttComportName()
+  {
+    return pttComportName;
+  }
+
+  public int getPttDelayInMilliseconds()
+  {
+    return pttDelayInMilliseconds;
+  }
+
+  public void setRadioComportDtr(boolean radioComportDtr)
+  {
+    this.radioComportDtr = radioComportDtr;
+  }
+
+  public void setRadioComportRts(boolean radioComportRts)
+  {
+    this.radioComportRts = radioComportRts;
+  }
+  
+  public boolean isRadioComportDtr()
+  {
+    return radioComportDtr;
+  }
+
+  public boolean isRadioComportRts()
+  {
+    return radioComportRts;
+  }
+  
   public Font getFonts(FontIndex index)
   {
     return fonts[index.toInt()];
@@ -206,24 +274,24 @@ public final class ApplicationSettings
   
   
   
-  public String getRadioComPort()
+  public String getRadioComportName()
   {
-    return radioComPort;
+    return radioComportName;
   }
 
-  public void setRadioComPort(String comPort)
+  public void setRadioComportName(String comportName)
   {
-    this.radioComPort = comPort;
+    this.radioComportName = comportName;
   }
   
-  public String getKeyerComPort()
+  public String getKeyerComportName()
   {
-    return keyerComPort;
+    return keyerComportName;
   }
 
-  public void setKeyerComPort(String comPort)
+  public void setKeyerComportName(String comPort)
   {
-    this.keyerComPort = comPort;
+    this.keyerComportName = comPort;
   }
   
   public KeyerTypes getKeyerType()
@@ -238,7 +306,7 @@ public final class ApplicationSettings
 
   public int getRadioComPortBaudRate()
   {
-    return radioComPortBaudRate;
+    return radioComportBaudrate;
   }
 
 //  public int getKeyerComPortBaudRate()
@@ -253,7 +321,7 @@ public final class ApplicationSettings
 
   public void setRadioComPortBaudRate(int radioComPortBaudRate)
   {
-    this.radioComPortBaudRate = radioComPortBaudRate;
+    this.radioComportBaudrate = radioComPortBaudRate;
   }
   
   public String getMyCallsign()
@@ -497,11 +565,17 @@ public final class ApplicationSettings
    */
   public void SaveSettingsToDisk()
   {
-    prop.setProperty(PROPERTY_RADIO_COMPORT, radioComPort);
-    prop.setProperty(PROPERTY_KEYER_COMPORT, keyerComPort);
-    prop.setProperty(PROPERTY_RADIO_COMPORT_BAUDRATE, Integer.toString(radioComPortBaudRate));
+    prop.setProperty(PROPERTY_RADIO_COMPORT, radioComportName);
+    prop.setProperty(PROPERTY_KEYER_COMPORT, keyerComportName);
+    prop.setProperty(PROPERTY_RADIO_COMPORT_DTR, Boolean.toString(radioComportDtr));
+    prop.setProperty(PROPERTY_RADIO_COMPORT_RTS, Boolean.toString(radioComportRts));
+    prop.setProperty(PROPERTY_RADIO_COMPORT_BAUDRATE, Integer.toString(radioComportBaudrate));
     //prop.setProperty(PROPERTY_KEYER_COMPORT_BAUDRATE, Integer.toString(keyerComPortBaudRate));
-    prop.setProperty(PROPERTY_KEYER_TYPE, Integer.toString(keyerType.toInt()));
+    prop.setProperty(PROPERTY_KEYER_TYPE, Integer.toString(keyerType.getValue()));
+    prop.setProperty(PROPERTY_PTT_TYPE, Integer.toString(pttType.getValue()));
+    prop.setProperty(PROPERTY_PTT_COMPORT, pttComportName);
+    prop.setProperty(PROPERTY_PTT_DELAY, Integer.toString(pttDelayInMilliseconds));
+    
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
     prop.setProperty(PROPERTY_QUICK_CALLSIGN_MODE, Boolean.toString(isQuickCallsignModeEnabled));
     prop.setProperty(PROPERTY_AUTO_CQ_FREQ_JUMP, Boolean.toString(autoCqJumpEnabled));
@@ -559,8 +633,8 @@ public final class ApplicationSettings
         SetSettingToDefault(PROPERTY_FONTS);
       
       // Radio Comport
-      radioComPort = prop.getProperty(PROPERTY_RADIO_COMPORT);
-      if (radioComPort == null)
+      radioComportName = prop.getProperty(PROPERTY_RADIO_COMPORT);
+      if (radioComportName == null)
         SetSettingToDefault(PROPERTY_RADIO_COMPORT);
       
       // Radio Comport baud rate
@@ -568,12 +642,29 @@ public final class ApplicationSettings
       if (temp == null)
         SetSettingToDefault(PROPERTY_RADIO_COMPORT_BAUDRATE);
       else
-        radioComPortBaudRate = Integer.parseInt(temp);
+        radioComportBaudrate = Integer.parseInt(temp);
+      
+      temp = prop.getProperty(PROPERTY_RADIO_COMPORT_DTR);
+      if (temp == null)
+        SetSettingToDefault(PROPERTY_RADIO_COMPORT_DTR);
+      else
+        radioComportDtr = Boolean.parseBoolean(temp);
+      
+      temp = prop.getProperty(PROPERTY_RADIO_COMPORT_RTS);
+      if (temp == null)
+        SetSettingToDefault(PROPERTY_RADIO_COMPORT_RTS);
+      else
+        radioComportRts = Boolean.parseBoolean(temp);
+      
       
       // Keyer Comport
-      keyerComPort = prop.getProperty(PROPERTY_KEYER_COMPORT);
-      if (keyerComPort == null)
+      keyerComportName = prop.getProperty(PROPERTY_KEYER_COMPORT);
+      if (keyerComportName == null)
         SetSettingToDefault(PROPERTY_KEYER_COMPORT);
+      
+      pttComportName = prop.getProperty(PROPERTY_PTT_COMPORT);
+      if (pttComportName == null)
+        SetSettingToDefault(PROPERTY_PTT_COMPORT);
       
       // Keyer Comport baud rate
 //      temp = prop.getProperty(PROPERTY_KEYER_COMPORT_BAUDRATE);
@@ -588,6 +679,19 @@ public final class ApplicationSettings
         SetSettingToDefault(PROPERTY_KEYER_TYPE);
       else
         keyerType = KeyerTypes.values()[Integer.parseInt(temp)];  
+      
+      temp = prop.getProperty(PROPERTY_PTT_TYPE);
+      if (temp == null)
+        SetSettingToDefault(PROPERTY_PTT_TYPE);
+      else
+        pttType = PttTypes.values()[Integer.parseInt(temp)];  
+      
+      temp = prop.getProperty(PROPERTY_PTT_DELAY);
+      if(temp == null)
+        SetSettingToDefault(PROPERTY_PTT_DELAY);
+      else
+        pttDelayInMilliseconds = Integer.parseInt(temp);
+      
       
       // My callsign
       myCallsign = prop.getProperty(PROPERTY_MY_CALL_SIGN);
@@ -702,16 +806,17 @@ public final class ApplicationSettings
   
   private void SetAllSettingsToDefault()
   {
-    radioComPort = "";
+    radioComportName = "";
+    radioComportBaudrate = 19200;
+    radioComportDtr = true;
+    radioComportRts = true;
 
-    keyerComPort = "";
-
-    radioComPortBaudRate = 19200;
-
-//    keyerComPortBaudRate = 1200;
-
+    keyerComportName = "";
     keyerType = KeyerTypes.DTR;
-
+    pttType = PttTypes.NONE;
+    pttComportName = "";
+    pttDelayInMilliseconds = 30;
+    
     myCallsign = "LZ1ABC";
 
     isQuickCallsignModeEnabled = false;
@@ -776,52 +881,68 @@ public final class ApplicationSettings
    */
   private void SetSettingToDefault(String propertyname)
   {
-    switch (propertyname)
+    switch(propertyname)
     {
       case PROPERTY_RADIO_COMPORT:
-        radioComPort = "";
+        radioComportName = "";
         break;
-        
+
+      case PROPERTY_RADIO_COMPORT_DTR:
+        radioComportDtr = true;
+        break;
+
+      case PROPERTY_RADIO_COMPORT_RTS:
+        radioComportRts = true;
+        break;
+
       case PROPERTY_KEYER_COMPORT:
-        keyerComPort = "";
+        keyerComportName = "";
         break;
-      
+
       case PROPERTY_RADIO_COMPORT_BAUDRATE:
-        radioComPortBaudRate = 19200;
+        radioComportBaudrate = 38400;
         break;
-        
-//      case PROPERTY_KEYER_COMPORT_BAUDRATE:
-//        keyerComPortBaudRate = 1200;
-//        break;
-      
+
       case PROPERTY_KEYER_TYPE:
         keyerType = KeyerTypes.DTR;
         break;
-        
+
+      case PROPERTY_PTT_TYPE:
+        pttType = PttTypes.NONE;
+        break;
+
+      case PROPERTY_PTT_COMPORT:
+        pttComportName = "";
+        break;
+
+      case PROPERTY_PTT_DELAY:
+        pttDelayInMilliseconds = 30;
+        break;
+
       case PROPERTY_MY_CALL_SIGN:
         myCallsign = "LZ1ABC";
         break;
-        
+
       case PROPERTY_QUICK_CALLSIGN_MODE:
         isQuickCallsignModeEnabled = false;
         break;
-        
+
       case PROPERTY_DEFAULT_PREFIX:
         defaultPrefix = "LZ";
         break;
-        
+
       case PROPERTY_QSO_REPEAT_PERIOD_SEC:
         qsoRepeatPeriodInSeconds = 1800;
         break;
-        
+
       case PROPERTY_INCOMING_QSO_MAX_ENTRIES:
         incomingQsoMaxEntries = 20;  // Number of entries visible on the Incoming Qso panel
         break;
-        
+
       case PROPERTY_INCOMING_QSO_HIDE_AFTER:
         incomingQsoHiderAfter = -14400; // If overtime is 4 hours don't show the entry
         break;
-        
+
       case PROPERTY_FUNCTION_KEYS:
         // Set texts for the direction buttons
         functionKeyTexts[0] = "test {mycall}";       // F1
@@ -837,66 +958,78 @@ public final class ApplicationSettings
         functionKeyTexts[10] = "not defined by user";
         functionKeyTexts[11] = "not defined by user";
         break;
-        
-      case PROPERTY_FRAMES_DIMENSIONS:  
+
+      case PROPERTY_FRAMES_DIMENSIONS:
         // Default positions for the different frames               x  y  width height
         framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(48, 1, 1374, 744);
         framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(9, 6, 383, 244);
-        framesDimensions[FrameIndex.LOG.toInt()]  = new Rectangle(430, 473, 943, 164);
+        framesDimensions[FrameIndex.LOG.toInt()] = new Rectangle(430, 473, 943, 164);
         framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(9, 254, 384, 375);
-        framesDimensions[FrameIndex.BANDMAP.toInt()]  = new Rectangle(440, 4, 932, 471);
+        framesDimensions[FrameIndex.BANDMAP.toInt()] = new Rectangle(440, 4, 932, 471);
         framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(236, 318, 394, 223);
         framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(306, 32, 265, 277);
         break;
-        
+
       case PROPERTY_BANDMAP_STEP:
         bandmapStepInHz = 200;
         break;
-        
+
       case PROPERTY_BANDMAP_COLUMN_COUNT:
         bandmapColumnCount = 18;
         break;
-        
+
       case PROPERTY_BANDMAP_ROW_COUNT:
         bandmapRowCount = 24;
         break;
-        
+
       case PROPERTY_FONTS:
         // Fonts
-        if(fonts[FontIndex.BANDMAP.toInt()]==null)
+        if(fonts[FontIndex.BANDMAP.toInt()] == null)
+        {
           fonts[FontIndex.BANDMAP.toInt()] = new Font("Dialog", Font.PLAIN, 12);
-        if(fonts[FontIndex.CALLSIGN.toInt()]==null)
+        }
+        if(fonts[FontIndex.CALLSIGN.toInt()] == null)
+        {
           fonts[FontIndex.CALLSIGN.toInt()] = new Font("Dialog", Font.PLAIN, 24);
-        if(fonts[FontIndex.INCOMING_QSO.toInt()]==null)
+        }
+        if(fonts[FontIndex.INCOMING_QSO.toInt()] == null)
+        {
           fonts[FontIndex.INCOMING_QSO.toInt()] = new Font("Dialog", 1, 18);
-        if(fonts[FontIndex.LOG.toInt()]==null)
+        }
+        if(fonts[FontIndex.LOG.toInt()] == null)
+        {
           fonts[FontIndex.LOG.toInt()] = new Font("Dialog", Font.PLAIN, 12);
-        if(fonts[FontIndex.RCV.toInt()]==null)
+        }
+        if(fonts[FontIndex.RCV.toInt()] == null)
+        {
           fonts[FontIndex.RCV.toInt()] = new Font("Dialog", Font.PLAIN, 24);
-        if(fonts[FontIndex.SNT.toInt()]==null)
+        }
+        if(fonts[FontIndex.SNT.toInt()] == null)
+        {
           fonts[FontIndex.SNT.toInt()] = new Font("Dialog", Font.PLAIN, 24);
+        }
         break;
-        
+
       case PROPERTY_ESM:
         emsEnabled = false;
         break;
-        
+
       case PROPERTY_SEND_ZERO_AS_T:
-        sendZeroAsT_Enabled = false; 
+        sendZeroAsT_Enabled = false;
         break;
-        
+
       case PROPERTY_AUTO_CQ_FREQ_JUMP:
         autoCqJumpEnabled = false;
         break;
-        
+
       case PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS:
         isShowBandmapFreqColumnsEnabled = true;
         break;
-      
+
       case PROPERTY_BANDMAP_AUTO_FREQ:
         isBandmapAutoFreq = true;
         break;
-        
+
       default:
         Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, "Property has no default settings");
         break;
