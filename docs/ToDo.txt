@@ -1,6 +1,7 @@
 High priority:
 - Add option to disable exchange validation (important for contests where strings are exchanged)
 - add another comport from which rts/cts will be controlled before starting to send morse codes
+- "radio controlled" PTT
 - Add ability to set bandmap start freq for different modes and bands (e.g. 3.700 instead of 3.600)
 - Remember the CQ frequency mode.
 - create help in Bulgarian

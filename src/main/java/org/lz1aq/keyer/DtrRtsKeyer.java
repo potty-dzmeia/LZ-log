@@ -201,7 +201,7 @@ public class DtrRtsKeyer implements Keyer
       }
       serialPort = null;
     }
-    // Com port is shared - do close com port
+    // Com port is shared - do NOT close com port
     else
     {
       threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse

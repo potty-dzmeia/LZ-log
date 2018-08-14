@@ -19,9 +19,6 @@
 // ***************************************************************************
 package org.lz1aq.ptt;
 
-import jssc.SerialPort;
-import org.lz1aq.radio.Radio;
-
 /**
  *
  * @author potty
@@ -30,6 +27,5 @@ public interface Ptt
 {
   public boolean connect();
   public void disconnect();
-  public void on();
-  public void off();
+  public void set(boolean pttState);
 }

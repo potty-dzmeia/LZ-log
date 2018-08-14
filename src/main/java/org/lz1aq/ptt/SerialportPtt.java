@@ -47,15 +47,9 @@ public class SerialportPtt implements Ptt
   }
 
   @Override
-  public void on()
+  public void set(boolean pttState)
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
-
-  @Override
-  public void off()
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-  
+    
 }
