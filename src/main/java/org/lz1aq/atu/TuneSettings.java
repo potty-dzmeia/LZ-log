@@ -19,34 +19,37 @@
 // ***************************************************************************
 package org.lz1aq.atu;
 
-import org.lz1aq.atu.TuneValue;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 
 /**
  *
  * @author levkov_cha_ext
  */
-public class Tunes
+public class TuneSettings
 {
   TuneValue[][][][] tuneValues;
-//  int bandCount;
-//  int antCount;
-//  int modeCount;
-//  int tuneCount;
+
   
-  public Tunes(int bandCount, int antCount, int modeCount, int tuneValueCount)
-  {  
-//    this.bandCount = bandCount;
-//    this.antCount = antCount;
-//    this.modeCount = modeCount;
-//    this.tuneCount = tuneValueCount;
-    
+  public TuneSettings(int bandCount, int antCount, int modeCount, int tuneValueCount)
+  { 
+    if(loadFromFile())
+    {
+      return;
+    }
+
+    // Init to default tune values
     tuneValues = new TuneValue[bandCount][antCount][modeCount][tuneValueCount];
-    for(int band=0; band<bandCount; band++)
-      for(int ant=0; ant<antCount; ant++)
-        for(int mode=0; mode<modeCount; mode++)
-          for(int tune=0; tune<tuneValueCount; tune++)
+    for (int band = 0; band < bandCount; band++)
+      for (int ant = 0; ant < antCount; ant++)
+        for (int mode = 0; mode < modeCount; mode++)
+          for (int tune = 0; tune < tuneValueCount; tune++)
             tuneValues[band][ant][mode][tune] = new TuneValue();
+      
   }
   
   TuneValue get(int band, int ant, int mode, int tune)
@@ -60,12 +63,44 @@ public class Tunes
     tuneValues[band][ant][mode][tune] = tuneValue;
   }
   
-  void saveToFile(String filePath)
+  void save()
   {
+    try
+    {
+      FileOutputStream fileOut = new FileOutputStream("tuneSettins.ser");
+      ObjectOutputStream out = new ObjectOutputStream(fileOut);
+      out.writeObject(tuneValues);
+      out.close();
+      fileOut.close();
+    }
+    catch (IOException i)
+    {
+      i.printStackTrace();
+    }
+
   }
   
-  void loadFromFile(String filePath)
+  private Boolean loadFromFile()
   {
+    try
+    {
+      FileInputStream fileIn = new FileInputStream("tuneSettins.ser");
+      ObjectInputStream in = new ObjectInputStream(fileIn);
+      tuneValues = (TuneValue[][][][]) in.readObject();
+      in.close();
+      fileIn.close();
+    }
+    catch (IOException i)
+    {
+      i.printStackTrace();
+      return false;
+    }
+    catch (ClassNotFoundException c)
+    {
+      c.printStackTrace();
+      return false;
+    }
+    
+    return true;
   }
-  
 }

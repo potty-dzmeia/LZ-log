@@ -19,15 +19,16 @@
 // ***************************************************************************
 package org.lz1aq.atu;
 
-/**
- *
- * @author levkov_cha_ext
- */
-public class TuneValue
+import java.io.Serializable;
+
+
+public class TuneValue implements Serializable
 {
-  int c1;
-  int c2;
-  int l;
+  private static final long serialVersionUID = 1L;
+  
+  private int c1;
+  private int c2;
+  private int l;
 
   public TuneValue()
   {
