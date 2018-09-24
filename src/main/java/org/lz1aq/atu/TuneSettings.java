@@ -67,7 +67,7 @@ public class TuneSettings
   {
     try
     {
-      FileOutputStream fileOut = new FileOutputStream("tuneSettins.ser");
+      FileOutputStream fileOut = new FileOutputStream("tuneSettings.ser");
       ObjectOutputStream out = new ObjectOutputStream(fileOut);
       out.writeObject(tuneValues);
       out.close();
@@ -84,7 +84,7 @@ public class TuneSettings
   {
     try
     {
-      FileInputStream fileIn = new FileInputStream("tuneSettins.ser");
+      FileInputStream fileIn = new FileInputStream("tuneSettings.ser");
       ObjectInputStream in = new ObjectInputStream(fileIn);
       tuneValues = (TuneValue[][][][]) in.readObject();
       in.close();

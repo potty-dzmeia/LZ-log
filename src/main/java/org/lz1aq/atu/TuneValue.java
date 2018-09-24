@@ -36,6 +36,14 @@ public class TuneValue implements Serializable
     this.c2 = 0;
     this.l = 0;
   }
+  
+  public void set(int c1, int c2, int l)
+  {
+    this.c1 = c1;
+    this.c2 = c2;
+    this.l = l;
+  }
+  
   public int getC1()
   {
     return c1;

@@ -31,20 +31,25 @@ public final class AtuApplicationSettings
 {
 
   static final String SETTINGS_FILE_NAME = "AtuSettings.properties";
-  static final String PROPERTY_COMPORT_RADIO = "comPortRadio";
-  static final String PROPERTY_BAUDE_RATE_RADIO = "baudRateRadio";
-  static final String PROPERTY_COMPORT_ATU = "comPortAtu";
-  static final String PROPERTY_BAUDE_RATE_ATU = "baudRateAtu";
-  static final String PROPERTY_LABEL_ANT = "labelAnt";
-  static final String PROPERTY_MAIN_WINDOW_X = "x";
-  static final String PROPERTY_MAIN_WINDOW_Y = "y";
-  static final String PROPERTY_MAIN_WINDOW_WIDTH = "w";
-  static final String PROPERTY_MAIN_WINDOW_HEIGHT = "h";
+  static final String PROPERTY_COMPORT_RADIO = "ComPortRadio";
+  static final String PROPERTY_BAUDE_RATE_RADIO = "BaudRateRadio";
+  static final String PROPERTY_COMPORT_ATU = "ComPortAtu";
+  static final String PROPERTY_BAUDE_RATE_ATU = "BaudRateAtu";
+  static final String PROPERTY_LABEL_ANT = "LabelAnt";
+  static final String PROPERTY_MAIN_WINDOW_X = "MainWindow_x";
+  static final String PROPERTY_MAIN_WINDOW_Y = "MainWindow_y";
+  static final String PROPERTY_MAIN_WINDOW_WIDTH = "MainWindow_w";
+  static final String PROPERTY_MAIN_WINDOW_HEIGHT = "MainWindow_h"; 
+  static final String PROPERTY_TUNEBOX_WINDOW_X = "TuneboxWindow_x";
+  static final String PROPERTY_TUNEBOX_WINDOW_Y = "TuneboxWindow_y";
+  static final String PROPERTY_TUNEBOX_WINDOW_WIDTH = "TuneboxWindow_w";
+  static final String PROPERTY_TUNEBOX_WINDOW_HEIGHT = "TuneboxWindow_h";
 
   static final int NUMBER_OF_BAND_BUTTONS = 9;
   static final int NUMBER_OF_ANT_BUTTONS = 6;
   static final int NUMBER_OF_MODE_BUTTONS = 2;
   static final int NUMBER_OF_TUNE_VALUES = 10;
+  static final int NUMBER_OF_SLIDER_BUTTONS = 3;
   
   static final int SLIDER_C1_MAX = 100;
   static final int SLIDER_C2_MAX = 100;
@@ -55,7 +60,8 @@ public final class AtuApplicationSettings
   private String comPortAtu;
   private String baudRateAtu;
   private String[] antennaLabels;
-  private Rectangle jFrameDimensions;
+  private Rectangle mainWindowDimensions;
+  private Rectangle tuneBoxDimensions;
   private final Properties prop;
 
   // Values below are not saved in the file
@@ -120,20 +126,32 @@ public final class AtuApplicationSettings
   public AtuApplicationSettings()
   {
     this.prop = new Properties();
-    jFrameDimensions = new Rectangle();
+    mainWindowDimensions = new Rectangle();
+    tuneBoxDimensions = new Rectangle();
     antennaLabels = new String[NUMBER_OF_ANT_BUTTONS];
    
     this.LoadSettingsFromDisk();
   }
   
-  public Rectangle getJFrameDimensions()
+   public Rectangle getTuneBoxDimensions()
   {
-    return jFrameDimensions;
+    return tuneBoxDimensions;
   }
 
-  public void setJFrameDimensions(Rectangle jFrameDimensions)
+  public void setTuneBoxDimensions(Rectangle tuneBoxDimensions)
   {
-    this.jFrameDimensions = jFrameDimensions;
+    this.tuneBoxDimensions = tuneBoxDimensions;
+    System.out.println("TuneBox:"+tuneBoxDimensions.toString());
+  }
+  
+  public Rectangle getMainWindowDimensions()
+  {
+    return mainWindowDimensions;
+  }
+
+  public void setMainWindowDimensions(Rectangle jFrameDimensions)
+  {
+    this.mainWindowDimensions = jFrameDimensions;
   }
 
   public String getComPortRadio()
@@ -221,11 +239,16 @@ public final class AtuApplicationSettings
     prop.setProperty(PROPERTY_COMPORT_ATU, comPortAtu);
     prop.setProperty(PROPERTY_BAUDE_RATE_ATU, baudRateAtu);
 
-    // Now save the JFrame dimensions:
-    prop.setProperty(PROPERTY_MAIN_WINDOW_X, Integer.toString(jFrameDimensions.x));
-    prop.setProperty(PROPERTY_MAIN_WINDOW_Y, Integer.toString(jFrameDimensions.y));
-    prop.setProperty(PROPERTY_MAIN_WINDOW_WIDTH, Integer.toString(jFrameDimensions.width));
-    prop.setProperty(PROPERTY_MAIN_WINDOW_HEIGHT, Integer.toString(jFrameDimensions.height));
+    // Now save the dimensions:
+    prop.setProperty(PROPERTY_MAIN_WINDOW_X, Integer.toString(mainWindowDimensions.x));
+    prop.setProperty(PROPERTY_MAIN_WINDOW_Y, Integer.toString(mainWindowDimensions.y));
+    prop.setProperty(PROPERTY_MAIN_WINDOW_WIDTH, Integer.toString(mainWindowDimensions.width));
+    prop.setProperty(PROPERTY_MAIN_WINDOW_HEIGHT, Integer.toString(mainWindowDimensions.height));
+    
+    prop.setProperty(PROPERTY_TUNEBOX_WINDOW_X, Integer.toString(tuneBoxDimensions.x));
+    prop.setProperty(PROPERTY_TUNEBOX_WINDOW_Y, Integer.toString(tuneBoxDimensions.y));
+    prop.setProperty(PROPERTY_TUNEBOX_WINDOW_WIDTH, Integer.toString(tuneBoxDimensions.width));
+    prop.setProperty(PROPERTY_TUNEBOX_WINDOW_HEIGHT, Integer.toString(tuneBoxDimensions.height));
 
     // Now save the texts for the Direction Buttons
     setProperties(PROPERTY_LABEL_ANT, antennaLabels);
@@ -275,13 +298,21 @@ public final class AtuApplicationSettings
         throwMissingPropertyException(PROPERTY_BAUDE_RATE_ATU);
       }
 
-      // Read the JFrame dimensions:
+      // Read the Main window dimensions:
       int x = Integer.parseInt(prop.getProperty(PROPERTY_MAIN_WINDOW_X));
       int y = Integer.parseInt(prop.getProperty(PROPERTY_MAIN_WINDOW_Y));
       int w = Integer.parseInt(prop.getProperty(PROPERTY_MAIN_WINDOW_WIDTH));
       int h = Integer.parseInt(prop.getProperty(PROPERTY_MAIN_WINDOW_HEIGHT));
 
-      this.jFrameDimensions = new Rectangle(x, y, w, h);
+      this.mainWindowDimensions = new Rectangle(x, y, w, h);
+      
+      // Read the TuneBox window dimensions:
+      x = Integer.parseInt(prop.getProperty(PROPERTY_TUNEBOX_WINDOW_X));
+      y = Integer.parseInt(prop.getProperty(PROPERTY_TUNEBOX_WINDOW_Y));
+      w = Integer.parseInt(prop.getProperty(PROPERTY_TUNEBOX_WINDOW_WIDTH));
+      h = Integer.parseInt(prop.getProperty(PROPERTY_TUNEBOX_WINDOW_HEIGHT));
+
+      this.tuneBoxDimensions = new Rectangle(x, y, w, h);
 
       // Now read the texts for the Direction Buttons
       getProperties(PROPERTY_LABEL_ANT, antennaLabels);
@@ -317,10 +348,15 @@ public final class AtuApplicationSettings
     baudRateAtu = "9600";
 
     // We have minimum size so we don't have to worry about the values:
-    jFrameDimensions.height = 0;
-    jFrameDimensions.width = 0;
-    jFrameDimensions.x = 0;
-    jFrameDimensions.y = 0;
+    mainWindowDimensions.height = 0;
+    mainWindowDimensions.width = 0;
+    mainWindowDimensions.x = 0;
+    mainWindowDimensions.y = 0;
+    
+    tuneBoxDimensions.height = 0;
+    tuneBoxDimensions.width = 0;
+    tuneBoxDimensions.x = 0;
+    tuneBoxDimensions.y = 0;
 
     // Set texts for the antenna buttons
     for(int i = 0; i < NUMBER_OF_ANT_BUTTONS; i++)

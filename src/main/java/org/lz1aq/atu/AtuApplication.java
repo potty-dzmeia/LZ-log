@@ -19,11 +19,20 @@
 // ***************************************************************************
 package org.lz1aq.atu;
 
+import java.awt.Container;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import org.lz1aq.lzlog.MainWindow;
 
 /**
@@ -32,13 +41,13 @@ import org.lz1aq.lzlog.MainWindow;
  */
 public class AtuApplication extends javax.swing.JFrame
 {
-
   private final AtuApplicationSettings applicationSettings;
   private final TuneSettings tuneSettins;
   private JToggleButton[] bandButtons;
   private JToggleButton[] antennaButtons;
   private JToggleButton[] modeButtons;
-
+  private List<JToggleButton>   tuneBoxButtons; 
+  private List<JSlider>  sliderButtons = new ArrayList<>(AtuApplicationSettings.NUMBER_OF_SLIDER_BUTTONS);        
   /**
    * Creates new form AtuApp
    */
@@ -53,10 +62,14 @@ public class AtuApplication extends javax.swing.JFrame
             applicationSettings.NUMBER_OF_TUNE_VALUES);
 
     initComponents();
-
+      
+    // Add buttons to the TuneBox dialog
+    populateTuneBox();
+    
     packButtonsIntoStructure();
   }
-
+  
+  
   /**
    * Initialize the controls of the main windows
    */
@@ -65,9 +78,9 @@ public class AtuApplication extends javax.swing.JFrame
     setAntennaButtonsLabels();
 
     // Read last used JFrame dimensions and restore it
-    if(applicationSettings.getJFrameDimensions().isEmpty() == false)
+    if(applicationSettings.getMainWindowDimensions().isEmpty() == false)
     {
-      this.setBounds(applicationSettings.getJFrameDimensions());
+      this.setBounds(applicationSettings.getMainWindowDimensions());
     }
 
     //
@@ -89,6 +102,8 @@ public class AtuApplication extends javax.swing.JFrame
 
   private void packButtonsIntoStructure()
   {
+    // order of inclusion is important
+    
     bandButtons = new JToggleButton[]
     {
       jToggleButtonBand1,
@@ -117,6 +132,13 @@ public class AtuApplication extends javax.swing.JFrame
       jToggleButtonCw,
       jToggleButtonSsb
     };
+    
+    
+    sliderButtons.add(jSliderC1);
+    sliderButtons.add(jSliderC2);
+    sliderButtons.add(jSliderL);
+    
+    
   }
 
   private void updateSliders()
@@ -144,18 +166,87 @@ public class AtuApplication extends javax.swing.JFrame
   {
     applicationSettings.setCurrentBandSelection(bandButton);
     updateSliders();
+    updateTuneBoxValues();
   }
 
   private void onAntennaButtonPress(int antennaButton)
   {
     applicationSettings.setCurrentAntSelection(antennaButton);
     updateSliders();
+    updateTuneBoxValues();
   }
 
   private void onModeButtonPress(int modeButton)
   {
     applicationSettings.setCurrentModeSelection(modeButton);
     updateSliders();
+    updateTuneBoxValues();
+  }
+  
+  private void onSliderButtonPress(int index)
+  {
+    
+    TuneValue tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(),
+                                     applicationSettings.getCurrentAntSelection(),
+                                     applicationSettings.getCurrentModeSelection(),
+                                     applicationSettings.getCurrentTuneSelection());
+    
+    switch(index)
+    {
+      case 0:
+        tune.setC1(jSliderC1.getValue());
+        break;
+      case 1:
+        tune.setC2(jSliderC2.getValue());
+        break;
+      case 2:
+        tune.setL(jSliderL.getValue());
+        break;
+    }
+   
+    updateTuneBoxValues();
+            
+    sendTune();
+  }
+  
+  
+  private void populateTuneBox()
+  { 
+    tuneBoxButtons = new ArrayList<>(AtuApplicationSettings.NUMBER_OF_TUNE_VALUES);
+    
+    for(int i=0; i<AtuApplicationSettings.NUMBER_OF_TUNE_VALUES; i++)
+    {
+      JToggleButton jb = new JToggleButton("tune "+i);
+      tuneBoxButtons.add(jb);
+      jPanelTuneBox.add(jb);
+      buttonGroupTuneBox.add(jb);
+      jb.addActionListener(new ActionListener()
+      {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+          JToggleButton button = (JToggleButton)e.getSource();
+          int index = tuneBoxButtons.indexOf(button);
+          applicationSettings.setCurrentTuneSelection(index);
+          updateSliders();
+        }
+      });
+    }
+  }
+  
+  
+  private void updateTuneBoxValues()
+  {
+    TuneValue tune;
+    for(int i=0; i<tuneBoxButtons.size(); i++)
+    {
+      tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(), 
+                             applicationSettings.getCurrentAntSelection(), 
+                             applicationSettings.getCurrentModeSelection(), 
+                             i);
+      
+      tuneBoxButtons.get(i).setText("c1="+tune.getC1()+"  c2="+tune.getC2()+"  l="+tune.getL());  
+    }
   }
   
   
@@ -169,10 +260,13 @@ public class AtuApplication extends javax.swing.JFrame
   {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    jLabel2 = new javax.swing.JLabel();
     buttonGroupBand = new javax.swing.ButtonGroup();
     buttonGroupAnt = new javax.swing.ButtonGroup();
     buttonGroupMode = new javax.swing.ButtonGroup();
+    jDialogTuneBox = new javax.swing.JDialog(this);
+    jPanelTuneBox = new javax.swing.JPanel();
+    jButton4 = new javax.swing.JButton();
+    buttonGroupTuneBox = new javax.swing.ButtonGroup();
     jPanelDisplay = new javax.swing.JPanel();
     jPanelSwr = new javax.swing.JPanel();
     jProgressBar1 = new javax.swing.JProgressBar();
@@ -189,6 +283,7 @@ public class AtuApplication extends javax.swing.JFrame
     jSliderC1 = new javax.swing.JSlider();
     jSliderC2 = new javax.swing.JSlider();
     jSliderL = new javax.swing.JSlider();
+    jButton3 = new javax.swing.JButton();
     jPanelBands = new javax.swing.JPanel();
     jToggleButtonBand1 = new javax.swing.JToggleButton();
     jToggleButtonBand2 = new javax.swing.JToggleButton();
@@ -210,7 +305,43 @@ public class AtuApplication extends javax.swing.JFrame
     jMenu1 = new javax.swing.JMenu();
     jMenu2 = new javax.swing.JMenu();
 
-    jLabel2.setText("jLabel2");
+    jDialogTuneBox.setMinimumSize(new java.awt.Dimension(50, 200));
+    jDialogTuneBox.addWindowListener(new java.awt.event.WindowAdapter()
+    {
+      public void windowDeactivated(java.awt.event.WindowEvent evt)
+      {
+        jDialogTuneBoxWindowDeactivated(evt);
+      }
+      public void windowOpened(java.awt.event.WindowEvent evt)
+      {
+        jDialogTuneBoxWindowOpened(evt);
+      }
+    });
+    jDialogTuneBox.getContentPane().setLayout(new java.awt.GridBagLayout());
+
+    jPanelTuneBox.setLayout(new java.awt.GridLayout(0, 1));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jDialogTuneBox.getContentPane().add(jPanelTuneBox, gridBagConstraints);
+
+    jButton4.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
+    jButton4.setText("CLOSE");
+    jButton4.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jButton4ActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    gridBagConstraints.weighty = 0.1;
+    jDialogTuneBox.getContentPane().add(jButton4, gridBagConstraints);
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     addWindowListener(new java.awt.event.WindowAdapter()
@@ -299,7 +430,7 @@ public class AtuApplication extends javax.swing.JFrame
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -317,7 +448,7 @@ public class AtuApplication extends javax.swing.JFrame
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -326,7 +457,7 @@ public class AtuApplication extends javax.swing.JFrame
     jButton1.setText("Tune PA");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
@@ -336,7 +467,7 @@ public class AtuApplication extends javax.swing.JFrame
     jButton2.setText("Tune");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
@@ -376,12 +507,29 @@ public class AtuApplication extends javax.swing.JFrame
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanelMiscButtons.add(jPanelSliderControls, gridBagConstraints);
+
+    jButton3.setText("TuneBox");
+    jButton3.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jButton3ActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelMiscButtons.add(jButton3, gridBagConstraints);
 
     getContentPane().add(jPanelMiscButtons);
 
@@ -581,7 +729,7 @@ public class AtuApplication extends javax.swing.JFrame
     // If not maximized...
     if(this.getExtendedState() != MAXIMIZED_BOTH)
     {
-      applicationSettings.setJFrameDimensions(this.getBounds()); // save the dimensions of the JFrame
+      applicationSettings.setMainWindowDimensions(this.getBounds()); // save the dimensions of the JFrame
     }
     
     applicationSettings.SaveSettingsToDisk();
@@ -677,47 +825,49 @@ public class AtuApplication extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jSliderC1StateChanged
     JSlider source = (JSlider) evt.getSource();
     if(source.getValueIsAdjusting())
-    {
       return;
-    }
-    TuneValue tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(),
-            applicationSettings.getCurrentAntSelection(),
-            applicationSettings.getCurrentModeSelection(),
-            applicationSettings.getCurrentTuneSelection());
-    tune.setC1(source.getValue());
-    sendTune();
+    
+    onSliderButtonPress(sliderButtons.lastIndexOf(source));
   }//GEN-LAST:event_jSliderC1StateChanged
 
   private void jSliderC2StateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jSliderC2StateChanged
   {//GEN-HEADEREND:event_jSliderC2StateChanged
     JSlider source = (JSlider) evt.getSource();
     if(source.getValueIsAdjusting())
-    {
       return;
-    }
-    TuneValue tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(),
-            applicationSettings.getCurrentAntSelection(),
-            applicationSettings.getCurrentModeSelection(),
-            applicationSettings.getCurrentTuneSelection());
-    tune.setC2(source.getValue());
-    sendTune();
+      
+    onSliderButtonPress(sliderButtons.lastIndexOf(source));
   }//GEN-LAST:event_jSliderC2StateChanged
 
   private void jSliderLStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jSliderLStateChanged
   {//GEN-HEADEREND:event_jSliderLStateChanged
     JSlider source = (JSlider) evt.getSource();
     if(source.getValueIsAdjusting())
-    {
       return;
-    }
-
-    TuneValue tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(),
-            applicationSettings.getCurrentAntSelection(),
-            applicationSettings.getCurrentModeSelection(),
-            applicationSettings.getCurrentTuneSelection());
-    tune.setL(source.getValue());
-    sendTune();
+  
+    onSliderButtonPress(sliderButtons.lastIndexOf(source));
   }//GEN-LAST:event_jSliderLStateChanged
+
+  private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
+  {//GEN-HEADEREND:event_jButton3ActionPerformed
+   jDialogTuneBox.setVisible(!jDialogTuneBox.isVisible());
+  }//GEN-LAST:event_jButton3ActionPerformed
+
+  private void jButton4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton4ActionPerformed
+  {//GEN-HEADEREND:event_jButton4ActionPerformed
+    jDialogTuneBox.setVisible(false);
+  }//GEN-LAST:event_jButton4ActionPerformed
+
+  private void jDialogTuneBoxWindowOpened(java.awt.event.WindowEvent evt)//GEN-FIRST:event_jDialogTuneBoxWindowOpened
+  {//GEN-HEADEREND:event_jDialogTuneBoxWindowOpened
+    jDialogTuneBox.setBounds(applicationSettings.getTuneBoxDimensions());
+    updateTuneBoxValues();
+  }//GEN-LAST:event_jDialogTuneBoxWindowOpened
+
+  private void jDialogTuneBoxWindowDeactivated(java.awt.event.WindowEvent evt)//GEN-FIRST:event_jDialogTuneBoxWindowDeactivated
+  {//GEN-HEADEREND:event_jDialogTuneBoxWindowDeactivated
+   applicationSettings.setTuneBoxDimensions(jDialogTuneBox.getBounds());
+  }//GEN-LAST:event_jDialogTuneBoxWindowDeactivated
 
   /**
    * @param args the command line arguments
@@ -774,9 +924,12 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.ButtonGroup buttonGroupAnt;
   private javax.swing.ButtonGroup buttonGroupBand;
   private javax.swing.ButtonGroup buttonGroupMode;
+  private javax.swing.ButtonGroup buttonGroupTuneBox;
   private javax.swing.JButton jButton1;
   private javax.swing.JButton jButton2;
-  private javax.swing.JLabel jLabel2;
+  private javax.swing.JButton jButton3;
+  private javax.swing.JButton jButton4;
+  private javax.swing.JDialog jDialogTuneBox;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JMenu jMenu1;
@@ -788,6 +941,7 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.JPanel jPanelMiscButtons;
   private javax.swing.JPanel jPanelSliderControls;
   private javax.swing.JPanel jPanelSwr;
+  private javax.swing.JPanel jPanelTuneBox;
   private javax.swing.JPanel jPanelVoltage;
   private javax.swing.JProgressBar jProgressBar1;
   private javax.swing.JProgressBar jProgressBar2;
