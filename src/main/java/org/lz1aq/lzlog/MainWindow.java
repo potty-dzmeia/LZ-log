@@ -19,6 +19,7 @@
 // ***************************************************************************
 package org.lz1aq.lzlog;
 
+import org.lz1aq.radio.RadioController;
 import org.lz1aq.keyer.KeyerTypes;
 import java.awt.FontMetrics;
 import java.awt.Color;

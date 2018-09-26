@@ -17,7 +17,7 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.lzlog;
+package org.lz1aq.radio;
 
 import java.util.EventListener;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,9 +28,9 @@ import jssc.SerialPort;
 import jssc.SerialPortException;
 import org.apache.commons.lang3.StringUtils;
 import org.lz1aq.keyer.Keyer;
+import org.lz1aq.lzlog.JythonObjectFactory;
 import org.lz1aq.py.rig.I_Radio;
 import org.lz1aq.py.rig.I_SerialSettings;
-import org.lz1aq.radio.Radio;
 import org.lz1aq.radio.event.ActiveVfoEvent;
 import org.lz1aq.radio.event.ConfirmationEvent;
 import org.lz1aq.radio.event.FrequencyEvent;
@@ -38,8 +38,6 @@ import org.lz1aq.radio.event.ModeEvent;
 import org.lz1aq.radio.event.NotsupportedEvent;
 import org.lz1aq.radio.event.RadioListener;
 import org.lz1aq.radio.event.SmeterEvent;
-import org.lz1aq.radio.RadioModes;
-import org.lz1aq.radio.RadioVfos;
 import org.lz1aq.utils.MorseCode;
 
 /**

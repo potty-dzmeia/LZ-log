@@ -19,21 +19,12 @@
 // ***************************************************************************
 package org.lz1aq.atu;
 
-import java.awt.Container;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
-import org.lz1aq.lzlog.MainWindow;
 
 /**
  *
@@ -136,9 +127,7 @@ public class AtuApplication extends javax.swing.JFrame
     
     sliderButtons.add(jSliderC1);
     sliderButtons.add(jSliderC2);
-    sliderButtons.add(jSliderL);
-    
-    
+    //sliderButtons.add(jSliderL);
   }
 
   private void updateSliders()
@@ -152,7 +141,7 @@ public class AtuApplication extends javax.swing.JFrame
     // update slider values to represent the current tune
     jSliderC1.setValue(tune.getC1());
     jSliderC2.setValue(tune.getC2());
-    jSliderL.setValue(tune.getL());
+    //jSliderL.setValue(tune.getL());
 
     sendTune();
   }
@@ -185,7 +174,7 @@ public class AtuApplication extends javax.swing.JFrame
   
   private void onSliderButtonPress(int index)
   {
-    
+    System.out.println("onSliderButtonPress()\n");
     TuneValue tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(),
                                      applicationSettings.getCurrentAntSelection(),
                                      applicationSettings.getCurrentModeSelection(),
@@ -199,9 +188,9 @@ public class AtuApplication extends javax.swing.JFrame
       case 1:
         tune.setC2(jSliderC2.getValue());
         break;
-      case 2:
-        tune.setL(jSliderL.getValue());
-        break;
+//      case 2:
+//        tune.setL(jSliderL.getValue());
+//        break;
     }
    
     updateTuneBoxValues();
@@ -237,6 +226,7 @@ public class AtuApplication extends javax.swing.JFrame
   
   private void updateTuneBoxValues()
   {
+    System.out.println("updateTuneBoxValues()\n");
     TuneValue tune;
     for(int i=0; i<tuneBoxButtons.size(); i++)
     {
@@ -245,8 +235,11 @@ public class AtuApplication extends javax.swing.JFrame
                              applicationSettings.getCurrentModeSelection(), 
                              i);
       
-      tuneBoxButtons.get(i).setText("c1="+tune.getC1()+"  c2="+tune.getC2()+"  l="+tune.getL());  
+      tuneBoxButtons.get(i).setText("c1="+tune.getC1()+"  l="+tune.getL());  
     }
+    
+    // Highlight the current selection
+    tuneBoxButtons.get(applicationSettings.getCurrentTuneSelection()).setSelected(true);
   }
   
   
@@ -277,13 +270,12 @@ public class AtuApplication extends javax.swing.JFrame
     jPanelMiscButtons = new javax.swing.JPanel();
     jToggleButtonSsb = new javax.swing.JToggleButton();
     jToggleButtonCw = new javax.swing.JToggleButton();
-    jButton1 = new javax.swing.JButton();
-    jButton2 = new javax.swing.JButton();
     jPanelSliderControls = new javax.swing.JPanel();
     jSliderC1 = new javax.swing.JSlider();
     jSliderC2 = new javax.swing.JSlider();
-    jSliderL = new javax.swing.JSlider();
     jButton3 = new javax.swing.JButton();
+    jToggleButtonTune = new javax.swing.JToggleButton();
+    jToggleButtonAuto = new javax.swing.JToggleButton();
     jPanelBands = new javax.swing.JPanel();
     jToggleButtonBand1 = new javax.swing.JToggleButton();
     jToggleButtonBand2 = new javax.swing.JToggleButton();
@@ -454,27 +446,7 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jPanelMiscButtons.add(jToggleButtonCw, gridBagConstraints);
 
-    jButton1.setText("Tune PA");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanelMiscButtons.add(jButton1, gridBagConstraints);
-
-    jButton2.setText("Tune");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanelMiscButtons.add(jButton2, gridBagConstraints);
-
-    jPanelSliderControls.setLayout(new java.awt.GridLayout(3, 1));
+    jPanelSliderControls.setLayout(new java.awt.GridLayout(2, 1));
 
     jSliderC1.setPaintLabels(true);
     jSliderC1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -495,15 +467,6 @@ public class AtuApplication extends javax.swing.JFrame
       }
     });
     jPanelSliderControls.add(jSliderC2);
-
-    jSliderL.addChangeListener(new javax.swing.event.ChangeListener()
-    {
-      public void stateChanged(javax.swing.event.ChangeEvent evt)
-      {
-        jSliderLStateChanged(evt);
-      }
-    });
-    jPanelSliderControls.add(jSliderL);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -530,6 +493,27 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanelMiscButtons.add(jButton3, gridBagConstraints);
+
+    jToggleButtonTune.setText("Tune");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelMiscButtons.add(jToggleButtonTune, gridBagConstraints);
+
+    jToggleButtonAuto.setSelected(true);
+    jToggleButtonAuto.setText("AUTO");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelMiscButtons.add(jToggleButtonAuto, gridBagConstraints);
 
     getContentPane().add(jPanelMiscButtons);
 
@@ -839,15 +823,6 @@ public class AtuApplication extends javax.swing.JFrame
     onSliderButtonPress(sliderButtons.lastIndexOf(source));
   }//GEN-LAST:event_jSliderC2StateChanged
 
-  private void jSliderLStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jSliderLStateChanged
-  {//GEN-HEADEREND:event_jSliderLStateChanged
-    JSlider source = (JSlider) evt.getSource();
-    if(source.getValueIsAdjusting())
-      return;
-  
-    onSliderButtonPress(sliderButtons.lastIndexOf(source));
-  }//GEN-LAST:event_jSliderLStateChanged
-
   private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
   {//GEN-HEADEREND:event_jButton3ActionPerformed
    jDialogTuneBox.setVisible(!jDialogTuneBox.isVisible());
@@ -925,8 +900,6 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.ButtonGroup buttonGroupBand;
   private javax.swing.ButtonGroup buttonGroupMode;
   private javax.swing.ButtonGroup buttonGroupTuneBox;
-  private javax.swing.JButton jButton1;
-  private javax.swing.JButton jButton2;
   private javax.swing.JButton jButton3;
   private javax.swing.JButton jButton4;
   private javax.swing.JDialog jDialogTuneBox;
@@ -947,13 +920,13 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.JProgressBar jProgressBar2;
   private javax.swing.JSlider jSliderC1;
   private javax.swing.JSlider jSliderC2;
-  private javax.swing.JSlider jSliderL;
   private javax.swing.JToggleButton jToggleButtonAnt1;
   private javax.swing.JToggleButton jToggleButtonAnt2;
   private javax.swing.JToggleButton jToggleButtonAnt3;
   private javax.swing.JToggleButton jToggleButtonAnt4;
   private javax.swing.JToggleButton jToggleButtonAnt5;
   private javax.swing.JToggleButton jToggleButtonAnt6;
+  private javax.swing.JToggleButton jToggleButtonAuto;
   private javax.swing.JToggleButton jToggleButtonBand1;
   private javax.swing.JToggleButton jToggleButtonBand2;
   private javax.swing.JToggleButton jToggleButtonBand3;
@@ -965,5 +938,6 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.JToggleButton jToggleButtonBand9;
   private javax.swing.JToggleButton jToggleButtonCw;
   private javax.swing.JToggleButton jToggleButtonSsb;
+  private javax.swing.JToggleButton jToggleButtonTune;
   // End of variables declaration//GEN-END:variables
 }
