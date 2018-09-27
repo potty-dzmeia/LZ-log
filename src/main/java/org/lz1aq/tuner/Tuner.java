@@ -21,9 +21,7 @@ package org.lz1aq.tuner;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.EventListener;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,8 +30,6 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.lz1aq.py.rig.I_EncodedTransaction;
-import org.lz1aq.radio.event.ConfirmationEvent;
-import org.lz1aq.radio.event.NotsupportedEvent;
 import org.lz1aq.utils.DynamicByteArray;
 
 
@@ -41,13 +37,13 @@ public class Tuner
 {
   private static final int QUEUE_SIZE = 30;   // Max number of commands that queueWithTransactions can hold
   
-  private final CopyOnWriteArrayList<TunerListener>  eventListeners;    
   private final String              serialPortName;       
   private final int                 baudRate;             
   private       SerialPort          serialPort;           // Used for writing to serialPort
   private final Thread              threadPortWriter;     // Thread that writes transaction to the serial port
   private final DynamicByteArray    receiveBuffer;        // Where bytes received through the serial port will be put
-   
+  private final TunerController     tunerController;
+  
   private final BlockingQueue<I_EncodedTransaction>  queueWithTransactions; // Transactions waiting to be sent to the ATU
   
   private static final Logger       logger = Logger.getLogger(Tuner.class.getName());
@@ -67,18 +63,19 @@ public class Tuner
    * 
    * @param portName -  name of the serial port that will be used for communicating with the ATU
    * @param baudRate -  baud rate to be used for the serial port
+   * @param tunerController - 
    */
-  public Tuner(String portName, int baudRate)
+  public Tuner(String portName, int baudRate, TunerController tunerController)
   {
     serialPortName        = portName;
     this.baudRate         = baudRate;
+    this.tunerController  = tunerController;
     queueWithTransactions = new LinkedBlockingQueue<>(); 
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
     receiveBuffer         = new DynamicByteArray(200);  // Set the initial size to some reasonable value
+    
+    tunerController.addEventListener(new LocalTunerControllerListener());
   }
-  
-  
-  
     
   
   //----------------------------------------------------------------------
@@ -100,18 +97,15 @@ public class Tuner
     if(threadPortWriter.getState() != Thread.State.NEW )
       throw new Exception("Please create a new ATU object");
     
-    // Open the serial port using the settings from the python file
+    // 
     serialPort = new SerialPort(serialPortName);
     serialPort.openPort();
     setComPortParams(serialPort);
     
-    // Register a local listener - this class is interested in the confirmation events
-    eventListeners.add(new LocalAtuListener());
-    
-    // Start Writer thread responsible of sending the data to the ATU
+    // PortWriter  (for sending the data to the ATU)
     threadPortWriter.start();
     
-    // Register the serial port reader which is responsible for handling the incoming data
+    // PortReader  (for reading data coming from ATU)
     serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
     serialPort.addEventListener(new PortReader());
   }
@@ -140,6 +134,7 @@ public class Tuner
     serialPort = null;
   }
   
+  
   /**
    * Checks if currently connected to the ATU
    * @return false if not connected
@@ -147,16 +142,6 @@ public class Tuner
   public boolean isConnected()
   {
     return !(serialPort==null || serialPort.isOpened()==false);   
-  }
- 
-  public void addEventListener(TunerListener listener) throws Exception
-  {
-    this.eventListeners.add(listener);
-  }
-  
-  public void removeEventListener(TunerListener listener)
-  { 
-    this.eventListeners.remove(listener);
   }
   
   public SerialPort getSerialPort()
@@ -169,7 +154,6 @@ public class Tuner
    * Inserts transaction(s) into the queueWithTransactions
    *
    * @param trans - array of I_EncodedTransaction
-   * @throws Exception
    */
   public void queueTransactions(I_EncodedTransaction trans)
   {
@@ -235,15 +219,11 @@ public class Tuner
       while(true)
       {
         // Pass the received data to the protocol parser for decoding
-        int bytesRead = XXXXXXX.decode(receiveBuffer.toByteArray());
-        
-        
+        int bytesRead = tunerController.feedData(receiveBuffer.toByteArray());
+            
         if(bytesRead > 0) 
         {
-//          // This will parseAndNotify the JSON string and notify all the interested parties
-//          TunerMessageParser.parseAndNotify(trans.getTransaction(), eventListeners);
-          // Remove the processed bytes from the received buffer
-          receiveBuffer.remove(bytesRead));
+          receiveBuffer.remove(bytesRead);
         }
         else
         {
@@ -359,38 +339,7 @@ public class Tuner
     }
     
   }// class
-  
-  
-  /**
-   * Listener for processing confirmation responses  (positive or negative) from the ATU
-   */
-  private class LocalAtuListener implements TunerListener 
-  {  
-    @Override
-    public void eventConfirmation(ConfirmationEvent e)
-    {
-      updateConfirmation(e.getConfirmation());
-    }
-   
-    @Override
-    public void eventNotsupported(NotsupportedEvent e)
-    {
-      logger.log(Level.WARNING, "The following transaction couldn't be decoded: " + e.getData());
-    }
-
-    @Override
-    public void eventSWR(float e)
-    {}
-
-    @Override
-    public void eventAntennaVoltage(float e)
-    {}
-
-    @Override
-    public void eventPowersupplyVoltage(float e)
-    {}
-  }
-          
+            
   
   /**
    *  Stores the confirmation received from the ATU and notifies the threadPortWriter
@@ -462,14 +411,35 @@ public class Tuner
 //    }
   }
   
-  
-  public interface TunerListener extends EventListener
+  class LocalTunerControllerListener implements TunerController.TunerControllerListener
   {
-    public void eventNotsupported(NotsupportedEvent e);
-    public void eventConfirmation(ConfirmationEvent e);
-    public void eventSWR(float e);
-    public void eventAntennaVoltage(float e);
-    public void eventPowersupplyVoltage(float e);
+
+    @Override
+    public void eventSwr(){}
+
+    @Override
+    public void eventAntennaVoltage(){}
+
+    @Override
+    public void eventPowerSupplyVoltage(){}
+
+    @Override
+    public void eventNotsupported(){}
+
+    @Override
+    public void eventPosConfirmation()
+    {
+      updateConfirmation(true);
+    }
+
+    @Override
+    public void eventNegConfirmation()
+    {
+      updateConfirmation(false);
+    }
   }
+  
+  
+
 }
 

@@ -20,6 +20,7 @@
 package org.lz1aq.tuner;
 
 import java.util.EventListener;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jssc.SerialPortException;
@@ -32,6 +33,7 @@ public class TunerController
   public static final int L_MAX  = 4000;
   
   private Tuner   tunerSerialComm;
+  private final CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
   
   // Controlled by the user
   private int     C1;
@@ -45,11 +47,11 @@ public class TunerController
   
   
   
-  TunerController(String comport, int baudRate)
+  public TunerController(String comport, String baudRate)
   {
     try
     {
-      tunerSerialComm = new Tuner(comport, baudRate);
+      tunerSerialComm = new Tuner(comport, Integer.parseInt(baudRate), this);
       tunerSerialComm.connect();
     }
     catch(Exception ex)
@@ -59,6 +61,9 @@ public class TunerController
   }
  
   
+  //----------------------------------------------------------------------
+  //                           Public methods
+  //----------------------------------------------------------------------
   void disconnect()
   {
     try
@@ -98,7 +103,7 @@ public class TunerController
     
     // encode the command and send it to serial through the serial connection
     I_EncodedTransaction transaction = new EncodedTransaction();
-    _((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
     tunerSerialComm.queueTransactions(transaction);
   }
   
@@ -110,16 +115,70 @@ public class TunerController
     
     // encode the command and send it to serial through the serial connection
     I_EncodedTransaction transaction = new EncodedTransaction();
-    _((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
     tunerSerialComm.queueTransactions(transaction);
   }
-   
+  
+  public void addEventListener(TunerControllerListener listener)
+  {
+    this.eventListeners.add(listener);
+  }
+
+  public void removeEventListener(TunerControllerListener listener)
+  {
+    this.eventListeners.remove(listener);
+  }
+  
+  public int feedData(byte[] data)
+  {
+    if(data.length==0)
+      return 0;
+    
+    // Depending on the decoded data inform the interested parties
+    // -----------------------------------------------------------
+    // POS confirmation
+    for(TunerControllerListener listener : eventListeners)
+    {
+      listener.eventPosConfirmation();
+    }
+    
+    // NEG confirmation
+    for(TunerControllerListener listener : eventListeners)
+    {
+      listener.eventNegConfirmation();
+    }
+    
+    // SWR 
+    for(TunerControllerListener listener : eventListeners)
+    {
+      listener.eventSwr();
+    }
+
+    // Ant voltage 
+    for(TunerControllerListener listener : eventListeners)
+    {
+      listener.eventAntennaVoltage();
+    }
+    
+    // Power supply voltage
+    for(TunerControllerListener listener : eventListeners)
+    {
+      listener.eventPowerSupplyVoltage();
+    }
+    
+    return 0;
+  }
+          
+  //----------------------------------------------------------------------
+  //                           Private methods
+  //----------------------------------------------------------------------
   
   
-  /**--------------------------------------------
-   *    internal class
-   * --------------------------------------------
-   */
+  
+  //----------------------------------------------------------------------
+  //                           Internal Classes
+  //----------------------------------------------------------------------
+ 
   private class EncodedTransaction implements I_EncodedTransaction
   {
     private byte[] transaction;
@@ -193,18 +252,14 @@ public class TunerController
   }
   
   
-   /**--------------------------------------------
-   *    internal class
-   * --------------------------------------------
-   */
   public interface TunerControllerListener extends EventListener
   {
     public void eventSwr();
     public void eventAntennaVoltage();
     public void eventPowerSupplyVoltage();
-//    public void eventNotsupported();
-//    public void eventPosConfirmation();
-//    public void eventNegConfirmation();
+    public void eventNotsupported();
+    public void eventPosConfirmation();
+    public void eventNegConfirmation();
   }
 
 }

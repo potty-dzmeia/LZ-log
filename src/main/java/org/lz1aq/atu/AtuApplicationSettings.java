@@ -50,16 +50,12 @@ public final class AtuApplicationSettings
   static final int NUMBER_OF_MODE_BUTTONS = 2;
   static final int NUMBER_OF_TUNE_VALUES = 10;
   static final int NUMBER_OF_SLIDER_BUTTONS = 3;
-  
-  static final int SLIDER_C1_MAX = 100;
-  static final int SLIDER_C2_MAX = 100;
-  static final int SLIDER_L_MAX = 100;
 
   private String comPortRadio;
   private String baudRateRadio;
   private String comPortAtu;
   private String baudRateAtu;
-  private String[] antennaLabels;
+  private final String[] antennaLabels;
   private Rectangle mainWindowDimensions;
   private Rectangle tuneBoxDimensions;
   private final Properties prop;
@@ -71,7 +67,6 @@ public final class AtuApplicationSettings
   private int currentTuneSelection = 0;
   private int[][][] lastUsedTuneSelection = new int[NUMBER_OF_BAND_BUTTONS][NUMBER_OF_ANT_BUTTONS][NUMBER_OF_MODE_BUTTONS];  // last used tune selection for given combination of Band, Ant and Mode
 
-  
   
   public int getCurrentBandSelection()
   {
@@ -174,14 +169,24 @@ public final class AtuApplicationSettings
     this.comPortAtu = comPort;
   }
 
-  public String getBaudRate()
+  public String getBaudRateRadio()
   {
     return baudRateRadio;
   }
 
-  public void setBaudRate(String baudRate)
+  public void setBaudRateRadio(String baudRate)
   {
     this.baudRateRadio = baudRate;
+  }
+  
+   public String getBaudRateAtu()
+  {
+    return this.baudRateAtu;
+  }
+
+  public void setBaudRateAtu(String baudRate)
+  {
+    this.baudRateAtu = baudRate;
   }
 
   /**
