@@ -34,8 +34,12 @@ public class TuneSettings
 {
   TuneValue[][][][] tuneValues;
 
+  int bandCount = AtuApplicationSettings.NUMBER_OF_BAND_BUTTONS;
+  int antCount = AtuApplicationSettings.NUMBER_OF_ANT_BUTTONS;
+  int modeCount = AtuApplicationSettings.NUMBER_OF_MODE_BUTTONS;
+  int tuneValueCount = AtuApplicationSettings.NUMBER_OF_TUNE_VALUES;
   
-  public TuneSettings(int bandCount, int antCount, int modeCount, int tuneValueCount)
+  public TuneSettings()
   { 
     if(loadFromFile())
     {

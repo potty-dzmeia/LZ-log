@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.lz1aq.lzlog</groupId>
-  <artifactId>LZ-log</artifactId>
+  <artifactId>Atu</artifactId>
   <packaging>jar</packaging>
-  <version>1.5.2</version>
-  <name>LZ-log</name>
+  <version>0.5</version>
+  <name>Atu</name>
   <url>http://maven.apache.org</url>
   
   <properties>
@@ -39,7 +39,7 @@
                <addClasspath>true</addClasspath>
                 <!--Specifies that all dependencies of our application are found from the lib directory.-->
                <classpathPrefix>lib/</classpathPrefix>
-               <mainClass>org.lz1aq.lzlog.MainWindow</mainClass>
+               <mainClass>org.lz1aq.atu.AtuApplication</mainClass>
              </manifest>
            </archive>
            <excludes>

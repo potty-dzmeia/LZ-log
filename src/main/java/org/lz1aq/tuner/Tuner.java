@@ -219,7 +219,7 @@ public class Tuner
       while(true)
       {
         // Pass the received data to the protocol parser for decoding
-        int bytesRead = tunerController.feedData(receiveBuffer.toByteArray());
+        int bytesRead = tunerController.decodeSerialData(receiveBuffer.toByteArray());
             
         if(bytesRead > 0) 
         {

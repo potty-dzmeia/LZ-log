@@ -21,14 +21,12 @@ package org.lz1aq.atu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JComponent;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
-import javax.swing.plaf.SliderUI;
-import javax.swing.plaf.basic.BasicSliderUI;
 import static javax.swing.plaf.basic.BasicSliderUI.NEGATIVE_SCROLL;
 import static javax.swing.plaf.basic.BasicSliderUI.POSITIVE_SCROLL;
 import javax.swing.plaf.synth.SynthSliderUI;
@@ -40,38 +38,43 @@ import org.lz1aq.tuner.TunerController;
  */
 public class AtuApplication extends javax.swing.JFrame
 {
+  public final String appTitle = "ATU";
+  public final String appVersion = "0.5";
+          
   private final AtuApplicationSettings applicationSettings;
   private final TunerController tunerController;
+  private final TunerController.TunerControllerListener tunerControllerListener = new LocalTunerControllerListener();
   
-  private final TuneSettings tuneSettins;
+  private final TuneSettings tuneSettings;
   private JToggleButton[] bandButtons;
   private JToggleButton[] antennaButtons;
   private JToggleButton[] modeButtons;
   private List<JToggleButton>   tuneBoxButtons; 
-  private List<JSlider>  sliderButtons = new ArrayList<>(AtuApplicationSettings.NUMBER_OF_SLIDER_BUTTONS);        
+  private List<JSlider>  sliderButtons = new ArrayList<>(AtuApplicationSettings.NUMBER_OF_SLIDER_BUTTONS);  
+  
+  // Variables used for controlling the AUTO mode - i.e. where we search for the tune setting with best SWR
+  private boolean isAutoTuneOn = false;
+  private int autoTuneBestSwrIndex = 0; // Index of the tune setting that has the best SWR
+  private int autoTuneBestSwrValue = 0;  // The lowest value of the SWR 
+  
+  
+  
   /**
    * Creates new form AtuApp
    */
   public AtuApplication()
   {
-    // Load user settings for the application from a properties file
-    applicationSettings = new AtuApplicationSettings();
-    // Load tune settings from a file
-    tuneSettins = new TuneSettings(AtuApplicationSettings.NUMBER_OF_BAND_BUTTONS,
-                                   AtuApplicationSettings.NUMBER_OF_ANT_BUTTONS,
-                                   AtuApplicationSettings.NUMBER_OF_MODE_BUTTONS,
-                                   AtuApplicationSettings.NUMBER_OF_TUNE_VALUES);
-    
+    applicationSettings = new AtuApplicationSettings(); // Load user settings for the application from a properties file
+    tuneSettings = new TuneSettings();  // Load tune settings from a file
     tunerController = new TunerController(applicationSettings.getComPortAtu(), applicationSettings.getBaudRateAtu());
             
-    initComponents();
+    initComponents(); // GUI
     
-    jSliderC1.setUI(new MySliderUI(jSliderC1));
+    jSliderC1.setUI(new MySliderUI(jSliderC1)); // Custom UI for slider buttons (needed for PG UP/DWN scrolling)
     jSliderL.setUI(new MySliderUI(jSliderL));
-    
-    // Add buttons to the TuneBox dialog
-    populateTuneBox();
-    
+
+    populateTuneBox(); // Add buttons to the TuneBox dialog
+
     packButtonsIntoStructure();
   }
   
@@ -81,6 +84,11 @@ public class AtuApplication extends javax.swing.JFrame
    */
   private void initMainWindow()
   {
+    this.setTitle(appTitle+" v"+appVersion);
+    
+    jProgressBarSwr.setStringPainted(true); // So that text is displayed on the progress bar
+    jProgressBarAntennaVoltage.setStringPainted(true); // So that text is displayed on the progress bar
+    
     setAntennaButtonsLabels();
 
     // Read last used JFrame dimensions and restore it
@@ -93,9 +101,6 @@ public class AtuApplication extends javax.swing.JFrame
     jToggleButtonBand1.setSelected(true);
     jToggleButtonAnt1.setSelected(true);
     jToggleButtonSsb.setSelected(true);
-
-    //
-    updateSliders();
   }
 
   private void setAntennaButtonsLabels()
@@ -148,7 +153,7 @@ public class AtuApplication extends javax.swing.JFrame
   private void updateSliders()
   {
     // Get the tune for the current combination of band, ant and mode
-    TuneValue tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(),
+    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
             applicationSettings.getCurrentAntSelection(),
             applicationSettings.getCurrentModeSelection(),
             applicationSettings.getCurrentTuneSelection());
@@ -157,13 +162,24 @@ public class AtuApplication extends javax.swing.JFrame
     jSliderC1.setValue(tune.getC1());
     jSliderL.setValue(tune.getL());
     //jSliderL.setValue(tune.getL());
-
-    sendTune();
   }
 
-  void sendTune()
+  void sendNewTuneValue()
   {
-    jProgressBar1.setValue(50);
+    // TODO remove
+    jProgressBarSwr.setValue(50);
+    jProgressBarSwr.setString(String.format("%.1f",1.1));
+    jProgressBarAntennaVoltage.setString(String.format("%.1f",1.1));
+    // Get the tune for the current combination of band, ant and mode
+    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
+                                      applicationSettings.getCurrentAntSelection(),
+                                      applicationSettings.getCurrentModeSelection(),
+                                      applicationSettings.getCurrentTuneSelection());
+    
+    
+    tunerController.setC1(tune.getC1());
+    tunerController.setL(tune.getL());
+    System.out.println("sendTune");
   }
 
   private void onBandButtonPress(int bandButton)
@@ -176,6 +192,7 @@ public class AtuApplication extends javax.swing.JFrame
   private void onAntennaButtonPress(int antennaButton)
   {
     applicationSettings.setCurrentAntSelection(antennaButton);
+    tunerController.setAntenna(antennaButton);
     updateSliders();
     updateTuneBoxValues();
   }
@@ -187,10 +204,10 @@ public class AtuApplication extends javax.swing.JFrame
     updateTuneBoxValues();
   }
   
-  private void onSliderButtonPress(int index)
+  private void onSliderValueChange(int index)
   {
-    System.out.println("onSliderButtonPress()\n");
-    TuneValue tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(),
+   // System.out.println("onSliderButtonPress()\n");
+    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
                                      applicationSettings.getCurrentAntSelection(),
                                      applicationSettings.getCurrentModeSelection(),
                                      applicationSettings.getCurrentTuneSelection());
@@ -207,10 +224,9 @@ public class AtuApplication extends javax.swing.JFrame
 //        tune.setL(jSliderL.getValue());
 //        break;
     }
-   
+       
+    sendNewTuneValue();
     updateTuneBoxValues();
-            
-    sendTune();
   }
   
   
@@ -241,11 +257,11 @@ public class AtuApplication extends javax.swing.JFrame
   
   private void updateTuneBoxValues()
   {
-    System.out.println("updateTuneBoxValues()\n");
+   // System.out.println("updateTuneBoxValues()\n");
     TuneValue tune;
     for(int i=0; i<tuneBoxButtons.size(); i++)
     {
-      tune = tuneSettins.get(applicationSettings.getCurrentBandSelection(), 
+      tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(), 
                              applicationSettings.getCurrentAntSelection(), 
                              applicationSettings.getCurrentModeSelection(), 
                              i);
@@ -255,6 +271,94 @@ public class AtuApplication extends javax.swing.JFrame
     
     // Highlight the current selection
     tuneBoxButtons.get(applicationSettings.getCurrentTuneSelection()).setSelected(true);
+  }
+  
+  
+  // A button from the TuneBox dialog is considered valid if at least one tune value is different from 0
+  void selectFirstValidTuneBoxButton()
+  {
+    // find the first Tune setting that has at least one value different than 0;
+    for(int i=0; i<AtuApplicationSettings.NUMBER_OF_TUNE_VALUES; i++)
+    {
+      TuneValue tune= tuneSettings.get(applicationSettings.getCurrentBandSelection(),
+                                       applicationSettings.getCurrentAntSelection(), 
+                                       applicationSettings.getCurrentModeSelection(), 
+                                       i);
+      if(tune.getC1()!=0 || tune.getL()!=0 )
+      {
+        tuneBoxButtons.get(i).setSelected(true);
+      }     
+    }
+    
+    autoTuneBestSwrIndex = 0;
+    au
+  }
+  void selectNextValidTuneBoxButton()
+  
+ 
+  
+  //----------------------------------------------------------------------
+  //                           Internal Classes
+  //----------------------------------------------------------------------
+  class LocalTunerControllerListener implements TunerController.TunerControllerListener
+  {
+
+    @Override
+    public void eventSwr()
+    {
+      jProgressBarSwr.setValue(swrToProgressBarValue(tunerController.getSwr()));
+      jProgressBarSwr.setString(String.format("%.1f", tunerController.getSwr()));
+      
+      // If automatic tune mode is on we have to remeber the current SWR for the current tune 
+      // and move on to the next one.
+      
+    }
+
+    @Override
+    public void eventAntennaVoltage()
+    {
+      jProgressBarAntennaVoltage.setValue(antVotageToProgressBarValue(tunerController.getAntennaVoltage()));
+      jProgressBarAntennaVoltage.setString(String.format ("%.0f", tunerController.getAntennaVoltage()));
+    }
+
+    @Override
+    public void eventPowerSupplyVoltage()
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void eventNotsupported()
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void eventPosConfirmation()
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void eventNegConfirmation()
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    // Converts SWR to progress bar value 
+    private int swrToProgressBarValue(float swr)
+    {
+      int i = Math.round(swr*10);
+      return i-1; // SWR 1 will be 0 on the progress bar
+    }
+    
+    // Converts Antenna Voltage to progress bar value
+    private int antVotageToProgressBarValue(float voltages)
+    {
+      int i = Math.round(voltages);
+      return i;
+    }
   }
   
   
@@ -333,10 +437,10 @@ public class AtuApplication extends javax.swing.JFrame
     buttonGroupTuneBox = new javax.swing.ButtonGroup();
     jPanelDisplay = new javax.swing.JPanel();
     jPanelSwr = new javax.swing.JPanel();
-    jProgressBar1 = new javax.swing.JProgressBar();
+    jProgressBarSwr = new javax.swing.JProgressBar();
     jLabel3 = new javax.swing.JLabel();
     jPanelVoltage = new javax.swing.JPanel();
-    jProgressBar2 = new javax.swing.JProgressBar();
+    jProgressBarAntennaVoltage = new javax.swing.JProgressBar();
     jLabel4 = new javax.swing.JLabel();
     jPanelMiscButtons = new javax.swing.JPanel();
     jToggleButtonSsb = new javax.swing.JToggleButton();
@@ -424,8 +528,9 @@ public class AtuApplication extends javax.swing.JFrame
 
     jPanelSwr.setLayout(new java.awt.GridBagLayout());
 
-    jProgressBar1.setOrientation(1);
-    jProgressBar1.setToolTipText("");
+    jProgressBarSwr.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+    jProgressBarSwr.setOrientation(1);
+    jProgressBarSwr.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -433,7 +538,7 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelSwr.add(jProgressBar1, gridBagConstraints);
+    jPanelSwr.add(jProgressBarSwr, gridBagConstraints);
 
     jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
     jLabel3.setText("SWR");
@@ -453,12 +558,13 @@ public class AtuApplication extends javax.swing.JFrame
 
     jPanelVoltage.setLayout(new java.awt.GridBagLayout());
 
-    jProgressBar2.setOrientation(1);
+    jProgressBarAntennaVoltage.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+    jProgressBarAntennaVoltage.setOrientation(1);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelVoltage.add(jProgressBar2, gridBagConstraints);
+    jPanelVoltage.add(jProgressBarAntennaVoltage, gridBagConstraints);
 
     jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
     jLabel4.setText("Voltage");
@@ -484,11 +590,11 @@ public class AtuApplication extends javax.swing.JFrame
 
     buttonGroupMode.add(jToggleButtonSsb);
     jToggleButtonSsb.setText("SSB");
-    jToggleButtonSsb.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonSsb.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonSsbActionPerformed(evt);
+        jToggleButtonSsbItemStateChanged(evt);
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -502,11 +608,11 @@ public class AtuApplication extends javax.swing.JFrame
 
     buttonGroupMode.add(jToggleButtonCw);
     jToggleButtonCw.setText("CW");
-    jToggleButtonCw.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonCw.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonCwActionPerformed(evt);
+        jToggleButtonCwItemStateChanged(evt);
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -529,6 +635,13 @@ public class AtuApplication extends javax.swing.JFrame
         jSliderC1StateChanged(evt);
       }
     });
+    jSliderC1.addKeyListener(new java.awt.event.KeyAdapter()
+    {
+      public void keyPressed(java.awt.event.KeyEvent evt)
+      {
+        jSliderC1KeyPressed(evt);
+      }
+    });
     jPanelSliderControls.add(jSliderC1);
 
     jSliderL.setMaximum(TunerController.L_MAX);
@@ -541,9 +654,9 @@ public class AtuApplication extends javax.swing.JFrame
     });
     jSliderL.addKeyListener(new java.awt.event.KeyAdapter()
     {
-      public void keyReleased(java.awt.event.KeyEvent evt)
+      public void keyPressed(java.awt.event.KeyEvent evt)
       {
-        jSliderLKeyReleased(evt);
+        jSliderLKeyPressed(evt);
       }
     });
     jPanelSliderControls.add(jSliderL);
@@ -575,6 +688,13 @@ public class AtuApplication extends javax.swing.JFrame
     jPanelMiscButtons.add(jButton3, gridBagConstraints);
 
     jToggleButtonTune.setText("Tune");
+    jToggleButtonTune.addItemListener(new java.awt.event.ItemListener()
+    {
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
+      {
+        jToggleButtonTuneItemStateChanged(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -585,6 +705,13 @@ public class AtuApplication extends javax.swing.JFrame
     jPanelMiscButtons.add(jToggleButtonTune, gridBagConstraints);
 
     jToggleButtonAuto.setText("AUTO");
+    jToggleButtonAuto.addItemListener(new java.awt.event.ItemListener()
+    {
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
+      {
+        jToggleButtonAutoItemStateChanged(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -600,22 +727,22 @@ public class AtuApplication extends javax.swing.JFrame
 
     buttonGroupBand.add(jToggleButtonBand1);
     jToggleButtonBand1.setText("1.8");
-    jToggleButtonBand1.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand1.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand1ActionPerformed(evt);
+        jToggleButtonBand1ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand1);
 
     buttonGroupBand.add(jToggleButtonBand2);
     jToggleButtonBand2.setText("3.5");
-    jToggleButtonBand2.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand2.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand2ActionPerformed(evt);
+        jToggleButtonBand2ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand2);
@@ -623,22 +750,22 @@ public class AtuApplication extends javax.swing.JFrame
     buttonGroupBand.add(jToggleButtonBand3);
     jToggleButtonBand3.setSelected(true);
     jToggleButtonBand3.setText("7");
-    jToggleButtonBand3.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand3.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand3ActionPerformed(evt);
+        jToggleButtonBand3ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand3);
 
     buttonGroupBand.add(jToggleButtonBand4);
     jToggleButtonBand4.setText("10");
-    jToggleButtonBand4.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand4.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand4ActionPerformed(evt);
+        jToggleButtonBand4ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand4);
@@ -646,11 +773,11 @@ public class AtuApplication extends javax.swing.JFrame
     buttonGroupBand.add(jToggleButtonBand5);
     jToggleButtonBand5.setText("14");
     jToggleButtonBand5.setToolTipText("");
-    jToggleButtonBand5.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand5.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand5ActionPerformed(evt);
+        jToggleButtonBand5ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand5);
@@ -658,44 +785,44 @@ public class AtuApplication extends javax.swing.JFrame
     buttonGroupBand.add(jToggleButtonBand6);
     jToggleButtonBand6.setText("18");
     jToggleButtonBand6.setToolTipText("");
-    jToggleButtonBand6.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand6.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand6ActionPerformed(evt);
+        jToggleButtonBand6ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand6);
 
     buttonGroupBand.add(jToggleButtonBand7);
     jToggleButtonBand7.setText("21");
-    jToggleButtonBand7.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand7.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand7ActionPerformed(evt);
+        jToggleButtonBand7ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand7);
 
     buttonGroupBand.add(jToggleButtonBand8);
     jToggleButtonBand8.setText("24");
-    jToggleButtonBand8.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand8.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand8ActionPerformed(evt);
+        jToggleButtonBand8ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand8);
 
     buttonGroupBand.add(jToggleButtonBand9);
     jToggleButtonBand9.setText("28");
-    jToggleButtonBand9.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonBand9.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonBand9ActionPerformed(evt);
+        jToggleButtonBand9ItemStateChanged(evt);
       }
     });
     jPanelBands.add(jToggleButtonBand9);
@@ -706,66 +833,68 @@ public class AtuApplication extends javax.swing.JFrame
 
     buttonGroupAnt.add(jToggleButtonAnt1);
     jToggleButtonAnt1.setText("ant 1");
-    jToggleButtonAnt1.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonAnt1.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonAnt1ActionPerformed(evt);
+        jToggleButtonAnt1ItemStateChanged(evt);
       }
     });
     jPanelAntennas.add(jToggleButtonAnt1);
 
     buttonGroupAnt.add(jToggleButtonAnt2);
-    jToggleButtonAnt2.setText("ant 4");
-    jToggleButtonAnt2.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonAnt2.setText("ant 2");
+    jToggleButtonAnt2.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonAnt2ActionPerformed(evt);
+        jToggleButtonAnt2ItemStateChanged(evt);
       }
     });
     jPanelAntennas.add(jToggleButtonAnt2);
 
     buttonGroupAnt.add(jToggleButtonAnt3);
-    jToggleButtonAnt3.setText("ant 2");
-    jToggleButtonAnt3.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonAnt3.setText("ant 3");
+    jToggleButtonAnt3.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonAnt3ActionPerformed(evt);
+        jToggleButtonAnt3ItemStateChanged(evt);
       }
     });
     jPanelAntennas.add(jToggleButtonAnt3);
 
     buttonGroupAnt.add(jToggleButtonAnt4);
-    jToggleButtonAnt4.setText("ant 5");
-    jToggleButtonAnt4.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonAnt4.setText("ant 4");
+    jToggleButtonAnt4.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonAnt4ActionPerformed(evt);
+        jToggleButtonAnt4ItemStateChanged(evt);
       }
     });
     jPanelAntennas.add(jToggleButtonAnt4);
 
     buttonGroupAnt.add(jToggleButtonAnt5);
-    jToggleButtonAnt5.setText("ant 3");
-    jToggleButtonAnt5.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonAnt5.setText("ant 5");
+    jToggleButtonAnt5.setEnabled(false);
+    jToggleButtonAnt5.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonAnt5ActionPerformed(evt);
+        jToggleButtonAnt5ItemStateChanged(evt);
       }
     });
     jPanelAntennas.add(jToggleButtonAnt5);
 
     buttonGroupAnt.add(jToggleButtonAnt6);
     jToggleButtonAnt6.setText("ant 6");
-    jToggleButtonAnt6.addActionListener(new java.awt.event.ActionListener()
+    jToggleButtonAnt6.setEnabled(false);
+    jToggleButtonAnt6.addItemListener(new java.awt.event.ItemListener()
     {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
       {
-        jToggleButtonAnt6ActionPerformed(evt);
+        jToggleButtonAnt6ItemStateChanged(evt);
       }
     });
     jPanelAntennas.add(jToggleButtonAnt6);
@@ -783,10 +912,6 @@ public class AtuApplication extends javax.swing.JFrame
     pack();
   }// </editor-fold>//GEN-END:initComponents
 
-    private void jToggleButtonBand1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonBand1ActionPerformed
-      onBandButtonPress(0);
-    }//GEN-LAST:event_jToggleButtonBand1ActionPerformed
-
   private void formWindowClosing(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowClosing
   {//GEN-HEADEREND:event_formWindowClosing
     // If not maximized...
@@ -796,7 +921,7 @@ public class AtuApplication extends javax.swing.JFrame
     }
     
     applicationSettings.SaveSettingsToDisk();
-    tuneSettins.save();
+    tuneSettings.save();
   }//GEN-LAST:event_formWindowClosing
 
   private void formWindowOpened(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowOpened
@@ -804,93 +929,13 @@ public class AtuApplication extends javax.swing.JFrame
     initMainWindow();
   }//GEN-LAST:event_formWindowOpened
 
-  private void jToggleButtonBand2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand2ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand2ActionPerformed
-    onBandButtonPress(1);
-  }//GEN-LAST:event_jToggleButtonBand2ActionPerformed
-
-  private void jToggleButtonBand4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand4ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand4ActionPerformed
-    onBandButtonPress(3);
-  }//GEN-LAST:event_jToggleButtonBand4ActionPerformed
-
-  private void jToggleButtonBand5ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand5ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand5ActionPerformed
-    onBandButtonPress(4);
-  }//GEN-LAST:event_jToggleButtonBand5ActionPerformed
-
-  private void jToggleButtonBand3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand3ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand3ActionPerformed
-    onBandButtonPress(2);
-  }//GEN-LAST:event_jToggleButtonBand3ActionPerformed
-
-  private void jToggleButtonBand6ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand6ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand6ActionPerformed
-    onBandButtonPress(5);
-  }//GEN-LAST:event_jToggleButtonBand6ActionPerformed
-
-  private void jToggleButtonBand7ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand7ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand7ActionPerformed
-    onBandButtonPress(6);
-  }//GEN-LAST:event_jToggleButtonBand7ActionPerformed
-
-  private void jToggleButtonBand8ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand8ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand8ActionPerformed
-    onBandButtonPress(7);
-  }//GEN-LAST:event_jToggleButtonBand8ActionPerformed
-
-  private void jToggleButtonBand9ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonBand9ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonBand9ActionPerformed
-    onBandButtonPress(8);
-  }//GEN-LAST:event_jToggleButtonBand9ActionPerformed
-
-  private void jToggleButtonAnt1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonAnt1ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonAnt1ActionPerformed
-    onAntennaButtonPress(0);
-  }//GEN-LAST:event_jToggleButtonAnt1ActionPerformed
-
-  private void jToggleButtonAnt2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonAnt2ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonAnt2ActionPerformed
-    onAntennaButtonPress(1);
-  }//GEN-LAST:event_jToggleButtonAnt2ActionPerformed
-
-  private void jToggleButtonAnt3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonAnt3ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonAnt3ActionPerformed
-    onAntennaButtonPress(2);
-  }//GEN-LAST:event_jToggleButtonAnt3ActionPerformed
-
-  private void jToggleButtonAnt4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonAnt4ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonAnt4ActionPerformed
-    onAntennaButtonPress(3);
-  }//GEN-LAST:event_jToggleButtonAnt4ActionPerformed
-
-  private void jToggleButtonAnt5ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonAnt5ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonAnt5ActionPerformed
-    onAntennaButtonPress(4);
-  }//GEN-LAST:event_jToggleButtonAnt5ActionPerformed
-
-  private void jToggleButtonAnt6ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonAnt6ActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonAnt6ActionPerformed
-    onAntennaButtonPress(5);
-  }//GEN-LAST:event_jToggleButtonAnt6ActionPerformed
-
-  private void jToggleButtonSsbActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonSsbActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonSsbActionPerformed
-    onModeButtonPress(0);
-  }//GEN-LAST:event_jToggleButtonSsbActionPerformed
-
-  private void jToggleButtonCwActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jToggleButtonCwActionPerformed
-  {//GEN-HEADEREND:event_jToggleButtonCwActionPerformed
-    onModeButtonPress(1);
-  }//GEN-LAST:event_jToggleButtonCwActionPerformed
-
   private void jSliderC1StateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jSliderC1StateChanged
   {//GEN-HEADEREND:event_jSliderC1StateChanged
     JSlider source = (JSlider) evt.getSource();
     if(source.getValueIsAdjusting())
       return;
-    
-    onSliderButtonPress(sliderButtons.lastIndexOf(source));
+
+    onSliderValueChange(sliderButtons.lastIndexOf(source));
   }//GEN-LAST:event_jSliderC1StateChanged
 
   private void jSliderLStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jSliderLStateChanged
@@ -898,8 +943,8 @@ public class AtuApplication extends javax.swing.JFrame
     JSlider source = (JSlider) evt.getSource();
     if(source.getValueIsAdjusting())
       return;
-      
-    onSliderButtonPress(sliderButtons.lastIndexOf(source));
+ 
+    onSliderValueChange(sliderButtons.lastIndexOf(source));
   }//GEN-LAST:event_jSliderLStateChanged
 
   private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
@@ -923,17 +968,145 @@ public class AtuApplication extends javax.swing.JFrame
    applicationSettings.setTuneBoxDimensions(jDialogTuneBox.getBounds());
   }//GEN-LAST:event_jDialogTuneBoxWindowDeactivated
 
-  private void jSliderLKeyReleased(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jSliderLKeyReleased
-  {//GEN-HEADEREND:event_jSliderLKeyReleased
-    if(evt.getKeyCode() == KeyEvent.VK_TAB)
+  private void jSliderC1KeyPressed(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jSliderC1KeyPressed
+  {//GEN-HEADEREND:event_jSliderC1KeyPressed
+     if(evt.getKeyCode() == KeyEvent.VK_DOWN || evt.getKeyCode() == KeyEvent.VK_UP)
     {
-      if(jSliderL.isFocusOwner())
-      {
+     
+        jSliderL.requestFocusInWindow();
+        evt.consume();
+
+    }
+  }//GEN-LAST:event_jSliderC1KeyPressed
+
+  private void jSliderLKeyPressed(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jSliderLKeyPressed
+  {//GEN-HEADEREND:event_jSliderLKeyPressed
+     if(evt.getKeyCode() == KeyEvent.VK_DOWN || evt.getKeyCode() == KeyEvent.VK_UP)
+    {
+     
         jSliderC1.requestFocusInWindow();
         evt.consume();
-      }
+
     }
-  }//GEN-LAST:event_jSliderLKeyReleased
+  }//GEN-LAST:event_jSliderLKeyPressed
+
+  private void jToggleButtonBand1ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand1ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand1ItemStateChanged
+    onBandButtonPress(0);
+  }//GEN-LAST:event_jToggleButtonBand1ItemStateChanged
+
+  private void jToggleButtonBand2ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand2ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand2ItemStateChanged
+    onBandButtonPress(1);
+  }//GEN-LAST:event_jToggleButtonBand2ItemStateChanged
+
+  private void jToggleButtonBand4ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand4ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand4ItemStateChanged
+    onBandButtonPress(3);
+  }//GEN-LAST:event_jToggleButtonBand4ItemStateChanged
+
+  private void jToggleButtonBand3ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand3ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand3ItemStateChanged
+    onBandButtonPress(2);
+  }//GEN-LAST:event_jToggleButtonBand3ItemStateChanged
+
+  private void jToggleButtonBand5ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand5ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand5ItemStateChanged
+    onBandButtonPress(4);
+  }//GEN-LAST:event_jToggleButtonBand5ItemStateChanged
+
+  private void jToggleButtonBand6ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand6ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand6ItemStateChanged
+    onBandButtonPress(5);
+  }//GEN-LAST:event_jToggleButtonBand6ItemStateChanged
+
+  private void jToggleButtonBand7ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand7ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand7ItemStateChanged
+    onBandButtonPress(6);
+  }//GEN-LAST:event_jToggleButtonBand7ItemStateChanged
+
+  private void jToggleButtonBand8ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand8ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand8ItemStateChanged
+    onBandButtonPress(7);
+  }//GEN-LAST:event_jToggleButtonBand8ItemStateChanged
+
+  private void jToggleButtonBand9ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonBand9ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonBand9ItemStateChanged
+    onBandButtonPress(8);
+  }//GEN-LAST:event_jToggleButtonBand9ItemStateChanged
+
+  private void jToggleButtonSsbItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonSsbItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonSsbItemStateChanged
+    onModeButtonPress(0);
+  }//GEN-LAST:event_jToggleButtonSsbItemStateChanged
+
+  private void jToggleButtonCwItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonCwItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonCwItemStateChanged
+    onModeButtonPress(1);
+  }//GEN-LAST:event_jToggleButtonCwItemStateChanged
+
+  private void jToggleButtonAnt1ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAnt1ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonAnt1ItemStateChanged
+    onAntennaButtonPress(0);
+  }//GEN-LAST:event_jToggleButtonAnt1ItemStateChanged
+
+  private void jToggleButtonAnt2ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAnt2ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonAnt2ItemStateChanged
+    onAntennaButtonPress(1);
+  }//GEN-LAST:event_jToggleButtonAnt2ItemStateChanged
+
+  private void jToggleButtonAnt3ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAnt3ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonAnt3ItemStateChanged
+    onAntennaButtonPress(2);
+  }//GEN-LAST:event_jToggleButtonAnt3ItemStateChanged
+
+  private void jToggleButtonAnt4ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAnt4ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonAnt4ItemStateChanged
+    onAntennaButtonPress(3);
+  }//GEN-LAST:event_jToggleButtonAnt4ItemStateChanged
+
+  private void jToggleButtonAnt5ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAnt5ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonAnt5ItemStateChanged
+    onAntennaButtonPress(4);
+  }//GEN-LAST:event_jToggleButtonAnt5ItemStateChanged
+
+  private void jToggleButtonAnt6ItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAnt6ItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonAnt6ItemStateChanged
+    onAntennaButtonPress(5);
+  }//GEN-LAST:event_jToggleButtonAnt6ItemStateChanged
+
+  private void jToggleButtonTuneItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonTuneItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonTuneItemStateChanged
+    if(evt.getStateChange() == ItemEvent.SELECTED)
+    {
+      tunerController.enableTuneMode();
+    }
+    else if(evt.getStateChange() == ItemEvent.DESELECTED)
+    {
+      tunerController.disableTuneMode();
+    }
+  }//GEN-LAST:event_jToggleButtonTuneItemStateChanged
+
+  private void jToggleButtonAutoItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAutoItemStateChanged
+  {//GEN-HEADEREND:event_jToggleButtonAutoItemStateChanged
+    if(evt.getStateChange() == ItemEvent.SELECTED)
+    {
+      if(jToggleButtonTune.isSelected())
+        jToggleButtonTune.setSelected(false);
+      
+      tunerController.enableTuneMode(); 
+      isAutoTuneOn = true; 
+      
+      // Select the first tune setting. 
+      tuneBoxButtons.get(0).setSelected(true);
+      // When SWR is measured we will switch to the next one until all the tune settings are tested.
+    }
+    else if(evt.getStateChange() == ItemEvent.DESELECTED)
+    {
+      tunerController.disableTuneMode();
+      isAutoTuneOn = false;
+    }
+  }//GEN-LAST:event_jToggleButtonAutoItemStateChanged
 
   /**
    * @param args the command line arguments
@@ -1007,8 +1180,8 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.JPanel jPanelSwr;
   private javax.swing.JPanel jPanelTuneBox;
   private javax.swing.JPanel jPanelVoltage;
-  private javax.swing.JProgressBar jProgressBar1;
-  private javax.swing.JProgressBar jProgressBar2;
+  private javax.swing.JProgressBar jProgressBarAntennaVoltage;
+  private javax.swing.JProgressBar jProgressBarSwr;
   private javax.swing.JSlider jSliderC1;
   private javax.swing.JSlider jSliderL;
   private javax.swing.JToggleButton jToggleButtonAnt1;

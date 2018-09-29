@@ -44,7 +44,9 @@ public final class AtuApplicationSettings
   static final String PROPERTY_TUNEBOX_WINDOW_Y = "TuneboxWindow_y";
   static final String PROPERTY_TUNEBOX_WINDOW_WIDTH = "TuneboxWindow_w";
   static final String PROPERTY_TUNEBOX_WINDOW_HEIGHT = "TuneboxWindow_h";
-
+  static final String PROPERTY_RADIO_ATTACK_POWER = "radioAttackPower";
+  static final String PROPERTY_RADIO_TUNE_POWER = "radioTunePower";
+  
   static final int NUMBER_OF_BAND_BUTTONS = 9;
   static final int NUMBER_OF_ANT_BUTTONS = 6;
   static final int NUMBER_OF_MODE_BUTTONS = 2;
@@ -59,6 +61,8 @@ public final class AtuApplicationSettings
   private Rectangle mainWindowDimensions;
   private Rectangle tuneBoxDimensions;
   private final Properties prop;
+  private int  radioAttackPower;
+  private int  radioTunePower;
 
   // Values below are not saved in the file
   private int currentBandSelection = 0;
@@ -66,6 +70,19 @@ public final class AtuApplicationSettings
   private int currentModeSelection = 0;
   private int currentTuneSelection = 0;
   private int[][][] lastUsedTuneSelection = new int[NUMBER_OF_BAND_BUTTONS][NUMBER_OF_ANT_BUTTONS][NUMBER_OF_MODE_BUTTONS];  // last used tune selection for given combination of Band, Ant and Mode
+
+  
+  // TODO implement support
+  public int getRadioAttackPower()
+  {
+    return radioAttackPower;
+  }
+
+  // TODO implement support
+  public int getRadioTunePower()
+  {
+    return radioTunePower;
+  }
 
   
   public int getCurrentBandSelection()
@@ -255,6 +272,9 @@ public final class AtuApplicationSettings
     prop.setProperty(PROPERTY_TUNEBOX_WINDOW_WIDTH, Integer.toString(tuneBoxDimensions.width));
     prop.setProperty(PROPERTY_TUNEBOX_WINDOW_HEIGHT, Integer.toString(tuneBoxDimensions.height));
 
+    prop.setProperty(PROPERTY_RADIO_ATTACK_POWER, Integer.toString(radioAttackPower));
+    prop.setProperty(PROPERTY_RADIO_TUNE_POWER, Integer.toString(radioTunePower));
+    
     // Now save the texts for the Direction Buttons
     setProperties(PROPERTY_LABEL_ANT, antennaLabels);
 
@@ -317,6 +337,9 @@ public final class AtuApplicationSettings
       w = Integer.parseInt(prop.getProperty(PROPERTY_TUNEBOX_WINDOW_WIDTH));
       h = Integer.parseInt(prop.getProperty(PROPERTY_TUNEBOX_WINDOW_HEIGHT));
 
+      radioAttackPower = Integer.parseInt(prop.getProperty(PROPERTY_RADIO_ATTACK_POWER));
+      radioTunePower = Integer.parseInt(prop.getProperty(PROPERTY_RADIO_TUNE_POWER));
+      
       this.tuneBoxDimensions = new Rectangle(x, y, w, h);
 
       // Now read the texts for the Direction Buttons
@@ -363,6 +386,9 @@ public final class AtuApplicationSettings
     tuneBoxDimensions.x = 0;
     tuneBoxDimensions.y = 0;
 
+    radioAttackPower = 10;
+    radioTunePower   = 10;
+    
     // Set texts for the antenna buttons
     for(int i = 0; i < NUMBER_OF_ANT_BUTTONS; i++)
     {
@@ -373,13 +399,5 @@ public final class AtuApplicationSettings
   void throwMissingPropertyException(String propertyName) throws Exception
   {
     throw new Exception("Error when trying to read element " + propertyName + " from file " + SETTINGS_FILE_NAME);
-  }
-
-  class jSliderC1
-  {
-
-    public jSliderC1()
-    {
-    }
   }
 }

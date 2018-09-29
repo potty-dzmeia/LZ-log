@@ -36,8 +36,9 @@ public class TunerController
   private final CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
   
   // Controlled by the user
-  private int     C1;
-  private int     L;
+  private int     c1;
+  private int     l;
+  private int     antenna;
   private boolean isTuneOn;
   
   // Controller by the Tuner
@@ -94,29 +95,54 @@ public class TunerController
     return powerSupplyVoltage;
   }
   
-   
+  
+  public void enableTuneMode()
+  {
+    if(this.isTuneOn)
+      return;
+    
+    this.isTuneOn = true;
+    sendSerialCommand();
+  }
+  
+  
+  public void disableTuneMode()
+  {
+    if(this.isTuneOn==false)
+      return;
+    
+    this.isTuneOn = false;
+    sendSerialCommand();
+  }
+  
+  
+  public void setAntenna(int antenna)
+  {
+    if(this.antenna == antenna)
+      return;
+    
+    this.antenna = antenna;
+    sendSerialCommand();
+  }
+  
   public void setC1(int value)
   {
     assert value<=C1_MAX;
-       
-    this.C1 = value;
+    if(this.c1 == value)
+      return;
     
-    // encode the command and send it to serial through the serial connection
-    I_EncodedTransaction transaction = new EncodedTransaction();
-    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
-    tunerSerialComm.queueTransactions(transaction);
+    this.c1 = value;
+    sendSerialCommand();
   }
   
   public void setL(int value)
   {
     assert value<=L_MAX;
-       
-    this.L = value;
+    if(this.l == value)
+      return;   
     
-    // encode the command and send it to serial through the serial connection
-    I_EncodedTransaction transaction = new EncodedTransaction();
-    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
-    tunerSerialComm.queueTransactions(transaction);
+    this.l = value;
+    sendSerialCommand();
   }
   
   public void addEventListener(TunerControllerListener listener)
@@ -129,7 +155,14 @@ public class TunerController
     this.eventListeners.remove(listener);
   }
   
-  public int feedData(byte[] data)
+  
+  /**
+   * Extracts swr, voltage and other parameters from the input data
+   * @param data - incoming data
+   * 
+   * @return - number of bytes read from the the supplied data
+   */
+  public int decodeSerialData(byte[] data)
   {
     if(data.length==0)
       return 0;
@@ -173,6 +206,19 @@ public class TunerController
   //                           Private methods
   //----------------------------------------------------------------------
   
+  /** Assembles and sends the data to the class responsible for the serial communication with the tuner.
+   * 
+   * @return Transaction contains the data that will be sent through the serial communication 
+   */
+  private void sendSerialCommand()
+  {
+    // encode the command and send it to serial through the serial connection
+    I_EncodedTransaction transaction = new EncodedTransaction();
+    
+    
+    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    tunerSerialComm.queueTransactions(transaction);
+  }
   
   
   //----------------------------------------------------------------------
