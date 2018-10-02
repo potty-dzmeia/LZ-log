@@ -19,6 +19,8 @@
 // ***************************************************************************
 package org.lz1aq.tuner;
 
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 import java.util.EventListener;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
@@ -29,8 +31,8 @@ import org.lz1aq.py.rig.I_EncodedTransaction;
 
 public class TunerController
 {
-  public static final int C1_MAX = 4000;
-  public static final int L_MAX  = 4000;
+  public static final int C1_MAX = 0xfff;  // 12bits 
+  public static final int L_MAX  = 0xfff;  // 12bits
   
   private Tuner   tunerSerialComm;
   private final CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
@@ -39,7 +41,7 @@ public class TunerController
   private int     c;
   private int     l;
   private boolean n;
-  private int     antenna;
+  private int     antenna = -1;
   private boolean isTuneOn;
   
   // Controller by the Tuner
@@ -137,51 +139,7 @@ public class TunerController
     isTuneOn = false;
     return sendSetTuneMode();
   }
-  
-  
-  /**
-   *  Sends a command to the tuner to select another antenna.
-   * 
-   * @param antenna
-   * @return 
-   */
-  public boolean setAntenna(int antenna)
-  {
-    if(this.antenna == antenna)
-      return true;
-    
-    System.out.println("setAnt");
-    this.antenna = antenna;
-    return sendSetRelays();
-  }
-  
-  
-  /**
-   * Sets the antenna locally only in the TunerController class without sending a command to the Tuner.
-   * Useful if we would like to avoid sending more than one setRelay command to the Tuner when
-   * changing antenna which possibly also includes change of tune values.
-   * 
-   * @param antenna
-   * @param sendCommand
-   * @return 
-   */
-  public boolean setAntenna(int antenna, boolean sendCommand)
-  {
-    if(this.antenna == antenna)
-      return true;
-    
-    
-    this.antenna = antenna;
-    
-    if(sendCommand)
-    {
-      System.out.println("setAnt");
-      return sendSetRelays();
-    }
-    else
-      return true;
-  }
-  
+
   
   /**
    * This sends immediately command to the tuner. 
@@ -237,11 +195,31 @@ public class TunerController
   /**
    * This sends immediately command to the tuner
    * 
+   * @param ant
    * @param c
    * @param l
    * @param n 
+   * @return  
    */
-  public boolean setAll(int c, int l, boolean n)
+  public boolean setAll(int ant, int c, int l, boolean n)
+  { 
+    assert c<=C1_MAX;
+    assert l<=L_MAX;
+    
+    if(this.c == c && this.l==l && this.n==n && this.antenna==ant)
+      return true;
+    
+    System.out.println("setAll");
+    this.c = c;  
+    this.l = l;
+    this.n = n;
+    this.antenna = ant;
+    
+    return sendSetRelays();
+  }
+  
+  
+  public boolean setTuneControls(int c, int l, boolean n)
   { 
     assert c<=C1_MAX;
     assert l<=L_MAX;
@@ -249,14 +227,13 @@ public class TunerController
     if(this.c == c && this.l==l && this.n==n)
       return true;
     
-    System.out.println("setAll");
+    System.out.println("setTuneControls");
     this.c = c;  
     this.l = l;
     this.n = n;
     
     return sendSetRelays();
   }
-  
   
   public void addEventListener(TunerControllerListener listener)
   {
@@ -334,7 +311,43 @@ public class TunerController
     I_EncodedTransaction transaction = new EncodedTransaction();
     
     
-    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    //   73   |   mode           |    B0     |    B1   |   B2    |  B3     |  B4
+    //           08(Load relays)   always 0     
+    byte[] packet = new byte[7];
+    packet[0] = 0x73;   // Magic byte
+    packet[1] = 0x08;   // Command (Load Relays)
+    packet[2] = 0x00;   // Always 0
+    packet[3] = (byte)(c&0xFF); // LO(c)
+    packet[4] = (byte) ((c>>0x08) | ((l&0x0F)<<4));     // HI(c) + LO(l)
+    packet[5] = (byte)((l>>4));     // HI(l)
+    
+    // Set C1/C2 active
+    if(n)
+      packet[6] = (byte)(packet[6] | 0x01); // C2 active
+    else
+      packet[6] = (byte)(packet[6] | 0x02); // C1 active
+    
+    // Set antenna
+    switch(antenna)
+    {
+      case 0:
+        packet[6] = (byte)(packet[6] | 0x08);
+        break;
+      case 1:
+        packet[6] = (byte)(packet[6] | 0x10);
+        break;
+      case 2:
+        packet[6] = (byte)(packet[6] | 0x20);
+        break;
+    }
+        
+    // Low L:    M1 = 0  CM3 = 1 ;       Hi L:  M1 = 1    CM3 = 0       low L  if L <512;  High L  if L >= 512
+    if(l<512)
+       packet[6] = (byte)(packet[6] | 0x40);
+    else
+       packet[6] = (byte)(packet[6] | 0x4);
+    
+    ((EncodedTransaction)transaction).setTransaction(packet); 
     return tunerSerialComm.queueTransactions(transaction);
   }
   
@@ -410,7 +423,7 @@ public class TunerController
     @Override
     public int getTimeout()
     {
-      return 0;
+      return 50;
     }
 
     /**
@@ -432,7 +445,7 @@ public class TunerController
     @Override
     public boolean isConfirmationExpected()
     {
-      return false;
+      return true;
     }
   }
   

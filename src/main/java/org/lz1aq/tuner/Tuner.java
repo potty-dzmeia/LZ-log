@@ -31,6 +31,7 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.lz1aq.py.rig.I_EncodedTransaction;
 import org.lz1aq.utils.DynamicByteArray;
+import org.lz1aq.utils.Misc;
 
 
 public class Tuner
@@ -270,7 +271,7 @@ public class Tuner
             // Write to serial port
             try
             {
-              //logger.log(Level.INFO, "Outgoing bytes ("+trans.getTransaction().length+") ------> " + new String(trans.getTransaction(),"UTF-8" ));
+              logger.log(Level.INFO, "Com-> "+Misc.toHexString(trans.getTransaction()));
               serialPort.writeBytes(trans.getTransaction());
               serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
             } catch (SerialPortException ex)
@@ -296,7 +297,7 @@ public class Tuner
               break; 
             }        
           }//for(retry count) 
-          
+
         }//while(true)
       }catch(InterruptedException e)
       {
@@ -362,8 +363,7 @@ public class Tuner
         logger.log(Level.WARNING, "Upon receiving of confirmation from the ATU the \"confirmation\" var is not empty!");
       if(isWaitingForConfirmation == false)
         logger.log(Level.WARNING, "Upon receiving of confirmation from the ATU the \"isWaitingForConfirmation\" var is false!");
-      
-      
+     
       // signal that confirmation has arrived  
       isWaitingForConfirmation = false; 
       

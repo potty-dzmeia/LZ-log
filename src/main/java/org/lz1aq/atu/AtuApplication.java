@@ -98,9 +98,9 @@ public class AtuApplication extends javax.swing.JFrame
       this.setBounds(applicationSettings.getMainWindowDimensions());
     }
 
-    //
-    jToggleButtonBand1.setSelected(true);
+    // Init by starting with antenna - as this will switch all the relays to the proper position sending only one command to the Tuner.
     jToggleButtonAnt1.setSelected(true);
+    jToggleButtonBand1.setSelected(true);
     jToggleButtonSsb.setSelected(true);
   }
 
@@ -150,93 +150,92 @@ public class AtuApplication extends javax.swing.JFrame
     sliderButtons.add(jSliderL);
   }
 
-  private void updateSliders()
+  private void updateTuneControls()
   {
-    // Get the tune for the current combination of band, ant and mode
-    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
-            applicationSettings.getCurrentAntSelection(),
-            applicationSettings.getCurrentModeSelection(),
-            applicationSettings.getCurrentTuneSelection());
-
- 
-    // Take care of sending the command to the Tuner now - so that later when sliders state change
-    // we won't need to send for each slider a separate command to the tunner.
-    while(!tunerController.setAll(tune.getC1(), tune.getL(), tune.isN())); 
+    TuneValue tune = getCurrentTune();
     
     // update slider values to represent the current tune
     jSliderC1.setValue(tune.getC1());
     jSliderL.setValue(tune.getL());
     jToggleButtonN.setSelected(tune.isN());
   }
-
-  void sendNewTuneValue()
+//
+//  void sendNewTuneValue()
+//  {
+//    // TODO remove
+//    jProgressBarSwr.setValue(50);
+//    jProgressBarSwr.setString(String.format("%.1f",1.1));
+//    jProgressBarAntennaVoltage.setString(String.format("%.1f",1.1));
+//    // Get the tune for the current combination of band, ant and mode
+//    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
+//                                      applicationSettings.getCurrentAntSelection(),
+//                                      applicationSettings.getCurrentModeSelection(),
+//                                      applicationSettings.getCurrentTuneSelection());
+//    
+//    tunerController.setAll(tune.getC1(), tune.getL(), tune.isN());
+//    System.out.println("sendTune");
+//  }
+  
+  TuneValue getCurrentTune()
   {
-    // TODO remove
-    jProgressBarSwr.setValue(50);
-    jProgressBarSwr.setString(String.format("%.1f",1.1));
-    jProgressBarAntennaVoltage.setString(String.format("%.1f",1.1));
-    // Get the tune for the current combination of band, ant and mode
-    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
-                                      applicationSettings.getCurrentAntSelection(),
-                                      applicationSettings.getCurrentModeSelection(),
-                                      applicationSettings.getCurrentTuneSelection());
-    
-    tunerController.setAll(tune.getC1(), tune.getL(), tune.isN());
-    System.out.println("sendTune");
+     return tuneSettings.get(applicationSettings.getCurrentBandSelection(),
+                             applicationSettings.getCurrentAntSelection(),
+                             applicationSettings.getCurrentModeSelection(),
+                             applicationSettings.getCurrentTuneSelection() );
   }
 
   private void onBandButtonPress(int bandButton)
   {
     applicationSettings.setCurrentBandSelection(bandButton);
-    updateSliders();
-    updateTuneBoxValues();
+    TuneValue tune = getCurrentTune(); // Get the tune for the current combination of band, ant and mode
+  
+    boolean ret = tunerController.setTuneControls(tune.getC1(), tune.getL(), tune.isN()); // Take care of sending the command to the Tuner now - so that later when sliders state change we won't need to send for each slider a separate command to the tunner.
+    if(!ret)
+      System.err.println("setTuneControls() failed!");
+    
+    updateTuneControls(); // Set the tuning controls to respective values
+    updateTuneBoxValues(); 
   }
 
+  
   private void onAntennaButtonPress(int antennaButton)
   {
     applicationSettings.setCurrentAntSelection(antennaButton);
-    tunerController.setAntenna(antennaButton, false);
-    updateSliders();
-    updateTuneBoxValues();
+    TuneValue tune = getCurrentTune();
+    
+    boolean ret = tunerController.setAll(antennaButton, tune.getC1(), tune.getL(), tune.isN()); 
+    if(!ret)
+      System.err.println("setTuneControls() failed!");
+    
+    updateTuneControls(); // Set the tuning controls to respective values
+    updateTuneBoxValues(); 
   }
 
+  
   private void onModeButtonPress(int modeButton)
   {
     applicationSettings.setCurrentModeSelection(modeButton);
-    updateSliders();
-    updateTuneBoxValues();
+    TuneValue tune = getCurrentTune();
+    
+    boolean ret = tunerController.setTuneControls(tune.getC1(), tune.getL(), tune.isN()); // Take care of sending the command to the Tuner now - so that later when sliders state change we won't need to send for each slider a separate command to the tunner.
+    if(!ret)
+      System.err.println("setTuneControls() failed!");
+    
+    updateTuneControls(); // Set the tuning controls to the respective values
+    updateTuneBoxValues(); 
   }
   
-  private void onTuneControlsChange(int index)
-  {
-   // System.out.println("onSliderButtonPress()\n");
-    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
-                                     applicationSettings.getCurrentAntSelection(),
-                                     applicationSettings.getCurrentModeSelection(),
-                                     applicationSettings.getCurrentTuneSelection());
-    
-    switch(index)
-    {
-      case 0:
-        tune.setC1(jSliderC1.getValue());
-        break;
-      case 1:
-        tune.setL(jSliderL.getValue());
-        break;
-      case 2: // sliderButtons.size()
-        tune.setN(jToggleButtonN.isSelected());
-        break;
-    }
-       
-    sendNewTuneValue();
-    updateTuneBoxValues();
-  }
   
   void onTuneBoxButtonPress(int buttonIndex)
   {
     applicationSettings.setCurrentTuneSelection(buttonIndex);
-
-    updateSliders();
+    TuneValue tune = getCurrentTune();
+    
+    boolean ret = tunerController.setTuneControls(tune.getC1(), tune.getL(), tune.isN());
+    if(!ret)
+      System.err.println("setTuneControls() failed!");
+    
+    updateTuneControls();
   }
   
    
@@ -263,10 +262,19 @@ public class AtuApplication extends javax.swing.JFrame
   }
   
   
+  private void updateTuneBoxText(TuneValue tune)
+  { 
+    tuneBoxButtons.get(applicationSettings.getCurrentTuneSelection()).setText("c1="+tune.getC1()+"  l="+tune.getL()+" >C="+tune.isN());  
+  }
+   
+  
+  /**
+   * Update the text of the buttons and select the button that needs to be active
+   */
   private void updateTuneBoxValues()
   {
-   // System.out.println("updateTuneBoxValues()\n");
     TuneValue tune;
+    
     for(int i=0; i<tuneBoxButtons.size(); i++)
     {
       tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(), 
@@ -474,9 +482,12 @@ public class AtuApplication extends javax.swing.JFrame
     jPanelSwr = new javax.swing.JPanel();
     jProgressBarSwr = new javax.swing.JProgressBar();
     jLabel3 = new javax.swing.JLabel();
-    jPanelVoltage = new javax.swing.JPanel();
+    jPanelAntVoltage = new javax.swing.JPanel();
     jProgressBarAntennaVoltage = new javax.swing.JProgressBar();
     jLabel4 = new javax.swing.JLabel();
+    jPanelRefVoltage = new javax.swing.JPanel();
+    jLabel1 = new javax.swing.JLabel();
+    jProgressBar1 = new javax.swing.JProgressBar();
     jPanelMiscButtons = new javax.swing.JPanel();
     jToggleButtonSsb = new javax.swing.JToggleButton();
     jToggleButtonCw = new javax.swing.JToggleButton();
@@ -590,9 +601,10 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
     jPanelDisplay.add(jPanelSwr, gridBagConstraints);
 
-    jPanelVoltage.setLayout(new java.awt.GridBagLayout());
+    jPanelAntVoltage.setLayout(new java.awt.GridBagLayout());
 
     jProgressBarAntennaVoltage.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
     jProgressBarAntennaVoltage.setOrientation(1);
@@ -600,17 +612,45 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelVoltage.add(jProgressBarAntennaVoltage, gridBagConstraints);
+    jPanelAntVoltage.add(jProgressBarAntennaVoltage, gridBagConstraints);
 
     jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-    jLabel4.setText("Voltage");
+    jLabel4.setText("Ant V");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
     gridBagConstraints.weighty = 0.1;
-    jPanelVoltage.add(jLabel4, gridBagConstraints);
+    jPanelAntVoltage.add(jLabel4, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+    jPanelDisplay.add(jPanelAntVoltage, gridBagConstraints);
+
+    jPanelRefVoltage.setLayout(new java.awt.GridBagLayout());
+
+    jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+    jLabel1.setText("Ref V");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    gridBagConstraints.weighty = 0.1;
+    jPanelRefVoltage.add(jLabel1, gridBagConstraints);
+
+    jProgressBar1.setOrientation(1);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelRefVoltage.add(jProgressBar1, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -618,7 +658,8 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelDisplay.add(jPanelVoltage, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+    jPanelDisplay.add(jPanelRefVoltage, gridBagConstraints);
 
     getContentPane().add(jPanelDisplay);
 
@@ -670,20 +711,6 @@ public class AtuApplication extends javax.swing.JFrame
       public void stateChanged(javax.swing.event.ChangeEvent evt)
       {
         jSliderC1StateChanged(evt);
-      }
-    });
-    jSliderC1.addMouseMotionListener(new java.awt.event.MouseMotionAdapter()
-    {
-      public void mouseDragged(java.awt.event.MouseEvent evt)
-      {
-        jSliderC1MouseDragged(evt);
-      }
-    });
-    jSliderC1.addMouseListener(new java.awt.event.MouseAdapter()
-    {
-      public void mouseClicked(java.awt.event.MouseEvent evt)
-      {
-        jSliderC1MouseClicked(evt);
       }
     });
     jSliderC1.addKeyListener(new java.awt.event.KeyAdapter()
@@ -1016,8 +1043,12 @@ public class AtuApplication extends javax.swing.JFrame
     JSlider source = (JSlider) evt.getSource();
     if(source.getValueIsAdjusting())
       return;
-
-    onTuneControlsChange(sliderButtons.lastIndexOf(source));
+    
+    TuneValue tune = getCurrentTune();
+    
+    tune.setC1(jSliderC1.getValue());     // Update the Tune with the new value
+    tunerController.setC1(tune.getC1());  // Tell the Tuner to set relays
+    updateTuneBoxText(tune);
   }//GEN-LAST:event_jSliderC1StateChanged
 
   private void jSliderLStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jSliderLStateChanged
@@ -1026,7 +1057,11 @@ public class AtuApplication extends javax.swing.JFrame
     if(source.getValueIsAdjusting())
       return;
  
-    onTuneControlsChange(sliderButtons.lastIndexOf(source));
+    TuneValue tune = getCurrentTune();
+    
+    tune.setL(jSliderL.getValue());    // Update the Tune with the new value
+    tunerController.setL(tune.getL());  // Tell the Tuner to set relays
+    updateTuneBoxText(tune);
   }//GEN-LAST:event_jSliderLStateChanged
 
   private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
@@ -1274,19 +1309,15 @@ public class AtuApplication extends javax.swing.JFrame
     }
   }//GEN-LAST:event_jToggleButtonAutoItemStateChanged
 
-  private void jSliderC1MouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jSliderC1MouseClicked
-  {//GEN-HEADEREND:event_jSliderC1MouseClicked
-
-  }//GEN-LAST:event_jSliderC1MouseClicked
-
-  private void jSliderC1MouseDragged(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jSliderC1MouseDragged
-  {//GEN-HEADEREND:event_jSliderC1MouseDragged
-  
-  }//GEN-LAST:event_jSliderC1MouseDragged
-
   private void jToggleButtonNItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonNItemStateChanged
   {//GEN-HEADEREND:event_jToggleButtonNItemStateChanged
-   onTuneControlsChange(sliderButtons.size()); // For toggle button send: LastSliderIndex+1
+    boolean isSelected = evt.getStateChange() == ItemEvent.SELECTED;
+    
+    TuneValue tune = getCurrentTune();
+    
+    tune.setN(isSelected);             // Update the Tune with the new value
+    tunerController.setN(isSelected);  // Tell the Tuner to set relays
+    updateTuneBoxText(tune);
   }//GEN-LAST:event_jToggleButtonNItemStateChanged
 
   /**
@@ -1348,19 +1379,22 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.JButton jButton3;
   private javax.swing.JButton jButton4;
   private javax.swing.JDialog jDialogTuneBox;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JMenu jMenu1;
   private javax.swing.JMenu jMenu2;
   private javax.swing.JMenuBar jMenuBar1;
+  private javax.swing.JPanel jPanelAntVoltage;
   private javax.swing.JPanel jPanelAntennas;
   private javax.swing.JPanel jPanelBands;
   private javax.swing.JPanel jPanelDisplay;
   private javax.swing.JPanel jPanelMiscButtons;
+  private javax.swing.JPanel jPanelRefVoltage;
   private javax.swing.JPanel jPanelSliderControls;
   private javax.swing.JPanel jPanelSwr;
   private javax.swing.JPanel jPanelTuneBox;
-  private javax.swing.JPanel jPanelVoltage;
+  private javax.swing.JProgressBar jProgressBar1;
   private javax.swing.JProgressBar jProgressBarAntennaVoltage;
   private javax.swing.JProgressBar jProgressBarSwr;
   private javax.swing.JSlider jSliderC1;
