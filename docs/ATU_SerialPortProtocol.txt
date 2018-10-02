@@ -1,0 +1,106 @@
+\ Serial protocol                            CLL 17:42 10/01/18
+TRANSMIT from PC
+----------------------
+7 bytes transmit  stirng from PC to Tuner 
+ TX string:  73 mode B0  B1  B2  B3  B4
+ 73H byte :   is sent first and is command token
+ Data stringf is next 6 bytes:
+    mode B0  B1  B2  B3  B4
+
+ B0 to B4 bytes :  are relays
+
+ B0 is not used,  send  00
+ C and L are each 12 bits and are in B1,B2,B3 bytes
+ Control relays are in  B4
+
+
+There are  5 modes (commands). Only 1 bit must be set in the mode byte! The tuner responses to a single command only. If 2  or more bits are set 
+the behaviour is unpredictable.
+
+ Mode byte bits:
+00000001         TUNE-OFF    Tuning is off
+00000010         TUNE-ON     Tuning is  on
+00000100         SEND-ADC    Send adc data 8 bytes
+00001000         LOAD-REL    Load relays
+00010000         HI          Do nothing
+\                                            
+
+>                  RELAY BYTES:
+BYTE     b0   b1   b2   b3   b4   b5   b6   b7
+-----------------------------------------------------
+ 0        x    x    x    x    x    x    x    x
+ 1       C1   C2   C3   C4   C5   C6   C7   C8
+ 2       C9   C10  C11  C12  L1   L2   L3   L4
+ 3       L5   L6   L7   L8   L9   L10  L11  L12
+ 4       L14  CM1  M1   M2   L13  CM2  CM3   x
+
+Control relays status:
+C1 active :   L14 = 0, CM1 = 1             others xx
+C2 active :   L14 = 1, CM1 = 0  
+Low L:    M1 = 0  CM3 = 1 ;       Hi L:  M1 = 1    CM3 = 0       low L  if L <512;  High L  if L >= 512
+Ant 1:    M2 = 1  L13 = 0   CM2 = 0
+Ant 2:    M2 = 0  L13 = 1   CM2 = 0
+Ant 2:    M2 = 0  L13 = 0   CM2 = 1
+Example:
+01010001         =    C2 active, ant2,  Lo L
+
+For Every command there is an answer from tuner:
+
+
+Response form Tuner
+---------------------
+
+
+: SET-MODE    \  --      if not match do nothing
+    RXBUF C@   \ get mode opcode
+    DUP    1 AND  IF   TUNE-OFF  ACK>       THEN
+    DUP   10 AND  IF   TUNE-ON   ACK>       THEN
+    DUP  100 AND  IF AVG# @ ACCUMULATE-ADC ACK> SEND-ADC THEN
+    DUP 1000 AND  IF   LOAD-REL  ACK>       THEN
+       10000 AND  IF       ( Hi) ACK>       THEN ;
+
+---------------------------------------------------------------------
+Response for any command is:
+ 2 bytes header $FE $FE 
+ 1 byte acknowledge  $FB  (ok)  or $FD ( no)
+ 4 channel (8 bytes)  ADC values only after SEND-ADC command. ADC values are 10 bits *10  (10 successive samples are acummulated)
+B0   B1  ,  B2     B3   ,  B4    B5  ,    B6      B7
+ms   ls  ,   ms   ls     , ms   ls     ,  ms   ls
+msb  lsb   msb    lsb    msb  lsb
+Forward V   Backward V     Antena V      PS voltage       ADC weight is 4 mV
+----------------------------------------------------------------------
+
+LC Values
+
+\ C value                                    CLL 14:04 09/22/18
+: >C         \  steps-- Cpf    get   C value
+    >R
+    29                               \  C0  = 29 pF
+    R@        1 AND IF    4 + THEN   \  4 pF
+    R@        2 AND IF    6 + THEN
+    R@        4 AND IF    9 + THEN
+    R@        8 AND IF   16 + THEN
+    R@       16 AND IF   23 + THEN
+    R@       32 AND IF   48 + THEN
+    R@       64 AND IF   84 + THEN
+    R@      128 AND IF  164 + THEN
+    R@      256 AND IF  257 + THEN
+    R@      512 AND IF  497 + THEN
+    R@     1024 AND IF  839 + THEN
+    R>     2048 AND IF 1498 + THEN ;  \ 1498 pF
+\ L value                                    CLL 14:59 09/25/18
+: >L         \  steps -- L[nH/10]     get   L value
+    >R
+    57                               \    L0 =  570 nH
+    R@        1 AND IF    1 + THEN   \ nH/10  =  10 nH
+    R@        2 AND IF    5 + THEN
+    R@        4 AND IF    9 + THEN
+    R@        8 AND IF   15 + THEN
+    R@       16 AND IF   27 + THEN
+    R@       32 AND IF   52 + THEN   \ = 520 nH
+    R@       64 AND IF   82 + THEN
+    R@      128 AND IF  162 + THEN
+    R@      256 AND IF  282 + THEN
+    R@      512 AND IF  619 + THEN
+    R@     1024 AND IF 1209 + THEN
+    R>     2048 AND IF 2236 + THEN ;   \ = 22360 nH or 22.36 uH

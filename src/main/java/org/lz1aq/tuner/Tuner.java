@@ -35,7 +35,7 @@ import org.lz1aq.utils.DynamicByteArray;
 
 public class Tuner
 {
-  private static final int QUEUE_SIZE = 30;   // Max number of commands that queueWithTransactions can hold
+  private static final int QUEUE_SIZE = 1;   // Max number of commands that queueWithTransactions can hold
   
   private final String              serialPortName;       
   private final int                 baudRate;             
@@ -70,7 +70,7 @@ public class Tuner
     serialPortName        = portName;
     this.baudRate         = baudRate;
     this.tunerController  = tunerController;
-    queueWithTransactions = new LinkedBlockingQueue<>(); 
+    queueWithTransactions = new LinkedBlockingQueue<>(QUEUE_SIZE); 
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
     receiveBuffer         = new DynamicByteArray(200);  // Set the initial size to some reasonable value
     
@@ -154,29 +154,36 @@ public class Tuner
    * Inserts transaction(s) into the queueWithTransactions
    *
    * @param trans - array of I_EncodedTransaction
+   * @return - if transaction was succesfully queued
    */
-  public void queueTransactions(I_EncodedTransaction trans)
+  public boolean queueTransactions(I_EncodedTransaction trans)
   {
     if(!isConnected())
     {
       logger.warning("Not connected to ATU! Please call the connect() method!");
-      return;
+      return false;
     }
     if(threadPortWriter.getState() == Thread.State.NEW)
     {
       logger.warning("You need to call the start() method first!");
-      return;
+      return false;
     }
 
     if(queueWithTransactions.size() >= QUEUE_SIZE)
     {
       logger.warning("Max queue sized reached!");
-      return;
+      return false;
     }
     
     queueWithTransactions.offer(trans);
+    return true;
   }
 
+  
+  boolean isQueueFull()
+  {
+    return queueWithTransactions.remainingCapacity() < 1;
+  }
   
   //----------------------------------------------------------------------
   //                           Private stuff
@@ -263,10 +270,10 @@ public class Tuner
             // Write to serial port
             try
             {
-              logger.log(Level.INFO, "Outgoing bytes ("+trans.getTransaction().length+") ------> " + new String(trans.getTransaction(),"UTF-8" ));
+              //logger.log(Level.INFO, "Outgoing bytes ("+trans.getTransaction().length+") ------> " + new String(trans.getTransaction(),"UTF-8" ));
               serialPort.writeBytes(trans.getTransaction());
               serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
-            } catch (SerialPortException | UnsupportedEncodingException ex)
+            } catch (SerialPortException ex)
             {
               logger.log(Level.SEVERE, null, ex);
             }

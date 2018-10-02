@@ -28,6 +28,7 @@ public class TuneValue implements Serializable
   
   private int c1;
   private int c2;
+  private boolean n;
   private int l;
 
   public TuneValue()
@@ -73,7 +74,15 @@ public class TuneValue implements Serializable
   {
     this.l = l;
   }
+
+  public boolean isN()
+  {
+    return n;
+  }
+
+  public void setN(boolean n)
+  {
+    this.n = n;
+  }
   
-  
-  
-}
+} 

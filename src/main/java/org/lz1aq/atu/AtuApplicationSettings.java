@@ -153,7 +153,6 @@ public final class AtuApplicationSettings
   public void setTuneBoxDimensions(Rectangle tuneBoxDimensions)
   {
     this.tuneBoxDimensions = tuneBoxDimensions;
-    System.out.println("TuneBox:"+tuneBoxDimensions.toString());
   }
   
   public Rectangle getMainWindowDimensions()

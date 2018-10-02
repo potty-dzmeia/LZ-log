@@ -36,8 +36,9 @@ public class TunerController
   private final CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
   
   // Controlled by the user
-  private int     c1;
+  private int     c;
   private int     l;
+  private boolean n;
   private int     antenna;
   private boolean isTuneOn;
   
@@ -45,8 +46,6 @@ public class TunerController
   private float   swr;
   private float   antennaVoltage;
   private float   powerSupplyVoltage;
-  
-  
   
   public TunerController(String comport, String baudRate)
   {
@@ -77,73 +76,187 @@ public class TunerController
     }
   }
   
+  /**
+   * Will send to the tuner request for ADC values.
+   * When response is back ADC value can be read with readSWR(), readAntennaVoltage() and readPowerSupplyVoltage()
+   * @return 
+   */
+  public boolean requestAdcValues()
+  {
+    if(isTuneOn == false)
+    {
+      System.err.println("SWR should not be requested if Tune Mode is not enabled!");
+      return false;
+    }
+    
+    return sendRequestADC();
+  }
   
-  public float getSwr()
+  
+  public float readSWR()
   {
     return swr;
   }
 
    
-  public float getAntennaVoltage()
+  public float readAntennaVoltage()
   {
     return antennaVoltage;
   }
 
   
-  public float getPowerSupplyVoltage()
+  public float readPowerSupplyVoltage()
   {
     return powerSupplyVoltage;
   }
   
   
-  public void enableTuneMode()
+  /**
+   * Sends to the tuner a command to go into Tune Mode (i.e. where we can read ADC values)
+   * @return 
+   */
+  public boolean enableTuneMode()
   {
     if(this.isTuneOn)
-      return;
+      return true;
     
     this.isTuneOn = true;
-    sendSerialCommand();
-  }
-  
-  
-  public void disableTuneMode()
-  {
-    if(this.isTuneOn==false)
-      return;
     
-    this.isTuneOn = false;
-    sendSerialCommand();
+    return sendSetTuneMode();
+  }
+  
+  /**
+   * Sends to the tuner a command to go into Tune Mode (i.e. where we cannot read ADC values)
+   * @return 
+   */
+  public boolean disableTuneMode()
+  {
+    if(isTuneOn == false)
+      return true;
+    
+    isTuneOn = false;
+    return sendSetTuneMode();
   }
   
   
-  public void setAntenna(int antenna)
+  /**
+   *  Sends a command to the tuner to select another antenna.
+   * 
+   * @param antenna
+   * @return 
+   */
+  public boolean setAntenna(int antenna)
   {
     if(this.antenna == antenna)
-      return;
+      return true;
+    
+    System.out.println("setAnt");
+    this.antenna = antenna;
+    return sendSetRelays();
+  }
+  
+  
+  /**
+   * Sets the antenna locally only in the TunerController class without sending a command to the Tuner.
+   * Useful if we would like to avoid sending more than one setRelay command to the Tuner when
+   * changing antenna which possibly also includes change of tune values.
+   * 
+   * @param antenna
+   * @param sendCommand
+   * @return 
+   */
+  public boolean setAntenna(int antenna, boolean sendCommand)
+  {
+    if(this.antenna == antenna)
+      return true;
+    
     
     this.antenna = antenna;
-    sendSerialCommand();
+    
+    if(sendCommand)
+    {
+      System.out.println("setAnt");
+      return sendSetRelays();
+    }
+    else
+      return true;
   }
   
-  public void setC1(int value)
+  
+  /**
+   * This sends immediately command to the tuner. 
+   * 
+   * @param value 
+   * @return  
+   */
+  public boolean setN(boolean value)
+  {
+    if(this.n == value)
+      return true;
+    
+    System.out.println("setN");
+    this.n = value;
+    return sendSetRelays();
+  }
+  
+ 
+  /**
+   * This sends immediately command to the tuner. 
+   * 
+   * @param value 
+   * @return  
+   */
+  public boolean setC1(int value)
   {
     assert value<=C1_MAX;
-    if(this.c1 == value)
-      return;
+    if(this.c == value)
+      return true;
     
-    this.c1 = value;
-    sendSerialCommand();
+    System.out.println("setC");
+    this.c = value;
+    return sendSetRelays();
   }
   
-  public void setL(int value)
+  /**
+   * This sends immediately command to the tuner.
+   * 
+   * @param value 
+   * @return  
+   */
+  public boolean setL(int value)
   {
     assert value<=L_MAX;
     if(this.l == value)
-      return;   
+      return true;   
     
+    System.out.println("setL");
     this.l = value;
-    sendSerialCommand();
+    return sendSetRelays();
   }
+  
+  /**
+   * This sends immediately command to the tuner
+   * 
+   * @param c
+   * @param l
+   * @param n 
+   */
+  public boolean setAll(int c, int l, boolean n)
+  { 
+    assert c<=C1_MAX;
+    assert l<=L_MAX;
+    
+    if(this.c == c && this.l==l && this.n==n)
+      return true;
+    
+    System.out.println("setAll");
+    this.c = c;  
+    this.l = l;
+    this.n = n;
+    
+    return sendSetRelays();
+  }
+  
   
   public void addEventListener(TunerControllerListener listener)
   {
@@ -157,7 +270,7 @@ public class TunerController
   
   
   /**
-   * Extracts swr, voltage and other parameters from the input data
+   * Extracts SWR, voltage and other parameters from the input data
    * @param data - incoming data
    * 
    * @return - number of bytes read from the the supplied data
@@ -201,6 +314,11 @@ public class TunerController
     
     return 0;
   }
+  
+ public boolean isReadyToAcceptCommand()
+  {
+    return !tunerSerialComm.isQueueFull();
+  }
           
   //----------------------------------------------------------------------
   //                           Private methods
@@ -210,14 +328,35 @@ public class TunerController
    * 
    * @return Transaction contains the data that will be sent through the serial communication 
    */
-  private void sendSerialCommand()
+  private boolean sendSetRelays()
   {
     // encode the command and send it to serial through the serial connection
     I_EncodedTransaction transaction = new EncodedTransaction();
     
     
     ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
-    tunerSerialComm.queueTransactions(transaction);
+    return tunerSerialComm.queueTransactions(transaction);
+  }
+  
+  
+  private boolean sendRequestADC()
+  {
+     // encode the command and send it to serial through the serial connection
+    I_EncodedTransaction transaction = new EncodedTransaction();
+    
+    
+    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    return tunerSerialComm.queueTransactions(transaction);
+  }
+  
+  
+  private boolean sendSetTuneMode()
+  {
+     // encode the command and send it to serial through the serial connection
+    I_EncodedTransaction transaction = new EncodedTransaction();
+ 
+    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    return tunerSerialComm.queueTransactions(transaction);
   }
   
   
