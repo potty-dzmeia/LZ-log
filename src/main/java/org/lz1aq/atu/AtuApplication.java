@@ -298,7 +298,7 @@ public class AtuApplication extends javax.swing.JFrame
   * A button from the TuneBox dialog is considered valid if at least one tune value is different from 0
   * @return true - if next Tune was selected; false - there are no more valid Tunes nothing has been selected
   */
-  boolean selectNextValidTuneBoxButton()
+  private boolean selectNextValidTuneBoxButton()
   {
     autoTuneCurrentTune++;
     
@@ -319,6 +319,40 @@ public class AtuApplication extends javax.swing.JFrame
     return false;
   }
   
+   // Converts SWR to progress bar value 
+  private static int swrToProgressBarValue(float swr)
+  {
+    int value;
+
+    if(swr < 1)
+    {
+      swr = 1;
+    }
+
+    // SWR 1 will be 0 on the progress bar
+    swr -= 1;
+
+    // Different scaling for different ranges of the SWR
+    if(swr <= 10)
+    {
+      value = Math.round(swr * 10);
+    }
+    else
+    {
+      value = Math.round(swr);
+    }
+
+    return value;
+  }
+
+  // Converts Antenna Voltage to progress bar value
+  private static int antVotageToProgressBarValue(float voltage)
+  {
+    voltage = (voltage / 26214) * 100;
+
+    return Math.round(voltage);
+  }
+
   
   // All needed actions in order to start measuring SWR for each tune setting and selecting the best one
   void initAutoTuneMode()
@@ -381,38 +415,7 @@ public class AtuApplication extends javax.swing.JFrame
     @Override
     public void eventNegConfirmation()
     {
-    }
-    
-    
-    // Converts SWR to progress bar value 
-    private int swrToProgressBarValue(float swr)
-    {
-      int value;
-      
-      if(swr < 1)
-        swr = 1;
-      
-      // SWR 1 will be 0 on the progress bar
-      swr -= 1;
-      
-      // Different scaling for different ranges of the SWR
-      if(swr <= 10)
-        value = Math.round(swr*10);
-      else
-        value = Math.round(swr);
-        
-        
-      
-      return value; 
-    }
-    
-    // Converts Antenna Voltage to progress bar value
-    private int antVotageToProgressBarValue(float voltage)
-    {
-      voltage = (voltage/26214)*100;
-      
-      return Math.round(voltage);
-    }
+    } 
   }
   
   
@@ -986,6 +989,7 @@ public class AtuApplication extends javax.swing.JFrame
 
     buttonGroupAnt.add(jToggleButtonAnt4);
     jToggleButtonAnt4.setText("ant 4");
+    jToggleButtonAnt4.setEnabled(false);
     jToggleButtonAnt4.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -1309,19 +1313,19 @@ public class AtuApplication extends javax.swing.JFrame
 
   private void jToggleButtonAutoItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonAutoItemStateChanged
   {//GEN-HEADEREND:event_jToggleButtonAutoItemStateChanged
-    if(evt.getStateChange() == ItemEvent.SELECTED)
-    {   
-      initAutoTuneMode();
-     
-      if(selectNextValidTuneBoxButton() == false)
-      {
-        clearAutoTuneMode();
-      }
-    }
-    else if(evt.getStateChange() == ItemEvent.DESELECTED)
-    {
-      clearAutoTuneMode();
-    }
+//    if(evt.getStateChange() == ItemEvent.SELECTED)
+//    {   
+//      initAutoTuneMode();
+//     
+//      if(selectNextValidTuneBoxButton() == false)
+//      {
+//        clearAutoTuneMode();
+//      }
+//    }
+//    else if(evt.getStateChange() == ItemEvent.DESELECTED)
+//    {
+//      clearAutoTuneMode();
+//    }
   }//GEN-LAST:event_jToggleButtonAutoItemStateChanged
 
   private void jToggleButtonNItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonNItemStateChanged

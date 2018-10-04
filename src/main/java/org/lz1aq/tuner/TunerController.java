@@ -35,7 +35,7 @@ public class TunerController
   
   private Tuner   tunerSerialComm;
   private final CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
-  private final Thread  adcPollingThread =  new Thread(new AdcPollingThread(), "adcPollingThread");  
+  private Thread  adcPollingThread;  
   
   // Controlled by the user
   private int     c;
@@ -144,9 +144,12 @@ public class TunerController
     
     if(sendSetTuneMode() == false)
       return false;
-    
+
+            
     this.isTuneOn = true;
-    adcPollingThread.run();
+    
+    adcPollingThread =  new Thread(new AdcPollingThread(), "adcPollingThread");
+    adcPollingThread.start();
     return true;
   }
   
@@ -161,7 +164,7 @@ public class TunerController
     
     if(sendSetTuneMode() == false)
       return false;
-    
+
     isTuneOn = false;
     adcPollingThread.interrupt();
     return true;
@@ -328,8 +331,10 @@ public class TunerController
         powerSupplyV = (int)Math.round((powerSupplyV/10.0)*4);
         
         for(TunerControllerListener listener : eventListeners)
+        {
           listener.eventAdc();
-
+          listener.eventPosConfirmation(); // when we get ADC, we will consider it also a positive confirmation (required so that the Tuner class can proceed with the next transaction)
+        }
         return (iHeader+LONG_FRAME_LEN);
         
       // Negative cfm
@@ -479,7 +484,7 @@ public class TunerController
     @Override
     public int getPostWriteDelay()
     {
-      return 100;
+      return 0;
     }
  
     /**
@@ -491,7 +496,7 @@ public class TunerController
     @Override
     public int getTimeout()
     {
-      return 50;
+      return 100;
     }
 
     /**

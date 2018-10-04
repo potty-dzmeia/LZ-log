@@ -154,7 +154,7 @@ public class Tuner
    * Inserts transaction(s) into the queueWithTransactions
    *
    * @param trans - array of I_EncodedTransaction
-   * @return - if transaction was succesfully queued
+   * @return - if transaction was successfully queued
    */
   public boolean queueTransactions(I_EncodedTransaction trans)
   {
@@ -171,7 +171,7 @@ public class Tuner
 
     if(queueWithTransactions.size() >= QUEUE_SIZE)
     {
-      logger.warning("Max queue sized reached!");
+      //logger.warning("Max queue sized reached!");
       return false;
     }
     

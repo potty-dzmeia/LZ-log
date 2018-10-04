@@ -513,6 +513,7 @@
               <ComponentRef name="buttonGroupAnt"/>
             </Property>
             <Property name="text" type="java.lang.String" value="ant 4"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jToggleButtonAnt4ItemStateChanged"/>
