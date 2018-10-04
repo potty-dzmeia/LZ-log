@@ -19,6 +19,7 @@
 // ***************************************************************************
 package org.lz1aq.atu;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import static javax.swing.plaf.basic.BasicSliderUI.NEGATIVE_SCROLL;
 import static javax.swing.plaf.basic.BasicSliderUI.POSITIVE_SCROLL;
 import javax.swing.plaf.synth.SynthSliderUI;
@@ -88,7 +90,9 @@ public class AtuApplication extends javax.swing.JFrame
     this.setTitle(appTitle+" v"+appVersion);
     
     jProgressBarSwr.setStringPainted(true); // So that text is displayed on the progress bar
-    jProgressBarAntennaVoltage.setStringPainted(true); // So that text is displayed on the progress bar
+    jProgressBarSwr.setBackground(Color.green);
+    jProgressBarSwr.setValue(50);
+    jProgressBarAntennaV.setStringPainted(true); // So that text is displayed on the progress bar
     
     setAntennaButtonsLabels();
 
@@ -345,62 +349,69 @@ public class AtuApplication extends javax.swing.JFrame
   //----------------------------------------------------------------------
   class LocalTunerControllerListener implements TunerController.TunerControllerListener
   {
-
     @Override
-    public void eventSwr()
+    // Event coming from the TunnerController
+    public void eventAdc()
     {
-      jProgressBarSwr.setValue(swrToProgressBarValue(tunerController.readSWR()));
-      jProgressBarSwr.setString(String.format("%.1f", tunerController.readSWR()));
+      SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() 
+            {
+              // SWR
+              // ----
+              jProgressBarSwr.setValue(swrToProgressBarValue(tunerController.getSwr()));  
+              jProgressBarSwr.setString(String.format("%.1f", tunerController.getSwr()));
+
+              // Antenna Voltage
+              // ----
+              jProgressBarAntennaV.setValue(antVotageToProgressBarValue(tunerController.getAntennaV()/(float)1000));
+              jProgressBarAntennaV.setString(String.format ("%.1f", tunerController.getAntennaV()/(float)1000)); 
+            }
+        });
+
       
-      // If automatic tune mode is on we have to remeber the current SWR for the current tune 
-      // and move on to the next one.
-      
-    }
-
-    @Override
-    public void eventAntennaVoltage()
-    {
-      jProgressBarAntennaVoltage.setValue(antVotageToProgressBarValue(tunerController.readAntennaVoltage()));
-      jProgressBarAntennaVoltage.setString(String.format ("%.0f", tunerController.readAntennaVoltage()));
-    }
-
-    @Override
-    public void eventPowerSupplyVoltage()
-    {
-      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void eventNotsupported()
-    {
-      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void eventPosConfirmation()
     {
-      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void eventNegConfirmation()
     {
-      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     
     // Converts SWR to progress bar value 
     private int swrToProgressBarValue(float swr)
     {
-      int i = Math.round(swr*10);
-      return i-1; // SWR 1 will be 0 on the progress bar
+      int value;
+      
+      if(swr < 1)
+        swr = 1;
+      
+      // SWR 1 will be 0 on the progress bar
+      swr -= 1;
+      
+      // Different scaling for different ranges of the SWR
+      if(swr <= 10)
+        value = Math.round(swr*10);
+      else
+        value = Math.round(swr);
+        
+        
+      
+      return value; 
     }
     
     // Converts Antenna Voltage to progress bar value
-    private int antVotageToProgressBarValue(float voltages)
+    private int antVotageToProgressBarValue(float voltage)
     {
-      int i = Math.round(voltages);
-      return i;
+      voltage = (voltage/26214)*100;
+      
+      return Math.round(voltage);
     }
   }
   
@@ -483,11 +494,11 @@ public class AtuApplication extends javax.swing.JFrame
     jProgressBarSwr = new javax.swing.JProgressBar();
     jLabel3 = new javax.swing.JLabel();
     jPanelAntVoltage = new javax.swing.JPanel();
-    jProgressBarAntennaVoltage = new javax.swing.JProgressBar();
+    jProgressBarAntennaV = new javax.swing.JProgressBar();
     jLabel4 = new javax.swing.JLabel();
     jPanelRefVoltage = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
-    jProgressBar1 = new javax.swing.JProgressBar();
+    jProgressBarRefV = new javax.swing.JProgressBar();
     jPanelMiscButtons = new javax.swing.JPanel();
     jToggleButtonSsb = new javax.swing.JToggleButton();
     jToggleButtonCw = new javax.swing.JToggleButton();
@@ -606,13 +617,13 @@ public class AtuApplication extends javax.swing.JFrame
 
     jPanelAntVoltage.setLayout(new java.awt.GridBagLayout());
 
-    jProgressBarAntennaVoltage.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-    jProgressBarAntennaVoltage.setOrientation(1);
+    jProgressBarAntennaV.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+    jProgressBarAntennaV.setOrientation(1);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelAntVoltage.add(jProgressBarAntennaVoltage, gridBagConstraints);
+    jPanelAntVoltage.add(jProgressBarAntennaV, gridBagConstraints);
 
     jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
     jLabel4.setText("Ant V");
@@ -645,12 +656,12 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.weighty = 0.1;
     jPanelRefVoltage.add(jLabel1, gridBagConstraints);
 
-    jProgressBar1.setOrientation(1);
+    jProgressBarRefV.setOrientation(1);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelRefVoltage.add(jProgressBar1, gridBagConstraints);
+    jPanelRefVoltage.add(jProgressBarRefV, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -751,7 +762,7 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jPanelSliderControls.add(jSliderL, gridBagConstraints);
 
-    jToggleButtonN.setText(">C");
+    jToggleButtonN.setText("C1");
     jToggleButtonN.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -1284,11 +1295,15 @@ public class AtuApplication extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jToggleButtonTuneItemStateChanged
     if(evt.getStateChange() == ItemEvent.SELECTED)
     {
-      tunerController.enableTuneMode();
+      boolean ret = tunerController.enableTuneMode();
+      if(!ret) // unable to send command to the Tuner
+        jToggleButtonTune.setSelected(false);
     }
-    else if(evt.getStateChange() == ItemEvent.DESELECTED)
+    else if(evt.getStateChange() == ItemEvent.DESELECTED)  
     {
-      tunerController.disableTuneMode();
+      boolean ret = tunerController.disableTuneMode();
+      if(!ret) // unable to send command to the Tuner
+        jToggleButtonTune.setSelected(true);
     }
   }//GEN-LAST:event_jToggleButtonTuneItemStateChanged
 
@@ -1311,7 +1326,18 @@ public class AtuApplication extends javax.swing.JFrame
 
   private void jToggleButtonNItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jToggleButtonNItemStateChanged
   {//GEN-HEADEREND:event_jToggleButtonNItemStateChanged
-    boolean isSelected = evt.getStateChange() == ItemEvent.SELECTED;
+    boolean isSelected;
+    
+    if(evt.getStateChange() == ItemEvent.SELECTED)
+    {
+      isSelected = true;
+      jToggleButtonN.setText("C2");
+    }
+    else
+    {
+      isSelected = false;
+      jToggleButtonN.setText("C1");
+    }
     
     TuneValue tune = getCurrentTune();
     
@@ -1394,8 +1420,8 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.JPanel jPanelSliderControls;
   private javax.swing.JPanel jPanelSwr;
   private javax.swing.JPanel jPanelTuneBox;
-  private javax.swing.JProgressBar jProgressBar1;
-  private javax.swing.JProgressBar jProgressBarAntennaVoltage;
+  private javax.swing.JProgressBar jProgressBarAntennaV;
+  private javax.swing.JProgressBar jProgressBarRefV;
   private javax.swing.JProgressBar jProgressBarSwr;
   private javax.swing.JSlider jSliderC1;
   private javax.swing.JSlider jSliderL;

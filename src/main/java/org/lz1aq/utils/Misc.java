@@ -19,6 +19,9 @@
 // ***************************************************************************
 package org.lz1aq.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 
 public class Misc
@@ -42,7 +45,7 @@ public class Misc
     return stringBuilder.toString();
   }
   
-  
+ 
   public static String leadingZerosToT(String serial)
   {
     String part1 = serial.substring(0, 3);
@@ -190,4 +193,26 @@ public class Misc
        else 
            return "160";
   }
+    
+  public static int indexOf(byte[] buffer, byte[] pattern)
+  {
+    for(int i = 0; i < buffer.length - pattern.length + 1; ++i)
+    {
+      boolean found = true;
+      for(int j = 0; j < pattern.length; ++j)
+      {
+        if(buffer[i + j] != pattern[j])
+        {
+          found = false;
+          break;
+        }
+      }
+      if(found)
+      {
+        return i;
+      }
+    }
+    return -1;
+  }
+    
 }

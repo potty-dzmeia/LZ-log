@@ -20,7 +20,6 @@
 package org.lz1aq.tuner;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -422,16 +421,7 @@ public class Tuner
   {
 
     @Override
-    public void eventSwr(){}
-
-    @Override
-    public void eventAntennaVoltage(){}
-
-    @Override
-    public void eventPowerSupplyVoltage(){}
-
-    @Override
-    public void eventNotsupported(){}
+    public void eventAdc(){}
 
     @Override
     public void eventPosConfirmation()

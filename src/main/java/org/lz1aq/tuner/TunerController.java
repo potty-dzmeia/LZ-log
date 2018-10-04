@@ -19,14 +19,13 @@
 // ***************************************************************************
 package org.lz1aq.tuner;
 
-import java.nio.ByteBuffer;
-import java.util.BitSet;
 import java.util.EventListener;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jssc.SerialPortException;
 import org.lz1aq.py.rig.I_EncodedTransaction;
+import org.lz1aq.utils.Misc;
 
 
 public class TunerController
@@ -36,6 +35,7 @@ public class TunerController
   
   private Tuner   tunerSerialComm;
   private final CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
+  private final Thread  adcPollingThread =  new Thread(new AdcPollingThread(), "adcPollingThread");  
   
   // Controlled by the user
   private int     c;
@@ -44,10 +44,11 @@ public class TunerController
   private int     antenna = -1;
   private boolean isTuneOn;
   
-  // Controller by the Tuner
-  private float   swr;
-  private float   antennaVoltage;
-  private float   powerSupplyVoltage;
+  // Read from the Tuner
+  private int   forwardV;     // in mV
+  private int   backwardV;    // in mV
+  private int   antennaV;     // in mV
+  private int   powerSupplyV; // in mV
   
   public TunerController(String comport, String baudRate)
   {
@@ -95,23 +96,42 @@ public class TunerController
   }
   
   
-  public float readSWR()
+  public float getSwr()
   {
+    if((forwardV-backwardV) == 0)
+      return 100.0f;
+    
+    float swr = (float)(forwardV+backwardV) / (forwardV-backwardV);
+    
+    if(swr>100)
+      swr = 100;
+    
     return swr;
   }
-
-   
-  public float readAntennaVoltage()
-  {
-    return antennaVoltage;
-  }
-
   
-  public float readPowerSupplyVoltage()
+  public int getForwardV()
   {
-    return powerSupplyVoltage;
+    return this.forwardV;
   }
   
+  
+  public int getBackwardV()
+  {
+    return this.backwardV;
+  }
+  
+  
+  public int getAntennaV()
+  {
+    return this.antennaV;
+  }
+  
+  
+  public float getPowerSupplyV()
+  {
+    return this.powerSupplyV;
+  }
+
   
   /**
    * Sends to the tuner a command to go into Tune Mode (i.e. where we can read ADC values)
@@ -122,9 +142,12 @@ public class TunerController
     if(this.isTuneOn)
       return true;
     
-    this.isTuneOn = true;
+    if(sendSetTuneMode() == false)
+      return false;
     
-    return sendSetTuneMode();
+    this.isTuneOn = true;
+    adcPollingThread.run();
+    return true;
   }
   
   /**
@@ -136,8 +159,12 @@ public class TunerController
     if(isTuneOn == false)
       return true;
     
+    if(sendSetTuneMode() == false)
+      return false;
+    
     isTuneOn = false;
-    return sendSetTuneMode();
+    adcPollingThread.interrupt();
+    return true;
   }
 
   
@@ -254,45 +281,69 @@ public class TunerController
    */
   public int decodeSerialData(byte[] data)
   {
-    if(data.length==0)
+    final int SHORT_FRAME_LEN = 3; // Short data frame coming from the ATU is 3 bytes (PosCfm: fe, fe, 1; NegCfm: fe, fe, 3)
+    final int LONG_FRAME_LEN = 11;  //  The long data frame coming from the ATU is 9 bytes (fe, fe, 2, a1, a2, a3, a4, a5, a6, a7, a8)
+     
+    if(data==null || data.length<SHORT_FRAME_LEN) 
       return 0;
     
-    // Depending on the decoded data inform the interested parties
-    // -----------------------------------------------------------
-    // POS confirmation
-    for(TunerControllerListener listener : eventListeners)
-    {
-      listener.eventPosConfirmation();
-    }
+    // Search for Header (0xfFE, 0xFE)
+    // --------------------
+    byte[] header = new byte[]{(byte)0xfe, (byte)0xfe};
+    int iHeader = Misc.indexOf(data, header); // Index of the Header beginning
+    int iLast = data.length-1; // Index of last byte
     
-    // NEG confirmation
-    for(TunerControllerListener listener : eventListeners)
-    {
-      listener.eventNegConfirmation();
-    }
+    if(iHeader == -1)
+      return 0; // Header was not found
+    else if((iHeader+2) > iLast)
+      return 0; // We need to wait for more data - only the header is available for now
     
-    // SWR 
-    for(TunerControllerListener listener : eventListeners)
+    
+    switch(data[iHeader+2])
     {
-      listener.eventSwr();
-    }
+      // Positive cfm 
+      // -----------------
+      case 0x01: 
+        for(TunerControllerListener listener : eventListeners)
+          listener.eventPosConfirmation();
+        return (iHeader+SHORT_FRAME_LEN);
+        
+      // ADC data
+      // -----------------
+      case 0x02: 
+        if( (iLast-iHeader+1) < LONG_FRAME_LEN ) 
+          return 0; // wait for more data
+        
+        
+        forwardV = (data[iHeader+3] & 0xff)<<8 | (data[iHeader+4] & 0xff);
+        forwardV = (int)Math.round((forwardV/10.0)*4);// ADC values are 10 bits *10(10 successive samples are acummulated);  ADC weight is 4 mV
 
-    // Ant voltage 
-    for(TunerControllerListener listener : eventListeners)
-    {
-      listener.eventAntennaVoltage();
+        backwardV = (data[iHeader+5] & 0xff)<<8 | (data[iHeader+6] & 0xff);
+        backwardV = (int)Math.round((backwardV/10.0)*4); 
+            
+        antennaV  = (data[iHeader+7] & 0xff)<<8 | (data[iHeader+8] & 0xff);
+        antennaV  = (int)Math.round((antennaV/10.0)*4); 
+        
+        powerSupplyV = (data[iHeader+9] & 0xff)<<8 | (data[iHeader+10] & 0xff);
+        powerSupplyV = (int)Math.round((powerSupplyV/10.0)*4);
+        
+        for(TunerControllerListener listener : eventListeners)
+          listener.eventAdc();
+
+        return (iHeader+LONG_FRAME_LEN);
+        
+      // Negative cfm
+      // -----------------
+      case 0x03: 
+      default:
+        for(TunerControllerListener listener : eventListeners)
+          listener.eventNegConfirmation();
+        return (iHeader+SHORT_FRAME_LEN);
     }
-    
-    // Power supply voltage
-    for(TunerControllerListener listener : eventListeners)
-    {
-      listener.eventPowerSupplyVoltage();
-    }
-    
-    return 0;
   }
   
- public boolean isReadyToAcceptCommand()
+  
+  public boolean isReadyToAcceptCommand()
   {
     return !tunerSerialComm.isQueueFull();
   }
@@ -318,8 +369,8 @@ public class TunerController
     packet[1] = 0x08;   // Command (Load Relays)
     packet[2] = 0x00;   // Always 0
     packet[3] = (byte)(c&0xFF); // LO(c)
-    packet[4] = (byte) ((c>>0x08) | ((l&0x0F)<<4));     // HI(c) + LO(l)
-    packet[5] = (byte)((l>>4));     // HI(l)
+    packet[4] = (byte) ( (c>>0x08) | (((~l)&0x0F)<<4) );     // HI(c) + LO(l)     Note:  bits controlling L must be negated
+    packet[5] = (byte)(~(l>>4));     // HI(l)
     
     // Set C1/C2 active
     if(n)
@@ -354,21 +405,38 @@ public class TunerController
   
   private boolean sendRequestADC()
   {
-     // encode the command and send it to serial through the serial connection
+    // encode the command and send it to serial through the serial connection
     I_EncodedTransaction transaction = new EncodedTransaction();
     
+    //   73   |   mode           |    B0     |    B1   |   B2    |  B3     |  B4
+    //           08(Load relays)   always 0     
+    byte[] packet = new byte[7];
+    packet[0] = 0x73;   // Magic byte
+    packet[1] = 0x04;   // Command - 00000100  SEND-ADC Send back ADC data 8 bytes
     
-    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    
+    ((EncodedTransaction)transaction).setTransaction(packet); 
     return tunerSerialComm.queueTransactions(transaction);
   }
   
   
   private boolean sendSetTuneMode()
   {
-     // encode the command and send it to serial through the serial connection
+    // encode the command and send it to the Tuner through the serial connection
     I_EncodedTransaction transaction = new EncodedTransaction();
- 
-    ((EncodedTransaction)transaction).setTransaction(new byte[]{}); 
+    
+    //   73   |   mode           |    B0     |    B1   |   B2    |  B3     |  B4
+    //           08(Load relays)   always 0     
+    byte[] packet = new byte[7];
+    packet[0] = 0x73;   // Magic byte
+    // 00000001         TUNE-OFF    Tuning is off
+    // 00000010         TUNE-ON     Tuning is  on
+    if(isTuneOn)
+      packet[1] = 0x02;   // Command 
+    else
+      packet[1] = 0x01;
+    
+    ((EncodedTransaction)transaction).setTransaction(packet); 
     return tunerSerialComm.queueTransactions(transaction);
   }
   
@@ -452,12 +520,30 @@ public class TunerController
   
   public interface TunerControllerListener extends EventListener
   {
-    public void eventSwr();
-    public void eventAntennaVoltage();
-    public void eventPowerSupplyVoltage();
-    public void eventNotsupported();
+    public void eventAdc();
     public void eventPosConfirmation();
     public void eventNegConfirmation();
   }
+  
+  
+  class AdcPollingThread implements Runnable
+  {
+    @Override
+    public void run()
+    {  
+      try
+      {
+        while(true)
+        {
+          requestAdcValues(); 
+          Thread.sleep(100);   
+        }//while(true)
+      }catch(InterruptedException e)
+      {
+        
+      }
+    }// run()
+    
+  } // class AdcPollingThread
 
 }
