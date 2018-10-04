@@ -211,7 +211,7 @@ public class TunerControllerTest extends TestCase
     expResult = 11;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     cleanFlags();
@@ -229,7 +229,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     cleanFlags();
@@ -238,7 +238,7 @@ public class TunerControllerTest extends TestCase
     expResult = 13;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     cleanFlags();
@@ -247,7 +247,7 @@ public class TunerControllerTest extends TestCase
     expResult = 11;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     cleanFlags();
@@ -256,7 +256,7 @@ public class TunerControllerTest extends TestCase
     expResult = 11;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==26214);
@@ -269,7 +269,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==17517);
@@ -282,7 +282,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==26214);
@@ -295,7 +295,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==26214);
@@ -308,7 +308,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==26214);
@@ -321,7 +321,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==0);
@@ -334,7 +334,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==2);
@@ -347,7 +347,7 @@ public class TunerControllerTest extends TestCase
     expResult = 12;
     result = instance.decodeSerialData(data);
     assertEquals(expResult, result);
-    assertTrue(!isPosCfmEvent);
+    assertTrue(isPosCfmEvent);
     assertTrue(!isNegCfmEvent);
     assertTrue(isAdcEvent);
     assertTrue(instance.getForwardV()==26214);
