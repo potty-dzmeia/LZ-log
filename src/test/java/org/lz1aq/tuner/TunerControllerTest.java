@@ -20,6 +20,7 @@
 package org.lz1aq.tuner;
 
 import junit.framework.TestCase;
+import org.lz1aq.utils.ComPortProperties;
 
 /**
  *
@@ -59,7 +60,8 @@ public class TunerControllerTest extends TestCase
    */
   public void testDecodeSerialData()
   {
-    TunerController instance = new TunerController("Com1", Integer.toString(9600));
+    ComPortProperties comProp = new ComPortProperties("foobar");
+    TunerController instance = new TunerController(comProp);
     instance.addEventListener(new LocalListener());
     
     
@@ -354,6 +356,48 @@ public class TunerControllerTest extends TestCase
     assertTrue(instance.getBackwardV()==26213);
     assertTrue(instance.getAntennaV()==26213);
     assertTrue(instance.getPowerSupplyV()==26212);
+    cleanFlags();
+    
+    data = new byte[]{(byte)0xfd, (byte)0xfe, (byte)0xfe, (byte)2, (byte)0xff, (byte)0xff,  (byte)0x0, (byte)0x0,  (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
+    expResult = 12;
+    result = instance.decodeSerialData(data);
+    assertEquals(expResult, result);
+    assertTrue(isPosCfmEvent);
+    assertTrue(!isNegCfmEvent);
+    assertTrue(isAdcEvent);
+    assertTrue(instance.getSwr()==1);
+    assertTrue(instance.getForwardV()==26214);
+    assertTrue(instance.getBackwardV()==0);
+    assertTrue(instance.getAntennaV()==26214);
+    assertTrue(instance.getPowerSupplyV()==26214);
+    cleanFlags();
+    
+    data = new byte[]{(byte)0xfd, (byte)0xfe, (byte)0xfe, (byte)2, (byte)0xff, (byte)0xff,  (byte)0xFF, (byte)0xFF,  (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
+    expResult = 12;
+    result = instance.decodeSerialData(data);
+    assertEquals(expResult, result);
+    assertTrue(isPosCfmEvent);
+    assertTrue(!isNegCfmEvent);
+    assertTrue(isAdcEvent);
+    assertTrue(instance.getSwr()==100);
+    assertTrue(instance.getForwardV()==26214);
+    assertTrue(instance.getBackwardV()==26214);
+    assertTrue(instance.getAntennaV()==26214);
+    assertTrue(instance.getPowerSupplyV()==26214);
+    cleanFlags();
+    
+    data = new byte[]{(byte)0xfd, (byte)0xfe, (byte)0xfe, (byte)2, (byte)0xff, (byte)0xff,  (byte)0xFF, (byte)0xFF,  (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
+    expResult = 12;
+    result = instance.decodeSerialData(data);
+    assertEquals(expResult, result);
+    assertTrue(isPosCfmEvent);
+    assertTrue(!isNegCfmEvent);
+    assertTrue(isAdcEvent);
+    assertTrue(instance.getSwr()==100);
+    assertTrue(instance.getForwardV()==26214);
+    assertTrue(instance.getBackwardV()==26214);
+    assertTrue(instance.getAntennaV()==26214);
+    assertTrue(instance.getPowerSupplyV()==26214);
     cleanFlags();
 
   }

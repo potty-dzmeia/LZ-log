@@ -29,6 +29,7 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.lz1aq.py.rig.I_EncodedTransaction;
+import org.lz1aq.utils.ComPortProperties;
 import org.lz1aq.utils.DynamicByteArray;
 import org.lz1aq.utils.Misc;
 
@@ -37,8 +38,7 @@ public class Tuner
 {
   private static final int QUEUE_SIZE = 1;   // Max number of commands that queueWithTransactions can hold
   
-  private final String              serialPortName;       
-  private final int                 baudRate;             
+  private final ComPortProperties   comPortProperties;                 
   private       SerialPort          serialPort;           // Used for writing to serialPort
   private final Thread              threadPortWriter;     // Thread that writes transaction to the serial port
   private final DynamicByteArray    receiveBuffer;        // Where bytes received through the serial port will be put
@@ -61,14 +61,12 @@ public class Tuner
   /**   
    * Constructor 
    * 
-   * @param portName -  name of the serial port that will be used for communicating with the ATU
-   * @param baudRate -  baud rate to be used for the serial port
+   * @param ComPortProperties -  com port settings
    * @param tunerController - 
    */
-  public Tuner(String portName, int baudRate, TunerController tunerController)
+  public Tuner(ComPortProperties comPortProperties, TunerController tunerController)
   {
-    serialPortName        = portName;
-    this.baudRate         = baudRate;
+    this.comPortProperties        = comPortProperties;
     this.tunerController  = tunerController;
     queueWithTransactions = new LinkedBlockingQueue<>(QUEUE_SIZE); 
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
@@ -98,9 +96,16 @@ public class Tuner
       throw new Exception("Please create a new ATU object");
     
     // 
-    serialPort = new SerialPort(serialPortName);
+    serialPort = new SerialPort(comPortProperties.getComPortName());
     serialPort.openPort();
-    setComPortParams(serialPort);
+    
+    serialPort.setParams(comPortProperties.getBaudRate(),
+                        comPortProperties.getDataBits(),
+                        comPortProperties.getStopbits(),
+                        comPortProperties.getParity());
+    
+    serialPort.setDTR(comPortProperties.getDtr());
+    serialPort.setRTS(comPortProperties.getRts());
     
     // PortWriter  (for sending the data to the ATU)
     threadPortWriter.start();
@@ -225,12 +230,14 @@ public class Tuner
       // Do parsing till there is nothing to be parsed...
       while(true)
       {
+        System.out.println("Bytes in before read: "+Misc.toHexString(receiveBuffer.toByteArray()));
         // Pass the received data to the protocol parser for decoding
-        int bytesRead = tunerController.decodeSerialData(receiveBuffer.toByteArray());
+        int bytesRead = tunerController.decodeSerialData(receiveBuffer.toByteArray());       
             
         if(bytesRead > 0) 
         {
           receiveBuffer.remove(bytesRead);
+          System.out.println("Bytes in after read: "+Misc.toHexString(receiveBuffer.toByteArray()));
         }
         else
         {
@@ -376,46 +383,6 @@ public class Tuner
     }
   }
   
-   /**
-   * Sets Com port parameters
-   * 
-   * @param port The serial port which parameters will be adjusted
-   * @param settings Source from which the values will be taken
-   */
-  private void setComPortParams(SerialPort port) throws SerialPortException
-  {
-    int parity = SerialPort.PARITY_NONE;
-    int stopbits = SerialPort.STOPBITS_2;
-
-    port.setParams(baudRate,
-                   8,
-                   stopbits,
-                   parity);
-    
-//    switch (settings.getDtr().toLowerCase())
-//    {
-//      case "none":
-//        break;
-//      case "on":
-//        port.setDTR(true);
-//        break;
-//      case "off":
-//        port.setDTR(false);
-//        break;
-//    }
-//
-//    switch (settings.getRts().toLowerCase())
-//    {
-//      case "none":
-//        break;
-//      case "on":
-//        port.setRTS(true);
-//        break;
-//      case "off":
-//        port.setRTS(false);
-//        break;
-//    }
-  }
   
   class LocalTunerControllerListener implements TunerController.TunerControllerListener
   {

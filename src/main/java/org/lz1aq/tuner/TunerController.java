@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jssc.SerialPortException;
 import org.lz1aq.py.rig.I_EncodedTransaction;
+import org.lz1aq.utils.ComPortProperties;
 import org.lz1aq.utils.Misc;
 
 
@@ -34,7 +35,7 @@ public class TunerController
   public static final int L_MAX  = 0xfff;  // 12bits
   
   private Tuner   tunerSerialComm;
-  private final CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
+  private final   CopyOnWriteArrayList<TunerControllerListener>  eventListeners = new CopyOnWriteArrayList<>();
   private Thread  adcPollingThread;  
   
   // Controlled by the user
@@ -50,11 +51,11 @@ public class TunerController
   private int   antennaV;     // in mV
   private int   powerSupplyV; // in mV
   
-  public TunerController(String comport, String baudRate)
+  public TunerController(ComPortProperties comPortProperties)
   {
     try
     {
-      tunerSerialComm = new Tuner(comport, Integer.parseInt(baudRate), this);
+      tunerSerialComm = new Tuner(comPortProperties, this);
       tunerSerialComm.connect();
     }
     catch(Exception ex)
@@ -88,7 +89,7 @@ public class TunerController
   {
     if(isTuneOn == false)
     {
-      System.err.println("SWR should not be requested if Tune Mode is not enabled!");
+//      System.err.println("SWR should not be requested if Tune Mode is not enabled!");
       return false;
     }
     
@@ -182,7 +183,7 @@ public class TunerController
     if(this.n == value)
       return true;
     
-    System.out.println("setN");
+//    System.out.println("setN");
     this.n = value;
     return sendSetRelays();
   }
@@ -200,7 +201,7 @@ public class TunerController
     if(this.c == value)
       return true;
     
-    System.out.println("setC");
+//    System.out.println("setC");
     this.c = value;
     return sendSetRelays();
   }
@@ -217,7 +218,7 @@ public class TunerController
     if(this.l == value)
       return true;   
     
-    System.out.println("setL");
+//    System.out.println("setL");
     this.l = value;
     return sendSetRelays();
   }
@@ -239,7 +240,7 @@ public class TunerController
     if(this.c == c && this.l==l && this.n==n && this.antenna==ant)
       return true;
     
-    System.out.println("setAll");
+//    System.out.println("setAll");
     this.c = c;  
     this.l = l;
     this.n = n;
@@ -257,7 +258,7 @@ public class TunerController
     if(this.c == c && this.l==l && this.n==n)
       return true;
     
-    System.out.println("setTuneControls");
+//    System.out.println("setTuneControls");
     this.c = c;  
     this.l = l;
     this.n = n;
@@ -437,9 +438,9 @@ public class TunerController
     // 00000001         TUNE-OFF    Tuning is off
     // 00000010         TUNE-ON     Tuning is  on
     if(isTuneOn)
-      packet[1] = 0x02;   // Command 
+      packet[1] = 0x01;   // Command 
     else
-      packet[1] = 0x01;
+      packet[1] = 0x02;
     
     ((EncodedTransaction)transaction).setTransaction(packet); 
     return tunerSerialComm.queueTransactions(transaction);
@@ -541,7 +542,7 @@ public class TunerController
         while(true)
         {
           requestAdcValues(); 
-          Thread.sleep(100);   
+          Thread.sleep(300);   
         }//while(true)
       }catch(InterruptedException e)
       {

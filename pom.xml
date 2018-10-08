@@ -131,6 +131,12 @@
         <artifactId>db4o-all-java5</artifactId>
         <version>8.0.276.16149</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>2.3</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
     <description>Program for logging internal LZ contests</description>
 </project>

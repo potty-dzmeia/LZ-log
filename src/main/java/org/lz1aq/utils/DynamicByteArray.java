@@ -26,8 +26,8 @@ import java.io.ByteArrayOutputStream;
  * remove() which removes desired number of bytes starting from the beginning 
  * of the array.
  */
-public class DynamicByteArray extends ByteArrayOutputStream 
-{
+public class DynamicByteArray extends ByteArrayOutputStream
+ {
   // private static final Logger logger = Logger.getLogger(DynamicByteArray.class.getName());
   
   public DynamicByteArray()
@@ -42,27 +42,25 @@ public class DynamicByteArray extends ByteArrayOutputStream
   /**
    * Removes bytes starting from the beginning of the array.
    * 
-   * @param bytesCount  - the number of bytes that we would like to remove.
+   * @param numberOfBytesToRemove  - the number of bytes that we would like to remove.
    * If the number of bytes is more than the amount inside the array no error
    * will occur and all bytes from the array will be deleted
    * 
    */
-  public void remove(int bytesCount)
+  public void remove(int numberOfBytesToRemove)
   {
     
-    if(bytesCount==0)
+    if(numberOfBytesToRemove==0)
       return;
     
     // We can't remove more than there is in the array
-    if(bytesCount > this.count)
-      bytesCount = this.count;
+    if(numberOfBytesToRemove > this.count)
+      numberOfBytesToRemove = this.count;
             
-    System.arraycopy(this.buf, bytesCount, buf, 0, this.count-bytesCount);
+    System.arraycopy(this.buf, numberOfBytesToRemove, this.buf, 0, this.count-numberOfBytesToRemove);
     
-    this.count -=bytesCount;
-    
-    // logger.log(Level.INFO, "Removed: "+removedBytes+"; Remaining: "+this.count+";  Buffer size "+this.buf.length);
-    
+    this.count -=numberOfBytesToRemove; 
+    // logger.log(Level.INFO, "Removed: "+removedBytes+"; Remaining: "+this.count+";  Buffer size "+this.buf.length);  
   }
   
 }

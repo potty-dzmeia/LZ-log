@@ -29,12 +29,7 @@ import java.util.logging.Logger;
 
 public final class AtuApplicationSettings
 {
-
-  static final String SETTINGS_FILE_NAME = "AtuSettings.properties";
-  static final String PROPERTY_COMPORT_RADIO = "ComPortRadio";
-  static final String PROPERTY_BAUDE_RATE_RADIO = "BaudRateRadio";
-  static final String PROPERTY_COMPORT_ATU = "ComPortAtu";
-  static final String PROPERTY_BAUDE_RATE_ATU = "BaudRateAtu";
+  static final String SETTINGS_FILE_NAME = "AppSettings.properties";
   static final String PROPERTY_LABEL_ANT = "LabelAnt";
   static final String PROPERTY_MAIN_WINDOW_X = "MainWindow_x";
   static final String PROPERTY_MAIN_WINDOW_Y = "MainWindow_y";
@@ -53,10 +48,6 @@ public final class AtuApplicationSettings
   static final int NUMBER_OF_TUNE_VALUES = 10;
   static final int NUMBER_OF_SLIDER_BUTTONS = 3;
 
-  private String comPortRadio;
-  private String baudRateRadio;
-  private String comPortAtu;
-  private String baudRateAtu;
   private final String[] antennaLabels;
   private Rectangle mainWindowDimensions;
   private Rectangle tuneBoxDimensions;
@@ -164,46 +155,7 @@ public final class AtuApplicationSettings
   {
     this.mainWindowDimensions = jFrameDimensions;
   }
-
-  public String getComPortRadio()
-  {
-    return comPortRadio;
-  }
-
-  public void setComPortRadio(String comPort)
-  {
-    this.comPortRadio = comPort;
-  }
-
-  public String getComPortAtu()
-  {
-    return comPortAtu;
-  }
-
-  public void setComPortAtu(String comPort)
-  {
-    this.comPortAtu = comPort;
-  }
-
-  public String getBaudRateRadio()
-  {
-    return baudRateRadio;
-  }
-
-  public void setBaudRateRadio(String baudRate)
-  {
-    this.baudRateRadio = baudRate;
-  }
   
-   public String getBaudRateAtu()
-  {
-    return this.baudRateAtu;
-  }
-
-  public void setBaudRateAtu(String baudRate)
-  {
-    this.baudRateAtu = baudRate;
-  }
 
   /**
    * Get the name for the antenna button
@@ -254,12 +206,6 @@ public final class AtuApplicationSettings
    */
   public void SaveSettingsToDisk()
   {
-    // Store com port settings
-    prop.setProperty(PROPERTY_COMPORT_RADIO, comPortRadio);
-    prop.setProperty(PROPERTY_BAUDE_RATE_RADIO, baudRateRadio);
-    prop.setProperty(PROPERTY_COMPORT_ATU, comPortAtu);
-    prop.setProperty(PROPERTY_BAUDE_RATE_ATU, baudRateAtu);
-
     // Now save the dimensions:
     prop.setProperty(PROPERTY_MAIN_WINDOW_X, Integer.toString(mainWindowDimensions.x));
     prop.setProperty(PROPERTY_MAIN_WINDOW_Y, Integer.toString(mainWindowDimensions.y));
@@ -295,32 +241,7 @@ public final class AtuApplicationSettings
   {
     try
     {
-
       prop.load(new FileInputStream(SETTINGS_FILE_NAME));
-
-      comPortRadio = prop.getProperty(PROPERTY_COMPORT_RADIO);
-      if(comPortRadio == null)
-      {
-        throwMissingPropertyException(PROPERTY_COMPORT_RADIO);
-      }
-
-      baudRateRadio = prop.getProperty(PROPERTY_BAUDE_RATE_RADIO);
-      if(baudRateRadio == null)
-      {
-        throwMissingPropertyException(PROPERTY_BAUDE_RATE_RADIO);
-      }
-
-      comPortAtu = prop.getProperty(PROPERTY_COMPORT_ATU);
-      if(comPortAtu == null)
-      {
-        throwMissingPropertyException(PROPERTY_COMPORT_ATU);
-      }
-
-      baudRateAtu = prop.getProperty(PROPERTY_BAUDE_RATE_ATU);
-      if(baudRateAtu == null)
-      {
-        throwMissingPropertyException(PROPERTY_BAUDE_RATE_ATU);
-      }
 
       // Read the Main window dimensions:
       int x = Integer.parseInt(prop.getProperty(PROPERTY_MAIN_WINDOW_X));
@@ -361,7 +282,6 @@ public final class AtuApplicationSettings
       this.SetSettingsToDefault();
       Logger.getLogger(AtuApplicationSettings.class.getName()).log(Level.SEVERE, null, ex);
     }
-
   }
 
   /**
@@ -369,11 +289,6 @@ public final class AtuApplicationSettings
    */
   private void SetSettingsToDefault()
   {
-    comPortRadio = "Com1";
-    baudRateRadio = "9600";
-    comPortAtu = "Com2";
-    baudRateAtu = "9600";
-
     // We have minimum size so we don't have to worry about the values:
     mainWindowDimensions.height = 0;
     mainWindowDimensions.width = 0;
@@ -395,8 +310,8 @@ public final class AtuApplicationSettings
     }
   }
 
-  void throwMissingPropertyException(String propertyName) throws Exception
-  {
-    throw new Exception("Error when trying to read element " + propertyName + " from file " + SETTINGS_FILE_NAME);
-  }
+    void throwMissingPropertyException(String propertyName) throws Exception
+    {
+      throw new Exception("Error when trying to read element " + propertyName + " from file " + SETTINGS_FILE_NAME);
+    }
 }

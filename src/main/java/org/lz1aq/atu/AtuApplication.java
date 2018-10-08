@@ -33,6 +33,7 @@ import static javax.swing.plaf.basic.BasicSliderUI.NEGATIVE_SCROLL;
 import static javax.swing.plaf.basic.BasicSliderUI.POSITIVE_SCROLL;
 import javax.swing.plaf.synth.SynthSliderUI;
 import org.lz1aq.tuner.TunerController;
+import org.lz1aq.utils.ComPortProperties;
 
 /**
  *
@@ -42,8 +43,13 @@ public class AtuApplication extends javax.swing.JFrame
 {
   public final String appTitle = "ATU";
   public final String appVersion = "0.5";
+  
+  static final String ATU_COMPORT_PROPERTIES_FILE = "AtuSerialPortSettings.properties";
+  static final String RADIO_COMPORT_PROPERTIES_FILE = "RadioSerialPortSettings.properties";
           
   private final AtuApplicationSettings applicationSettings;
+  private final ComPortProperties atuSerialPortSettings;
+  private final ComPortProperties radioSerialPortSettings;
   private final TunerController tunerController;
   private final TunerController.TunerControllerListener tunerControllerListener = new LocalTunerControllerListener();
   
@@ -68,9 +74,13 @@ public class AtuApplication extends javax.swing.JFrame
   public AtuApplication()
   {
     applicationSettings = new AtuApplicationSettings(); // Load user settings for the application from a properties file
+    atuSerialPortSettings = new ComPortProperties(ATU_COMPORT_PROPERTIES_FILE);
+    radioSerialPortSettings = new ComPortProperties(RADIO_COMPORT_PROPERTIES_FILE);
+    
     tuneSettings = new TuneSettings();  // Load tune settings from a file
-    tunerController = new TunerController(applicationSettings.getComPortAtu(), applicationSettings.getBaudRateAtu());
-            
+    tunerController = new TunerController(atuSerialPortSettings);
+    tunerController.addEventListener(tunerControllerListener);
+    
     initComponents(); // GUI
     
     jSliderC1.setUI(new MySliderUI(jSliderC1)); // Custom UI for slider buttons (needed for PG UP/DWN scrolling)
@@ -394,7 +404,8 @@ public class AtuApplication extends javax.swing.JFrame
             {
               // SWR
               // ----
-              jProgressBarSwr.setValue(swrToProgressBarValue(tunerController.getSwr()));  
+              jProgressBarSwr.setValue(swrToProgressBarValue(tunerController.getSwr())); 
+              System.out.println("SWR------------> "+Float.toString(tunerController.getSwr()));
               jProgressBarSwr.setString(String.format("%.1f", tunerController.getSwr()));
 
               // Antenna Voltage
@@ -1045,6 +1056,8 @@ public class AtuApplication extends javax.swing.JFrame
     }
     
     applicationSettings.SaveSettingsToDisk();
+    atuSerialPortSettings.SaveSettingsToDisk();
+    radioSerialPortSettings.SaveSettingsToDisk();
     tuneSettings.save();
   }//GEN-LAST:event_formWindowClosing
 
