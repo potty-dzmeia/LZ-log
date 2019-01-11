@@ -256,7 +256,7 @@ public class ComPortProperties
 
   public boolean getDtr()
   {
-     return Boolean.parseBoolean(rts);
+     return Boolean.parseBoolean(dtr);
   }
 
   public void setDtr(boolean dtr)

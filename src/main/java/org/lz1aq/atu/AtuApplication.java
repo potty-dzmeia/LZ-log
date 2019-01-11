@@ -24,14 +24,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import static javax.swing.plaf.basic.BasicSliderUI.NEGATIVE_SCROLL;
 import static javax.swing.plaf.basic.BasicSliderUI.POSITIVE_SCROLL;
 import javax.swing.plaf.synth.SynthSliderUI;
+import org.lz1aq.lzlog.MainWindow;
+import org.lz1aq.radio.RadioController;
+import org.lz1aq.radio.RadioModes;
 import org.lz1aq.tuner.TunerController;
 import org.lz1aq.utils.ComPortProperties;
 
@@ -42,16 +52,19 @@ import org.lz1aq.utils.ComPortProperties;
 public class AtuApplication extends javax.swing.JFrame
 {
   public final String appTitle = "ATU";
-  public final String appVersion = "0.5";
+  public final String appVersion = "0.9";
   
   static final String ATU_COMPORT_PROPERTIES_FILE = "AtuSerialPortSettings.properties";
   static final String RADIO_COMPORT_PROPERTIES_FILE = "RadioSerialPortSettings.properties";
           
-  private final AtuApplicationSettings applicationSettings;
-  private final ComPortProperties atuSerialPortSettings;
-  private final ComPortProperties radioSerialPortSettings;
-  private final TunerController tunerController;
+  private final AtuApplicationSettings  applicationSettings;
+  private final ComPortProperties       atuSerialPortSettings;
+  private final ComPortProperties       radioSerialPortSettings;
+  private final TunerController         tunerController;
   private final TunerController.TunerControllerListener tunerControllerListener = new LocalTunerControllerListener();
+  private final RadioController         radioController;
+  
+  private String                        pathToWorkingDir; // where the ATU jar file is located
   
   private final TuneSettings tuneSettings;
   private JToggleButton[] bandButtons;
@@ -62,9 +75,12 @@ public class AtuApplication extends javax.swing.JFrame
   
   // Variables used for controlling the AUTO mode - i.e. where we search for the tune setting with best SWR
   private boolean isAutoTuneModeActive = false;
-  private int autoTuneCurrentTune;  // Index of the currently selected Tune; -1 if we are just starting
-  private int autoTuneBestSwrIndex; // Index of the tune setting that has the best SWR
-  private float autoTuneBestSwrValue; // The lowest value of the SWR 
+  private int     autoTuneCurrentTune;  // Index of the currently selected Tune; -1 if we are just starting
+  private int     autoTuneBestSwrIndex; // Index of the tune setting that has the best SWR
+  private float   autoTuneBestSwrValue; // The lowest value of the SWR 
+  
+  
+  private static final Logger logger = Logger.getLogger(AtuApplication.class.getName());
   
   
   
@@ -80,6 +96,10 @@ public class AtuApplication extends javax.swing.JFrame
     tuneSettings = new TuneSettings();  // Load tune settings from a file
     tunerController = new TunerController(atuSerialPortSettings);
     tunerController.addEventListener(tunerControllerListener);
+    
+    radioController = new RadioController();
+    if(loadRadioProtocolParser())// Select the python file describing the radio protocol
+      connectToRadio(); // now we can try to connect
     
     initComponents(); // GUI
     
@@ -118,6 +138,7 @@ public class AtuApplication extends javax.swing.JFrame
     jToggleButtonSsb.setSelected(true);
   }
 
+  
   private void setAntennaButtonsLabels()
   {
     for(int i = 0; i < antennaButtons.length; i++)
@@ -164,31 +185,49 @@ public class AtuApplication extends javax.swing.JFrame
     sliderButtons.add(jSliderL);
   }
 
+  
+  /**
+   * Sets the Sliders and C1/C2 to the appropriate current values
+   */  
   private void updateTuneControls()
   {
     TuneValue tune = getCurrentTune();
     
     // update slider values to represent the current tune
-    jSliderC1.setValue(tune.getC1());
+    jSliderC1.setValue(tune.getC());
     jSliderL.setValue(tune.getL());
     jToggleButtonN.setSelected(tune.isN());
   }
-//
-//  void sendNewTuneValue()
-//  {
-//    // TODO remove
-//    jProgressBarSwr.setValue(50);
-//    jProgressBarSwr.setString(String.format("%.1f",1.1));
-//    jProgressBarAntennaVoltage.setString(String.format("%.1f",1.1));
-//    // Get the tune for the current combination of band, ant and mode
-//    TuneValue tune = tuneSettings.get(applicationSettings.getCurrentBandSelection(),
-//                                      applicationSettings.getCurrentAntSelection(),
-//                                      applicationSettings.getCurrentModeSelection(),
-//                                      applicationSettings.getCurrentTuneSelection());
-//    
-//    tunerController.setAll(tune.getC1(), tune.getL(), tune.isN());
-//    System.out.println("sendTune");
-//  }
+
+  
+  private boolean loadRadioProtocolParser()
+  { 
+    boolean result = radioController.loadProtocolParser(applicationSettings.getRadioProtocolParserLocation());
+    if (result == false)
+    {
+      JOptionPane.showMessageDialog(null, "Error when trying to load the radio protocol parser file!", "Error", JOptionPane.ERROR_MESSAGE);
+      return false;
+    }
+     
+    // Show the serial settings that we are going to use when connecting to this radio
+    JOptionPane.showMessageDialog(null, radioController.getInfo());
+    return true;
+  }
+  
+  
+  private boolean connectToRadio()
+  {
+    boolean result =   radioController.connect(radioSerialPortSettings.getComPortName(), 
+                                                radioSerialPortSettings.getBaudRate(), 
+                                                null);
+    if (!result)
+    {
+      JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    return result;
+  }
+  
   
   TuneValue getCurrentTune()
   {
@@ -198,26 +237,106 @@ public class AtuApplication extends javax.swing.JFrame
                              applicationSettings.getCurrentTuneSelection() );
   }
 
+  
   private void onBandButtonPress(int bandButton)
   {
+    if(jToggleButtonTune.isSelected())
+      return; // do nothing in case tune mode is active
+    
     applicationSettings.setCurrentBandSelection(bandButton);
     TuneValue tune = getCurrentTune(); // Get the tune for the current combination of band, ant and mode
   
-    boolean ret = tunerController.setTuneControls(tune.getC1(), tune.getL(), tune.isN()); // Take care of sending the command to the Tuner now - so that later when sliders state change we won't need to send for each slider a separate command to the tunner.
+    boolean ret = tunerController.setTuneControls(tune.getC(), tune.getL(), tune.isN()); // Take care of sending the command to the Tuner now - so that later when sliders state change we won't need to send for each slider a separate command to the tunner.
     if(!ret)
       System.err.println("setTuneControls() failed!");
     
     updateTuneControls(); // Set the tuning controls to respective values
     updateTuneBoxValues(); 
+    
+    changeRadioBand(bandButton);
+    changeRadioMode(applicationSettings.getCurrentModeSelection());
   }
 
   
+  private void changeRadioBand(int bandButtonPressed)
+  {
+    boolean isCw = false;
+    if(applicationSettings.getCurrentModeSelection() == 1)
+      isCw = true;
+   
+    
+    switch(bandButtonPressed)
+    {
+      case 0: // 1.8
+        if(isCw)
+          radioController.setFrequency(1820000);
+        else
+          radioController.setFrequency(1850000);
+        break;
+        
+      case 1: // 3.5
+          if(isCw)
+          radioController.setFrequency(3510000);
+        else
+          radioController.setFrequency(3700000);
+        break;
+        
+      case 2: // 7
+        if(isCw)
+          radioController.setFrequency(7010000);
+        else
+          radioController.setFrequency(7120000);
+        break;
+        
+      case 3: // 10
+        if(isCw)
+          radioController.setFrequency(10110000);
+        else
+          radioController.setFrequency(10110000);
+        break;
+        
+      case 4: // 14
+        if(isCw)
+          radioController.setFrequency(14015000);
+        else
+          radioController.setFrequency(14200000);
+        break;
+      case 5: // 18
+        if(isCw)
+          radioController.setFrequency(18070000);
+        else
+          radioController.setFrequency(18130000);
+        break;
+      case 6: // 21
+        if(isCw)
+          radioController.setFrequency(21010000);
+        else
+          radioController.setFrequency(21200000);
+        break;
+      case 7: // 24
+        if(isCw)
+          radioController.setFrequency(24900000);
+        else
+          radioController.setFrequency(24940000);
+        break;
+      case 8: // 28
+        if(isCw)
+          radioController.setFrequency(28010000);
+        else
+          radioController.setFrequency(28450000);
+    }
+  }
+  
+  
   private void onAntennaButtonPress(int antennaButton)
   {
+    if(jToggleButtonTune.isSelected())
+      return; // do nothing in case tune mode is active
+     
     applicationSettings.setCurrentAntSelection(antennaButton);
     TuneValue tune = getCurrentTune();
     
-    boolean ret = tunerController.setAll(antennaButton, tune.getC1(), tune.getL(), tune.isN()); 
+    boolean ret = tunerController.setAll(antennaButton, tune.getC(), tune.getL(), tune.isN()); 
     if(!ret)
       System.err.println("setTuneControls() failed!");
     
@@ -228,15 +347,37 @@ public class AtuApplication extends javax.swing.JFrame
   
   private void onModeButtonPress(int modeButton)
   {
+    // TODO: use instead radioController.isTransmiiting()
+    if(jToggleButtonTune.isSelected())
+      return; // do nothing in case tune mode is active
+     
     applicationSettings.setCurrentModeSelection(modeButton);
     TuneValue tune = getCurrentTune();
     
-    boolean ret = tunerController.setTuneControls(tune.getC1(), tune.getL(), tune.isN()); // Take care of sending the command to the Tuner now - so that later when sliders state change we won't need to send for each slider a separate command to the tunner.
+    boolean ret = tunerController.setTuneControls(tune.getC(), tune.getL(), tune.isN()); // Take care of sending the command to the Tuner now - so that later when sliders state change we won't need to send for each slider a separate command to the tunner.
     if(!ret)
       System.err.println("setTuneControls() failed!");
     
     updateTuneControls(); // Set the tuning controls to the respective values
     updateTuneBoxValues(); 
+    
+    changeRadioBand(applicationSettings.getCurrentBandSelection());
+    changeRadioMode(modeButton);
+  }
+  
+  
+  private void changeRadioMode(int modeButton)
+  {
+    if(modeButton == 1)
+      radioController.setMode(RadioModes.CW);
+    else
+    {
+       // If higher than 10MHz
+      if(applicationSettings.getCurrentBandSelection()>3)
+        radioController.setMode(RadioModes.USB);
+      else
+        radioController.setMode(RadioModes.LSB);
+    }
   }
   
   
@@ -245,7 +386,7 @@ public class AtuApplication extends javax.swing.JFrame
     applicationSettings.setCurrentTuneSelection(buttonIndex);
     TuneValue tune = getCurrentTune();
     
-    boolean ret = tunerController.setTuneControls(tune.getC1(), tune.getL(), tune.isN());
+    boolean ret = tunerController.setTuneControls(tune.getC(), tune.getL(), tune.isN());
     if(!ret)
       System.err.println("setTuneControls() failed!");
     
@@ -276,9 +417,14 @@ public class AtuApplication extends javax.swing.JFrame
   }
   
   
-  private void updateTuneBoxText(TuneValue tune)
+  private void updateTuneBoxText(int index, TuneValue tune)
   { 
-    tuneBoxButtons.get(applicationSettings.getCurrentTuneSelection()).setText("c1="+tune.getC1()+"  l="+tune.getL()+" >C="+tune.isN());  
+    String c;
+    if(tune.isN())
+      c = "C_ANT";
+    else
+      c = "C_TX";
+    tuneBoxButtons.get(index).setText("c1= "+tune.getC()+"  l= "+tune.getL()+"   C="+c);  
   }
    
   
@@ -296,7 +442,9 @@ public class AtuApplication extends javax.swing.JFrame
                              applicationSettings.getCurrentModeSelection(), 
                              i);
       
-      tuneBoxButtons.get(i).setText("c1="+tune.getC1()+"  l="+tune.getL()+" >C="+tune.isN());  
+      
+      updateTuneBoxText(i, tune);
+      //tuneBoxButtons.get(i).setText("c1="+tune.getC()+"  l="+tune.getL()+" >C="+tune.isN());  
     }
     
     // Highlight the current selection
@@ -319,7 +467,7 @@ public class AtuApplication extends javax.swing.JFrame
                                        applicationSettings.getCurrentAntSelection(), 
                                        applicationSettings.getCurrentModeSelection(), 
                                        i);
-      if(tune.getC1()!=0 || tune.getL()!=0 )
+      if(tune.getC()!=0 || tune.getL()!=0 )
       {
         tuneBoxButtons.get(i).setSelected(true);
         return true;
@@ -520,6 +668,8 @@ public class AtuApplication extends javax.swing.JFrame
     jSliderC1 = new javax.swing.JSlider();
     jSliderL = new javax.swing.JSlider();
     jToggleButtonN = new javax.swing.JToggleButton();
+    jLabel2 = new javax.swing.JLabel();
+    jLabel5 = new javax.swing.JLabel();
     jButton3 = new javax.swing.JButton();
     jToggleButtonTune = new javax.swing.JToggleButton();
     jToggleButtonAuto = new javax.swing.JToggleButton();
@@ -730,6 +880,7 @@ public class AtuApplication extends javax.swing.JFrame
 
     jSliderC1.setMaximum(TunerController.C1_MAX);
     jSliderC1.setPaintLabels(true);
+    jSliderC1.setToolTipText("C");
     jSliderC1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
     jSliderC1.addChangeListener(new javax.swing.event.ChangeListener()
     {
@@ -746,7 +897,7 @@ public class AtuApplication extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
@@ -754,6 +905,7 @@ public class AtuApplication extends javax.swing.JFrame
     jPanelSliderControls.add(jSliderC1, gridBagConstraints);
 
     jSliderL.setMaximum(TunerController.L_MAX);
+    jSliderL.setToolTipText("L");
     jSliderL.addChangeListener(new javax.swing.event.ChangeListener()
     {
       public void stateChanged(javax.swing.event.ChangeEvent evt)
@@ -769,14 +921,14 @@ public class AtuApplication extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanelSliderControls.add(jSliderL, gridBagConstraints);
 
-    jToggleButtonN.setText("C1");
+    jToggleButtonN.setText("C_TX");
     jToggleButtonN.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -785,7 +937,7 @@ public class AtuApplication extends javax.swing.JFrame
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -794,6 +946,24 @@ public class AtuApplication extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     jPanelSliderControls.add(jToggleButtonN, gridBagConstraints);
+
+    jLabel2.setText("L");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.01;
+    gridBagConstraints.weighty = 1.0;
+    jPanelSliderControls.add(jLabel2, gridBagConstraints);
+
+    jLabel5.setText("C");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.01;
+    gridBagConstraints.weighty = 1.0;
+    jPanelSliderControls.add(jLabel5, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -822,6 +992,7 @@ public class AtuApplication extends javax.swing.JFrame
     jPanelMiscButtons.add(jButton3, gridBagConstraints);
 
     jToggleButtonTune.setText("Tune");
+    jToggleButtonTune.setToolTipText("");
     jToggleButtonTune.addItemListener(new java.awt.event.ItemListener()
     {
       public void itemStateChanged(java.awt.event.ItemEvent evt)
@@ -1074,9 +1245,9 @@ public class AtuApplication extends javax.swing.JFrame
     
     TuneValue tune = getCurrentTune();
     
-    tune.setC1(jSliderC1.getValue());     // Update the Tune with the new value
-    tunerController.setC1(tune.getC1());  // Tell the Tuner to set relays
-    updateTuneBoxText(tune);
+    tune.setC(jSliderC1.getValue());     // Update the Tune with the new value
+    tunerController.setC1(tune.getC());  // Tell the Tuner to set relays
+    updateTuneBoxText(applicationSettings.getCurrentTuneSelection(), tune);
   }//GEN-LAST:event_jSliderC1StateChanged
 
   private void jSliderLStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jSliderLStateChanged
@@ -1089,7 +1260,7 @@ public class AtuApplication extends javax.swing.JFrame
     
     tune.setL(jSliderL.getValue());    // Update the Tune with the new value
     tunerController.setL(tune.getL());  // Tell the Tuner to set relays
-    updateTuneBoxText(tune);
+    updateTuneBoxText(applicationSettings.getCurrentTuneSelection(), tune);
   }//GEN-LAST:event_jSliderLStateChanged
 
   private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
@@ -1312,15 +1483,60 @@ public class AtuApplication extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jToggleButtonTuneItemStateChanged
     if(evt.getStateChange() == ItemEvent.SELECTED)
     {
-      boolean ret = tunerController.enableTuneMode();
-      if(!ret) // unable to send command to the Tuner
-        jToggleButtonTune.setSelected(false);
+      java.awt.EventQueue.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          Object[] options = {"Yes", "No"};
+          int dialogResult = JOptionPane.showOptionDialog(null,
+                                                          "Did you set PA to STBY ?!?",
+                                                          "Warning !!!",
+                                                          JOptionPane.YES_NO_OPTION,
+                                                          JOptionPane.WARNING_MESSAGE,
+                                                          null,
+                                                          options,
+                                                          options[1]);
+
+          if(dialogResult == JOptionPane.NO_OPTION || dialogResult == JOptionPane.CLOSED_OPTION)
+          {
+            jToggleButtonTune.setSelected(false);
+            return;
+          }
+
+          boolean ret = tunerController.enableTuneMode();
+          if(!ret) // unable to send command to the Tuner
+          {
+            jToggleButtonTune.setSelected(false);
+            return;
+          }
+
+          // Set the transmitter into: FM; Low power; Transmit mode
+          radioController.setMode(RadioModes.FM);
+          radioController.setTxPower(applicationSettings.getRadioTunePower());
+          radioController.setMicPtt(true);
+        }
+      });
     }
     else if(evt.getStateChange() == ItemEvent.DESELECTED)  
     {
-      boolean ret = tunerController.disableTuneMode();
-      if(!ret) // unable to send command to the Tuner
-        jToggleButtonTune.setSelected(true);
+      java.awt.EventQueue.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          System.out.println("DESELECTED");
+          boolean ret = tunerController.disableTuneMode();
+          if(!ret) // unable to send command to the Tuner
+          {
+            jToggleButtonTune.setSelected(true);
+            return;
+          }
+
+          // Set the transmitter into: FM; Low power; Transmit mode
+          changeRadioMode(applicationSettings.getCurrentModeSelection());
+          radioController.setTxPower(applicationSettings.getRadioAttackPower());
+          radioController.setMicPtt(false);
+        }
+      });
     }
   }//GEN-LAST:event_jToggleButtonTuneItemStateChanged
 
@@ -1348,19 +1564,19 @@ public class AtuApplication extends javax.swing.JFrame
     if(evt.getStateChange() == ItemEvent.SELECTED)
     {
       isSelected = true;
-      jToggleButtonN.setText("C2");
+      jToggleButtonN.setText("C_ANT");
     }
     else
     {
       isSelected = false;
-      jToggleButtonN.setText("C1");
+      jToggleButtonN.setText("C_TX");
     }
     
     TuneValue tune = getCurrentTune();
     
-    tune.setN(isSelected);             // Update the Tune with the new value
-    tunerController.setN(isSelected);  // Tell the Tuner to set relays
-    updateTuneBoxText(tune);
+    tune.setIsC2Selected(isSelected);             // Update the Tune with the new value
+    tunerController.setIsC2Selected(isSelected);  // Tell the Tuner to set relays
+    updateTuneBoxText(applicationSettings.getCurrentTuneSelection(), tune);
   }//GEN-LAST:event_jToggleButtonNItemStateChanged
 
   /**
@@ -1423,8 +1639,10 @@ public class AtuApplication extends javax.swing.JFrame
   private javax.swing.JButton jButton4;
   private javax.swing.JDialog jDialogTuneBox;
   private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
+  private javax.swing.JLabel jLabel5;
   private javax.swing.JMenu jMenu1;
   private javax.swing.JMenu jMenu2;
   private javax.swing.JMenuBar jMenuBar1;

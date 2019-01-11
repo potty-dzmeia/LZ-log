@@ -41,7 +41,7 @@ public class TunerController
   // Controlled by the user
   private int     c;
   private int     l;
-  private boolean n;
+  private boolean isC2Selected;
   private int     antenna = -1;
   private boolean isTuneOn;
   
@@ -178,13 +178,13 @@ public class TunerController
    * @param value 
    * @return  
    */
-  public boolean setN(boolean value)
+  public boolean setIsC2Selected(boolean value)
   {
-    if(this.n == value)
+    if(this.isC2Selected == value)
       return true;
     
 //    System.out.println("setN");
-    this.n = value;
+    this.isC2Selected = value;
     return sendSetRelays();
   }
   
@@ -237,13 +237,13 @@ public class TunerController
     assert c<=C1_MAX;
     assert l<=L_MAX;
     
-    if(this.c == c && this.l==l && this.n==n && this.antenna==ant)
+    if(this.c == c && this.l==l && this.isC2Selected==n && this.antenna==ant)
       return true;
     
 //    System.out.println("setAll");
     this.c = c;  
     this.l = l;
-    this.n = n;
+    this.isC2Selected = n;
     this.antenna = ant;
     
     return sendSetRelays();
@@ -255,13 +255,13 @@ public class TunerController
     assert c<=C1_MAX;
     assert l<=L_MAX;
     
-    if(this.c == c && this.l==l && this.n==n)
+    if(this.c == c && this.l==l && this.isC2Selected==n)
       return true;
     
 //    System.out.println("setTuneControls");
     this.c = c;  
     this.l = l;
-    this.n = n;
+    this.isC2Selected = n;
     
     return sendSetRelays();
   }
@@ -379,7 +379,7 @@ public class TunerController
     packet[5] = (byte)(~(l>>4));     // HI(l)
     
     // Set C1/C2 active
-    if(n)
+    if(isC2Selected)
       packet[6] = (byte)(packet[6] | 0x01); // C2 active
     else
       packet[6] = (byte)(packet[6] | 0x02); // C1 active

@@ -280,6 +280,37 @@ class Icom(radio.Radio):
         return list()
 
 
+    @classmethod
+    def encodeSetTxPower(cls, tx_power):
+        """
+        Gets the command(s) with which we can tell the radio to set the TX power to certain value
+        :param tx_power: from 0[watts] to Max[watts]
+        :return:
+        """
+        tx_power = int((tx_power*255)/100)
+
+        temp = cls.__transaction(cls.SET_TX_POWER, sub_command=0xA, data=misc_utils.toBcd_bigendian(tx_power, 4))  # Select the frequency
+        tr = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+
+        return [tr]
+
+
+    @classmethod
+    def encodeSetMicPtt(cls, is_enabled):
+        """
+        Gets the command(s) with which we can tell the radio to go into TX/RCV mode
+        :param is_enabled: true - TX on; false - TX is off
+        :return:
+        """
+        if is_enabled == 0:
+            temp = cls.__transaction(cls.SET_PTT_ON, sub_command=0x0, data=[0x0])  # set to RX
+        else:
+            temp = cls.__transaction(cls.SET_PTT_ON, sub_command=0x0,data=[0x1])  # set to TX
+
+
+        tr = EncodedTransaction(bytearray(temp).__str__(), is_cfm_expected=True)
+        return [tr]
+
     #+--------------------------------------------------------------------------+
     #|  Decode methods below                                                    |
     #+--------------------------------------------------------------------------+
@@ -434,6 +465,8 @@ class Icom(radio.Radio):
     READ_MODE = 0x04        # Read operating mode
     SET_FREQ = 0x05         # Set frequency data (same as SEND_FREQ)
     SET_MODE = 0x06         # Set mode data (same as SEND_MODE)
+    SET_TX_POWER = 0x14     # Set
+    SET_PTT_ON = 0x1C       # Set the transceiver to receive or transmit condition (0=Rx; 1=Tx)
     CFM_POSITIVE = 0xFB     # Positive confirmation send by the Icom radio
     CFM_NEGATIVE = 0xFA     # Negative confirmation send by the Icom radio
 

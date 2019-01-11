@@ -39,8 +39,9 @@ public final class AtuApplicationSettings
   static final String PROPERTY_TUNEBOX_WINDOW_Y = "TuneboxWindow_y";
   static final String PROPERTY_TUNEBOX_WINDOW_WIDTH = "TuneboxWindow_w";
   static final String PROPERTY_TUNEBOX_WINDOW_HEIGHT = "TuneboxWindow_h";
-  static final String PROPERTY_RADIO_ATTACK_POWER = "radioAttackPower";
-  static final String PROPERTY_RADIO_TUNE_POWER = "radioTunePower";
+  static final String PROPERTY_RADIO_ATTACK_POWER = "RadioAttackPower";
+  static final String PROPERTY_RADIO_TUNE_POWER = "RadioTunePower";
+  static final String PROPERTY_RADIO_PROTOCOL_PARSER = "RadioProtocolParserLocation";
   
   static final int NUMBER_OF_BAND_BUTTONS = 9;
   static final int NUMBER_OF_ANT_BUTTONS = 6;
@@ -54,6 +55,7 @@ public final class AtuApplicationSettings
   private final Properties prop;
   private int  radioAttackPower;
   private int  radioTunePower;
+  private String radioProtocolParserLocation;
 
   // Values below are not saved in the file
   private int currentBandSelection = 0;
@@ -75,6 +77,17 @@ public final class AtuApplicationSettings
     return radioTunePower;
   }
 
+  public String getRadioProtocolParserLocation()
+  {
+    return radioProtocolParserLocation;
+  }
+
+  public void setRadioProtocolParserLocation(String radioProtocolParserLocation)
+  {
+    this.radioProtocolParserLocation = radioProtocolParserLocation;
+  }
+
+  
   
   public int getCurrentBandSelection()
   {
@@ -100,6 +113,10 @@ public final class AtuApplicationSettings
     currentTuneSelection = lastUsedTuneSelection[currentBandSelection][currentAntSelection][currentModeSelection];
   }
 
+  /**
+   * 
+   * @return 0 - SSB; 1 - CW
+   */
   public int getCurrentModeSelection()
   {
     return currentModeSelection;
@@ -112,6 +129,11 @@ public final class AtuApplicationSettings
     currentTuneSelection = lastUsedTuneSelection[currentBandSelection][currentAntSelection][currentModeSelection];
   }
 
+  
+  /**
+   * Returns the index of the current selections per band,ant,mode
+   * @return  Index of the current selection (from 0 to NUMBER_OF_TUNE_VALUES)
+   */
   public int getCurrentTuneSelection()
   {
     return currentTuneSelection;
@@ -220,7 +242,8 @@ public final class AtuApplicationSettings
     prop.setProperty(PROPERTY_RADIO_ATTACK_POWER, Integer.toString(radioAttackPower));
     prop.setProperty(PROPERTY_RADIO_TUNE_POWER, Integer.toString(radioTunePower));
     
-    // Now save the texts for the Direction Buttons
+    prop.setProperty(PROPERTY_RADIO_PROTOCOL_PARSER, radioProtocolParserLocation);
+
     setProperties(PROPERTY_LABEL_ANT, antennaLabels);
 
     try
@@ -260,6 +283,8 @@ public final class AtuApplicationSettings
       radioAttackPower = Integer.parseInt(prop.getProperty(PROPERTY_RADIO_ATTACK_POWER));
       radioTunePower = Integer.parseInt(prop.getProperty(PROPERTY_RADIO_TUNE_POWER));
       
+      radioProtocolParserLocation = prop.getProperty(PROPERTY_RADIO_PROTOCOL_PARSER);
+    
       this.tuneBoxDimensions = new Rectangle(x, y, w, h);
 
       // Now read the texts for the Direction Buttons
@@ -302,6 +327,8 @@ public final class AtuApplicationSettings
 
     radioAttackPower = 10;
     radioTunePower   = 10;
+    
+    radioProtocolParserLocation = "icom.py";
     
     // Set texts for the antenna buttons
     for(int i = 0; i < NUMBER_OF_ANT_BUTTONS; i++)

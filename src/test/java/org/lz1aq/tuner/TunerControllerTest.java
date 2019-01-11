@@ -60,7 +60,7 @@ public class TunerControllerTest extends TestCase
    */
   public void testDecodeSerialData()
   {
-    ComPortProperties comProp = new ComPortProperties("foobar");
+    ComPortProperties comProp = new ComPortProperties("AtuSerialPortSettings.properties");
     TunerController instance = new TunerController(comProp);
     instance.addEventListener(new LocalListener());
     

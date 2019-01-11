@@ -26,44 +26,31 @@ public class TuneValue implements Serializable
 {
   private static final long serialVersionUID = 1L;
   
-  private int c1;
-  private int c2;
-  private boolean n;
+  private int c;
+  private boolean isC2Selected; // This decides between two C1 and C2 being selected inside the tuner
   private int l;
 
   public TuneValue()
   {
-    this.c1 = 0;
-    this.c2 = 0;
+    this.c = 0;
     this.l = 0;
   }
   
-  public void set(int c1, int c2, int l)
+  public void set(int c, int l)
   {
-    this.c1 = c1;
-    this.c2 = c2;
+    this.c = c;
     this.l = l;
   }
   
-  public int getC1()
+  public int getC()
   {
-    return c1;
+    return c;
   }
 
-  public void setC1(int c1)
+  public void setC(int c)
   {
-    this.c1 = c1;
+    this.c = c;
   }
-
-//  public int getC2()
-//  {
-//    return c2;
-//  }
-
-//  public void setC2(int c2)
-//  {
-//    this.c2 = c2;
-//  }
 
   public int getL()
   {
@@ -77,12 +64,12 @@ public class TuneValue implements Serializable
 
   public boolean isN()
   {
-    return n;
+    return isC2Selected;
   }
 
-  public void setN(boolean n)
+  public void setIsC2Selected(boolean n)
   {
-    this.n = n;
+    this.isC2Selected = n;
   }
   
 } 

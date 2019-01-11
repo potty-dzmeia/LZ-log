@@ -157,4 +157,20 @@ public interface I_Radio extends I_Rig
    */
   public I_EncodedTransaction[] encodeEnableAutomaticInfo();
   
+   /**
+   * Gets the command(s) with which we can tell the radio to set the TX power to certain value
+   * 
+   * @param power - from 0 to MaxPower
+   * @return 
+   */
+  public I_EncodedTransaction[] encodeSetTxPower(int txPower);
+  
+   /**
+   * Gets the command(s) with which we can tell the radio to go into TX/RCV mode
+   * 
+   * @param isOn - true - TX on; false - TX is off
+   * @return 
+   */
+  public I_EncodedTransaction[] encodeSetMicPtt(boolean isOn);
+  
 }

@@ -179,6 +179,26 @@ class Radio(I_Radio):
         raise NotImplementedError("encodeEnableAutomaticInfo")
 
 
+    @classmethod
+    def encodeSetTxPower(cls, txPower):
+        """
+        Gets the command(s) with which we can tell the radio to set the TX power to certain value
+        :param txPower: from 0 to MaxPower
+        :return:
+        """
+        raise NotImplementedError("encodeSetTxPower")
+
+
+    @classmethod
+    def encodeSetMicPtt(cls, is_enabled):
+        """
+        Gets the command(s) with which we can tell the radio to go into TX/RCV mode
+        :param is_enabled: true - TX on; false - TX is off
+        :return:
+        """
+        raise NotImplementedError("encodeEnableTx")
+
+
     #Freq - frequency of the target VFO
     #rig_set_mode(RIG *rig, vfo_t vfo, rmode_t mode, pbwidth_t width)
     #rig_set_vfo(RIG *rig, vfo_t vfo) - set the current VFO

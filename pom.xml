@@ -4,7 +4,7 @@
   <groupId>org.lz1aq.lzlog</groupId>
   <artifactId>Atu</artifactId>
   <packaging>jar</packaging>
-  <version>0.5</version>
+  <version>0.9</version>
   <name>Atu</name>
   <url>http://maven.apache.org</url>
   

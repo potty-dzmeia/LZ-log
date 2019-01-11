@@ -70,6 +70,34 @@ def toBcd(number, bcd_len):
 
     return result
 
+def toBcd_bigendian(number, bcd_len):
+    """
+    Converts number to 4bit BCD values (big endian).
+    Example: toBcd_bigendian(1234, 10) --> [0x00, 0x00, 0x00, 0x12, 0x34]
+
+    :param number: number to be converted to BCD format
+    :type number: int
+    :param bcd_len: how many BCD character should the output contain (must be an even value)
+    :type bcd_len: int
+    :return: list of integers containing the BCD values
+    :rtype: list
+    """
+
+    if bcd_len % 2 != 0:
+        raise ValueError("bcd_len should be even number!")
+    if len(str(number)) > bcd_len:
+        raise ValueError("number is too big!")
+
+    result = []
+
+    for i in range(0, bcd_len / 2):
+        byte = number % 10;
+        number /= 10
+        byte |= (number % 10) << 4
+        number /= 10
+        result.append(byte)
+
+    return result[::-1]
 
 def printListInHex(lst):
     print ' '.join('0x%02x' % b for b in lst)

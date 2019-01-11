@@ -113,7 +113,8 @@ public class RadioController
       radio = new Radio(radioParser, commport, baudRate);
       radio.addEventListener(new RadioController.LocalRadioListener());
       radio.connect(); // Let's not forget to call connect(). Calling disconnects() later will close the Com Port
-      eventListeners.add(listener);
+      if(listener!=null)
+        eventListeners.add(listener);
       
       
       radio.getFrequency(RadioVfos.A);
@@ -350,6 +351,40 @@ public class RadioController
     }
   }
   
+  
+  public void setTxPower(int radioTunePower)
+  {
+    if (!isConnected())
+      return;
+    
+    try
+    {
+      radio.setTxPower(radioTunePower);
+    }
+    catch (Exception ex)
+    {
+      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }
+
+  
+  public void setMicPtt(boolean isOn)
+  {
+    if (!isConnected())
+      return;
+    
+    try
+    {
+      radio.setMicPtt(isOn);
+    }
+    catch (Exception ex)
+    {
+      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }
+
+  
+  
   public String getInfo()
   {
     I_SerialSettings serialSettings = radioParser.getSerialPortSettings();
@@ -380,6 +415,7 @@ public class RadioController
     this.eventListeners.remove(listener);
   }
 
+  
   
   /**
    * Handlers for events coming from the radio

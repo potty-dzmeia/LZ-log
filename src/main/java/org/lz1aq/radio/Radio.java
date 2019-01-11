@@ -286,6 +286,25 @@ public class Radio
   
   
   
+  /**
+   * Tell the radio to set the TX power to the required level
+   * 
+   * @param txPower - MinPower to MaxPower
+   * @throws Exception 
+   */
+  public void setTxPower(int txPower) throws Exception
+  {
+    this.queueTransactions(radioProtocolParser.encodeSetTxPower(txPower));
+  }
+  
+  
+  public void setMicPtt(boolean isEnabled) throws Exception
+  {
+    this.queueTransactions(radioProtocolParser.encodeSetMicPtt(isEnabled));
+  }
+  
+  
+  
   public void addEventListener(RadioListener listener) throws Exception
   {
     this.eventListeners.add(listener);

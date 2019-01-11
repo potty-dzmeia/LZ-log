@@ -292,6 +292,41 @@ class Kenwood(Radio):
         logger.debug("returns: {0}".format(result))
         return list([EncodedTransaction(result)])
 
+
+    @classmethod
+    def encodeSetTxPower(cls, tx_power):
+        """
+        Gets the command(s) with which we can tell the radio to set the TX power to certain value
+        :param txPower: from 0 to MaxPower
+        :return:
+        """
+        if tx_power < 5:
+            tx_power = 5
+        if tx_power > 100:
+            tx_power = 100
+
+        result = "PC{0:03d};".format(tx_power)
+
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
+
+    @classmethod
+    def encodeSetMicPtt(cls, is_enabled):
+        """
+        Gets the command(s) with which we can tell the radio to go into TX/RCV mode
+        :param is_enabled: true - TX on; false - TX is off
+        :return:
+        """
+        if is_enabled == 0:
+            result = "RX;"
+        else:
+            result = "TX;"
+
+        logger.debug("returns: {0}".format(result))
+        return list([EncodedTransaction(result)])
+
+
     #+--------------------------------------------------------------------------+
     #|  Decode methods below                                                    |
     #+--------------------------------------------------------------------------+
