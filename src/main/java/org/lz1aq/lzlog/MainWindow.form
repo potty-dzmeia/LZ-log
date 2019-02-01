@@ -332,9 +332,20 @@
                         <Property name="text" type="java.lang.String" value="F1 Cq"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="jtextfieldf1">
+                    <Component class="javax.swing.JTextField" name="jtextfieldfF1">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="jTextField1"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="jLabel31">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="F2 Exchange"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JTextField" name="jTextFieldF2">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="jTextField2"/>
+                        <Property name="toolTipText" type="java.lang.String" value="For serial number use: {#}; For first part of last Rcv use: {$};"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="jLabel9">
@@ -342,7 +353,7 @@
                         <Property name="text" type="java.lang.String" value="F3 Tu"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="jtextfieldf3">
+                    <Component class="javax.swing.JTextField" name="jtextfieldfF3">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="jTextField2"/>
                       </Properties>
@@ -353,7 +364,7 @@
                         <Property name="text" type="java.lang.String" value="F6"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="jtextfieldf6">
+                    <Component class="javax.swing.JTextField" name="jtextfieldfF6">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="jTextField3"/>
                       </Properties>
@@ -364,7 +375,7 @@
                         <Property name="text" type="java.lang.String" value="F7"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="jtextfieldf7">
+                    <Component class="javax.swing.JTextField" name="jtextfieldfF7">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="jTextField4"/>
                       </Properties>
@@ -374,7 +385,7 @@
                         <Property name="text" type="java.lang.String" value="F8"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="jtextfieldf8">
+                    <Component class="javax.swing.JTextField" name="jtextfieldF8">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="jTextField5"/>
                       </Properties>
@@ -385,7 +396,7 @@
                         <Property name="text" type="java.lang.String" value="F9"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="jtextfieldf9">
+                    <Component class="javax.swing.JTextField" name="jtextfieldF9">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="jTextField6"/>
                       </Properties>
@@ -396,7 +407,7 @@
                         <Property name="text" type="java.lang.String" value="F10 "/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="jtextfieldf10">
+                    <Component class="javax.swing.JTextField" name="jtextfieldF10">
                       <Properties>
                         <Property name="editable" type="boolean" value="false"/>
                         <Property name="text" type="java.lang.String" value="jTextField7"/>
@@ -427,43 +438,34 @@
                         <Property name="text" type="java.lang.String" value="1800"/>
                         <Property name="toolTipText" type="java.lang.String" value="Usually is 30 minutes - i.e. 1800 seconds."/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtextfieldQsoRepeatPeriodActionPerformed"/>
-                      </Events>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-                          <GridBagConstraints gridX="1" gridY="1" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.3" weightY="0.8"/>
+                          <GridBagConstraints gridX="1" gridY="1" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.3" weightY="0.5"/>
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="javax.swing.JLabel" name="jLabel2">
+                    <Component class="javax.swing.JLabel" name="jLabel29">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="QSO repeat period in seconds:"/>
+                        <Property name="text" type="java.lang.String" value="QSO repeat period [seconds]:"/>
+                        <Property name="toolTipText" type="java.lang.String" value="After what period we can work the same station again."/>
                       </Properties>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-                          <GridBagConstraints gridX="0" gridY="1" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="18" weightX="1.0" weightY="0.8"/>
+                          <GridBagConstraints gridX="0" gridY="1" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="1.0" weightY="0.5"/>
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="javax.swing.JLabel" name="jLabel27">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value=" "/>
-                      </Properties>
-                      <Constraints>
-                        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-                          <GridBagConstraints gridX="0" gridY="2" gridWidth="2" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="1.0" weightY="1.0"/>
-                        </Constraint>
-                      </Constraints>
-                    </Component>
-                    <Component class="javax.swing.JLabel" name="jLabel28">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value=" "/>
-                        <Property name="toolTipText" type="java.lang.String" value=""/>
-                      </Properties>
+                    <Component class="javax.swing.JLabel" name="jLabel32">
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
                           <GridBagConstraints gridX="0" gridY="0" gridWidth="2" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="1.0" weightY="1.0"/>
+                        </Constraint>
+                      </Constraints>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="jLabel33">
+                      <Constraints>
+                        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
+                          <GridBagConstraints gridX="0" gridY="2" gridWidth="2" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="1.0" weightY="1.0"/>
                         </Constraint>
                       </Constraints>
                     </Component>

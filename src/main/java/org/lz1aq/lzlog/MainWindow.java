@@ -70,6 +70,7 @@ import org.lz1aq.utils.FontChooser;
 import org.lz1aq.utils.Misc;
 import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.MorseCode;
+import org.lz1aq.utils.RcvFormatter;
 import org.lz1aq.utils.TimeUtils;
 
 /**
@@ -78,7 +79,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.5.2";
+  static final String PROGRAM_VERSION = "1.6";
   static final String PROGRAM_NAME    = "LZ-Log";
   static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
@@ -215,8 +216,8 @@ public class MainWindow extends javax.swing.JFrame
     // Callsign text field should show capital letters only
     ((AbstractDocument) jtextfieldCallsign.getDocument()).setDocumentFilter(callsignFilter);
     // Serial number should be 6 digits long
-    ((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
-    ((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
+    //((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
+    //((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
     
     
     // Needed so that jTable to scroll automatically upon entering a new Qso
@@ -370,24 +371,26 @@ public class MainWindow extends javax.swing.JFrame
     jLabel26 = new javax.swing.JLabel();
     jPanelFunctionKeys = new javax.swing.JPanel();
     jLabel3 = new javax.swing.JLabel();
-    jtextfieldf1 = new javax.swing.JTextField();
+    jtextfieldfF1 = new javax.swing.JTextField();
+    jLabel31 = new javax.swing.JLabel();
+    jTextFieldF2 = new javax.swing.JTextField();
     jLabel9 = new javax.swing.JLabel();
-    jtextfieldf3 = new javax.swing.JTextField();
+    jtextfieldfF3 = new javax.swing.JTextField();
     jLabel4 = new javax.swing.JLabel();
-    jtextfieldf6 = new javax.swing.JTextField();
+    jtextfieldfF6 = new javax.swing.JTextField();
     jLabel5 = new javax.swing.JLabel();
-    jtextfieldf7 = new javax.swing.JTextField();
+    jtextfieldfF7 = new javax.swing.JTextField();
     jLabel8 = new javax.swing.JLabel();
-    jtextfieldf8 = new javax.swing.JTextField();
+    jtextfieldF8 = new javax.swing.JTextField();
     jLabel6 = new javax.swing.JLabel();
-    jtextfieldf9 = new javax.swing.JTextField();
+    jtextfieldF9 = new javax.swing.JTextField();
     jLabel7 = new javax.swing.JLabel();
-    jtextfieldf10 = new javax.swing.JTextField();
+    jtextfieldF10 = new javax.swing.JTextField();
     jPanelContestRules = new javax.swing.JPanel();
     jtextfieldQsoRepeatPeriod = new javax.swing.JTextField();
-    jLabel2 = new javax.swing.JLabel();
-    jLabel27 = new javax.swing.JLabel();
-    jLabel28 = new javax.swing.JLabel();
+    jLabel29 = new javax.swing.JLabel();
+    jLabel32 = new javax.swing.JLabel();
+    jLabel33 = new javax.swing.JLabel();
     jPanelOther = new javax.swing.JPanel();
     checkboxSettingsQuickMode = new javax.swing.JCheckBox();
     textfieldSettingsDefaultPrefix = new javax.swing.JTextField();
@@ -422,9 +425,9 @@ public class MainWindow extends javax.swing.JFrame
     jScrollPane5 = new javax.swing.JScrollPane();
     jtableBandmap = new javax.swing.JTable();
     jPanel8 = new javax.swing.JPanel();
-    jcomboboxStepInHz = new javax.swing.JComboBox<String>();
-    jcomboboxColumnCount = new javax.swing.JComboBox<String>();
-    jcomboboxRowCount = new javax.swing.JComboBox<String>();
+    jcomboboxStepInHz = new javax.swing.JComboBox<>();
+    jcomboboxColumnCount = new javax.swing.JComboBox<>();
+    jcomboboxRowCount = new javax.swing.JComboBox<>();
     jLabel13 = new javax.swing.JLabel();
     jLabel14 = new javax.swing.JLabel();
     jLabel15 = new javax.swing.JLabel();
@@ -760,50 +763,57 @@ public class MainWindow extends javax.swing.JFrame
     jLabel3.setText("F1 Cq");
     jPanelFunctionKeys.add(jLabel3);
 
-    jtextfieldf1.setText("jTextField1");
-    jPanelFunctionKeys.add(jtextfieldf1);
+    jtextfieldfF1.setText("jTextField1");
+    jPanelFunctionKeys.add(jtextfieldfF1);
+
+    jLabel31.setText("F2 Exchange");
+    jPanelFunctionKeys.add(jLabel31);
+
+    jTextFieldF2.setText("jTextField2");
+    jTextFieldF2.setToolTipText("For serial number use: {#}; For first part of last Rcv use: {$};");
+    jPanelFunctionKeys.add(jTextFieldF2);
 
     jLabel9.setText("F3 Tu");
     jPanelFunctionKeys.add(jLabel9);
 
-    jtextfieldf3.setText("jTextField2");
-    jPanelFunctionKeys.add(jtextfieldf3);
+    jtextfieldfF3.setText("jTextField2");
+    jPanelFunctionKeys.add(jtextfieldfF3);
 
     jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     jLabel4.setText("F6");
     jPanelFunctionKeys.add(jLabel4);
 
-    jtextfieldf6.setText("jTextField3");
-    jPanelFunctionKeys.add(jtextfieldf6);
+    jtextfieldfF6.setText("jTextField3");
+    jPanelFunctionKeys.add(jtextfieldfF6);
 
     jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     jLabel5.setText("F7");
     jPanelFunctionKeys.add(jLabel5);
 
-    jtextfieldf7.setText("jTextField4");
-    jPanelFunctionKeys.add(jtextfieldf7);
+    jtextfieldfF7.setText("jTextField4");
+    jPanelFunctionKeys.add(jtextfieldfF7);
 
     jLabel8.setText("F8");
     jPanelFunctionKeys.add(jLabel8);
 
-    jtextfieldf8.setText("jTextField5");
-    jPanelFunctionKeys.add(jtextfieldf8);
+    jtextfieldF8.setText("jTextField5");
+    jPanelFunctionKeys.add(jtextfieldF8);
 
     jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     jLabel6.setText("F9");
     jPanelFunctionKeys.add(jLabel6);
 
-    jtextfieldf9.setText("jTextField6");
-    jPanelFunctionKeys.add(jtextfieldf9);
+    jtextfieldF9.setText("jTextField6");
+    jPanelFunctionKeys.add(jtextfieldF9);
 
     jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     jLabel7.setText("F10 ");
     jPanelFunctionKeys.add(jLabel7);
 
-    jtextfieldf10.setEditable(false);
-    jtextfieldf10.setText("jTextField7");
-    jtextfieldf10.setEnabled(false);
-    jPanelFunctionKeys.add(jtextfieldf10);
+    jtextfieldF10.setEditable(false);
+    jtextfieldF10.setText("jTextField7");
+    jtextfieldF10.setEnabled(false);
+    jPanelFunctionKeys.add(jtextfieldF10);
 
     jTabbedPane1.addTab("Function Keys", jPanelFunctionKeys);
 
@@ -813,43 +823,23 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldQsoRepeatPeriod.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
     jtextfieldQsoRepeatPeriod.setText("1800");
     jtextfieldQsoRepeatPeriod.setToolTipText("Usually is 30 minutes - i.e. 1800 seconds.");
-    jtextfieldQsoRepeatPeriod.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        jtextfieldQsoRepeatPeriodActionPerformed(evt);
-      }
-    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.weighty = 0.8;
+    gridBagConstraints.weighty = 0.5;
     jPanelContestRules.add(jtextfieldQsoRepeatPeriod, gridBagConstraints);
 
-    jLabel2.setText("QSO repeat period in seconds:");
+    jLabel29.setText("QSO repeat period [seconds]:");
+    jLabel29.setToolTipText("After what period we can work the same station again.");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.8;
-    jPanelContestRules.add(jLabel2, gridBagConstraints);
-
-    jLabel27.setText(" ");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanelContestRules.add(jLabel27, gridBagConstraints);
-
-    jLabel28.setText(" ");
-    jLabel28.setToolTipText("");
+    gridBagConstraints.weighty = 0.5;
+    jPanelContestRules.add(jLabel29, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -857,7 +847,15 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelContestRules.add(jLabel28, gridBagConstraints);
+    jPanelContestRules.add(jLabel32, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelContestRules.add(jLabel33, gridBagConstraints);
 
     jTabbedPane1.addTab("Contest Rules", jPanelContestRules);
 
@@ -1173,7 +1171,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
     jDesktopPane1.add(intframeTimeToNextQso);
-    intframeTimeToNextQso.setBounds(490, 10, 463, 435);
+    intframeTimeToNextQso.setBounds(490, 10, 468, 447);
 
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setResizable(true);
@@ -1378,7 +1376,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 528, 482);
+    intframeBandmap.setBounds(500, 520, 670, 476);
 
     intframeLog.setIconifiable(true);
     intframeLog.setResizable(true);
@@ -1899,7 +1897,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeEntryWindow.getContentPane().add(jPanelStatusBar, gridBagConstraints);
 
     jDesktopPane1.add(intframeEntryWindow);
-    intframeEntryWindow.setBounds(280, 20, 453, 227);
+    intframeEntryWindow.setBounds(280, 20, 453, 251);
 
     intframeMisc.setIconifiable(true);
     intframeMisc.setResizable(true);
@@ -2512,8 +2510,8 @@ public class MainWindow extends javax.swing.JFrame
     switch(evt.getKeyChar())
     {
       case KeyEvent.VK_SPACE: // Move to Rcv field    
-        jtextfieldCallsign.requestFocusInWindow();
-        evt.consume();
+        //jtextfieldCallsign.requestFocusInWindow();
+        //evt.consume();
         break;
     }
   }//GEN-LAST:event_jtextfieldRcvKeyTyped
@@ -2850,11 +2848,6 @@ public class MainWindow extends javax.swing.JFrame
     jDialogSettings.setVisible(false);
   }//GEN-LAST:event_jButtonCancelActionPerformed
 
-  private void jtextfieldQsoRepeatPeriodActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtextfieldQsoRepeatPeriodActionPerformed
-  {//GEN-HEADEREND:event_jtextfieldQsoRepeatPeriodActionPerformed
-    // TODO add your handling code here:
-  }//GEN-LAST:event_jtextfieldQsoRepeatPeriodActionPerformed
-
   private void checkboxSettingsQuickModeStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_checkboxSettingsQuickModeStateChanged
   {//GEN-HEADEREND:event_checkboxSettingsQuickModeStateChanged
     if(checkboxSettingsQuickMode.isSelected())
@@ -3052,33 +3045,40 @@ public class MainWindow extends javax.swing.JFrame
       return false;
     }
 
-    if(!Qso.isValidSerial(jtextfieldSnt.getText()))
-    {
-      JOptionPane.showMessageDialog(null, "Invalid Snt!");
-      jtextfieldSnt.requestFocusInWindow();
-      return false;
-    }
     
-    if(!Qso.isValidSerial(jtextfieldRcv.getText()))
+    
+    // Format Rcv
+    
+//    if(!Qso.isValidSerial(jtextfieldSnt.getText()))
+//    {
+//      JOptionPane.showMessageDialog(null, "Invalid Snt!");
+//      jtextfieldSnt.requestFocusInWindow();
+//      return false;
+//    }
+//    
+    if(jtextfieldRcv.getText().isEmpty())
     {
       JOptionPane.showMessageDialog(null, "Invalid Rcv!");
       jtextfieldRcv.requestFocusInWindow();
       return false;
     }
-      
+    
+    
+    // Format the RCV filed
+    String Rcv = jtextfieldRcv.getText().trim().replaceAll(" +", " "); // Remove trailing/leading white spaces and also more than one space between words
+    Rcv = RcvFormatter.padNumbersWithZeros(Rcv); // Add leading zeros to numbers (e.g. 1 --> 001)
     
     // Add qso to log
     // ------------------------------
     Qso qso;
     try
     {
-     
       qso = new Qso(getFreq(),
                     getMode(),     
                     applicationSettings.getMyCallsign(),
                     getCallsignFromTextField(),
                     jtextfieldSnt.getText(),
-                    jtextfieldRcv.getText(),
+                    Rcv,
                     getTypeOfWork());
     }
     catch (Exception exc)
@@ -3252,8 +3252,9 @@ public class MainWindow extends javax.swing.JFrame
   {
     // Clean the callsign field
     jtextfieldCallsign.setText("");
-    // Add the new Snt number
-    jtextfieldSnt.setText(log.getNextSentReport());
+    // Set the new Snt 
+    setSntField();
+    //jtextfieldSnt.setText(log.getNextSentReport());
     // Cean the Rcv field
     jtextfieldRcv.setText("");
     // Clean the callsign status
@@ -3262,7 +3263,23 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldCallsign.requestFocusInWindow();
   }
   
-
+  
+  private void setSntField()
+  {
+    String snt = applicationSettings.getFunctionKeyMessage(1);
+    
+    // {#} - is [serial number]
+    String serial = String.format("%03d", log.getQsoCount()+1);
+    snt = snt.replaceAll("\\{#\\}", serial); 
+    
+    // {$} - is [first part of last Rcv] 
+    String lastRcv = log.getFirstPartOfLastRcv();
+    snt = snt.replaceAll("\\{\\$\\}", lastRcv);
+     
+    jtextfieldSnt.setText(snt);
+  }
+  
+  
   /**
    * @return Returns a new DefaultComboBoxModel containing all available COM ports
    */
@@ -3318,10 +3335,9 @@ public class MainWindow extends javax.swing.JFrame
       jcomboboxRowCount.setSelectedItem(Integer.toString(applicationSettings.getBandmapRowCount()));
       jCheckBoxShowFreq.setSelected(applicationSettings.isShowBandmapFreqColumns());
       //jtextfieldFreqWidth.setText(applicationSettings.get);
-      
+  
       restoreFonts();
     }
-    
     
     // Update the Function keys button text
     jButton4.setText("F4 "+applicationSettings.getMyCallsign());
@@ -3332,7 +3348,9 @@ public class MainWindow extends javax.swing.JFrame
     //jButton10.setText("F10 "+applicationSettings.getFunctionKeyText(9));
     
     // Set the CQ frequency
-    jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));   
+    jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency))); 
+    
+    initEntryFields();
   }
     
     
@@ -3377,13 +3395,14 @@ public class MainWindow extends javax.swing.JFrame
     checkboxSendLeadingZeroAsT.setSelected(applicationSettings.isSendZeroAsT_Enabled());
 
     // Set the text for the function keys
-    jtextfieldf1.setText(applicationSettings.getFunctionKeyMessage(0));
-    jtextfieldf3.setText(applicationSettings.getFunctionKeyMessage(2));
-    jtextfieldf6.setText(applicationSettings.getFunctionKeyMessage(5));
-    jtextfieldf7.setText(applicationSettings.getFunctionKeyMessage(6));
-    jtextfieldf8.setText(applicationSettings.getFunctionKeyMessage(7));
-    jtextfieldf9.setText(applicationSettings.getFunctionKeyMessage(8));
-    jtextfieldf10.setText(applicationSettings.getFunctionKeyMessage(9));
+    jtextfieldfF1.setText(applicationSettings.getFunctionKeyMessage(0));
+    jTextFieldF2.setText(applicationSettings.getFunctionKeyMessage(1));
+    jtextfieldfF3.setText(applicationSettings.getFunctionKeyMessage(2));
+    jtextfieldfF6.setText(applicationSettings.getFunctionKeyMessage(5));
+    jtextfieldfF7.setText(applicationSettings.getFunctionKeyMessage(6));
+    jtextfieldF8.setText(applicationSettings.getFunctionKeyMessage(7));
+    jtextfieldF9.setText(applicationSettings.getFunctionKeyMessage(8));
+    jtextfieldF10.setText(applicationSettings.getFunctionKeyMessage(9));
 
     // Default prefix
     textfieldSettingsDefaultPrefix.setText(applicationSettings.getDefaultPrefix());
@@ -3392,7 +3411,7 @@ public class MainWindow extends javax.swing.JFrame
     {
       textfieldSettingsDefaultPrefix.setEnabled(false); // Disable the "default prefix" text field if the "Quick callsign mode" is disabled
     }
-
+    
     // Repeat period in seconds
     jtextfieldQsoRepeatPeriod.setText(Integer.toString(applicationSettings.getQsoRepeatPeriod()));
 
@@ -3442,25 +3461,23 @@ public class MainWindow extends javax.swing.JFrame
     applicationSettings.setMyCallsign(textfieldSettingsMyCallsign.getText());
     
     // Function keys texts
-    applicationSettings.setFunctionKeyMessage(0, jtextfieldf1.getText());
-    applicationSettings.setFunctionKeyMessage(2, jtextfieldf3.getText());
-    applicationSettings.setFunctionKeyMessage(5, jtextfieldf6.getText());
-    applicationSettings.setFunctionKeyMessage(6, jtextfieldf7.getText());
-    applicationSettings.setFunctionKeyMessage(7, jtextfieldf8.getText());
-    applicationSettings.setFunctionKeyMessage(8, jtextfieldf9.getText());
-    applicationSettings.setFunctionKeyMessage(9, jtextfieldf10.getText());
-    
+    applicationSettings.setFunctionKeyMessage(0, jtextfieldfF1.getText());
+    applicationSettings.setFunctionKeyMessage(1, jTextFieldF2.getText());
+    applicationSettings.setFunctionKeyMessage(2, jtextfieldfF3.getText());
+    applicationSettings.setFunctionKeyMessage(5, jtextfieldfF6.getText());
+    applicationSettings.setFunctionKeyMessage(6, jtextfieldfF7.getText());
+    applicationSettings.setFunctionKeyMessage(7, jtextfieldF8.getText());
+    applicationSettings.setFunctionKeyMessage(8, jtextfieldF9.getText());
+    applicationSettings.setFunctionKeyMessage(9, jtextfieldF10.getText());
     
     // Misc settings
     applicationSettings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
     //TODO applicationSettings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
     applicationSettings.setEmsEnabled(checkboxESM.isSelected());
-    applicationSettings.setSendZeroAsT_Enabled(checkboxSendLeadingZeroAsT.isSelected());
-    
+    applicationSettings.setSendZeroAsT_Enabled(checkboxSendLeadingZeroAsT.isSelected());    
     
     // Default prefix
     applicationSettings.setDefaultPrefix(textfieldSettingsDefaultPrefix.getText());
-    
     
     // Qso repeat period
     try
@@ -3475,7 +3492,7 @@ public class MainWindow extends javax.swing.JFrame
       JOptionPane.showMessageDialog(null, "Invalid repeat Qso period! Must be a number.");
       return false;
     }
-    
+  
     // Incoming Qso "hideAfter" and "maxEntries"
     try
     {
@@ -3558,7 +3575,7 @@ public class MainWindow extends javax.swing.JFrame
         try
         {
           radioController.setFrequency(cqFrequency);
-          Thread.sleep(300);
+          Thread.sleep(300); // w8 for radio to jump to frequency
         }
         catch (InterruptedException ex)
         {
@@ -3688,17 +3705,18 @@ public class MainWindow extends javax.swing.JFrame
     }
     else
     {
-      serial = jtextfieldSnt.getText().replaceAll("\\s", ""); // Get the serial removing white spaces
+      serial = jtextfieldSnt.getText();//.replaceAll("\\s", ""); // Get the serial removing white spaces
     }
     
 
-    // If needed substitute leading zeros with 'T'
+    
     if(applicationSettings.isSendZeroAsT_Enabled())
     {
-      serial = Misc.leadingZerosToT(serial);
+      serial = RcvFormatter.leadingZerosToT(serial);
     }
-   
-    sendCw(serial.substring(0, 3)+ " " +serial.substring(3, 6)+" ");
+  
+    
+    sendCw(serial);
   }
   
   
@@ -4239,6 +4257,7 @@ public class MainWindow extends javax.swing.JFrame
       if(overlimit > 0)
       {
         fb.insertString(offset, text.substring(0, text.length()-overlimit), attr);
+        return;
       }
       fb.insertString(offset, text, attr);
     }
@@ -4312,7 +4331,6 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel17;
   private javax.swing.JLabel jLabel18;
   private javax.swing.JLabel jLabel19;
-  private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel20;
   private javax.swing.JLabel jLabel21;
   private javax.swing.JLabel jLabel22;
@@ -4320,9 +4338,11 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel24;
   private javax.swing.JLabel jLabel25;
   private javax.swing.JLabel jLabel26;
-  private javax.swing.JLabel jLabel27;
-  private javax.swing.JLabel jLabel28;
+  private javax.swing.JLabel jLabel29;
   private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel31;
+  private javax.swing.JLabel jLabel32;
+  private javax.swing.JLabel jLabel33;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabel6;
@@ -4365,6 +4385,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JTabbedPane jTabbedPane1;
   private javax.swing.JTextArea jTextArea1;
   private javax.swing.JTextField jTextField1;
+  private javax.swing.JTextField jTextFieldF2;
   private javax.swing.JButton jbuttonCreateNewLog;
   private javax.swing.JButton jbuttonDeleteEntry;
   private javax.swing.JButton jbuttonJumpToCqFreq;
@@ -4405,6 +4426,9 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JTextField jtextfieldBandmapStartFreq;
   private javax.swing.JTextField jtextfieldCallsign;
   private javax.swing.JTextField jtextfieldContinuousCqPeriod;
+  private javax.swing.JTextField jtextfieldF10;
+  private javax.swing.JTextField jtextfieldF8;
+  private javax.swing.JTextField jtextfieldF9;
   private javax.swing.JTextField jtextfieldFreqWidth;
   private javax.swing.JTextField jtextfieldFrequency;
   private javax.swing.JTextField jtextfieldMode;
@@ -4412,13 +4436,10 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JTextField jtextfieldQsoRepeatPeriod;
   private javax.swing.JTextField jtextfieldRcv;
   private javax.swing.JTextField jtextfieldSnt;
-  private javax.swing.JTextField jtextfieldf1;
-  private javax.swing.JTextField jtextfieldf10;
-  private javax.swing.JTextField jtextfieldf3;
-  private javax.swing.JTextField jtextfieldf6;
-  private javax.swing.JTextField jtextfieldf7;
-  private javax.swing.JTextField jtextfieldf8;
-  private javax.swing.JTextField jtextfieldf9;
+  private javax.swing.JTextField jtextfieldfF1;
+  private javax.swing.JTextField jtextfieldfF3;
+  private javax.swing.JTextField jtextfieldfF6;
+  private javax.swing.JTextField jtextfieldfF7;
   private javax.swing.JToggleButton jtogglebuttonConnectToKeyer;
   private javax.swing.JToggleButton jtogglebuttonConnectToRadio;
   private javax.swing.JTextField textfieldSettingsDefaultPrefix;

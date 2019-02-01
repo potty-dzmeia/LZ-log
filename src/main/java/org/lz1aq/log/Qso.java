@@ -173,13 +173,10 @@ public class Qso
     qsoParams.add(new QsoParameter(FREQ_TXT, Long.toString(freq)));
     qsoParams.add(new QsoParameter(MODE_TXT, mode.toString()));
     qsoParams.add(new QsoParameter(MYCALL_TXT, myCall.toUpperCase()));
-    qsoParams.add(new QsoParameter(HISCALL_TXT, hisCall.toUpperCase()));
-    snt = snt.replaceAll("\\s", ""); // Remove any empty spaces
+    qsoParams.add(new QsoParameter(HISCALL_TXT, hisCall.toUpperCase())); 
     qsoParams.add(new QsoParameter(SNT_TXT, snt));
-    rcv = rcv.replaceAll("\\s", ""); // Remove any empty spaces
     qsoParams.add(new QsoParameter(RCV_TXT, rcv));
     qsoParams.add(new QsoParameter(TYPE_TXT, type.toUpperCase()));
-
   }
 
   
@@ -213,9 +210,9 @@ public class Qso
     fmt.format(" %s", getDate());
     fmt.format(" %s", getTime());
     fmt.format(" %-13s", getMyCallsign());
-    fmt.format(" %-13s", getSntWithExtraSpace());
+    fmt.format(" %-13s", qsoParams.get(SNT_INDEX).value);
     fmt.format(" %-13s", getHisCallsign());
-    fmt.format(" %-13s", getRcvWithExtraSpace());
+    fmt.format(" %-13s", qsoParams.get(RCV_INDEX).value);
     
     return sbuf.toString();
   }
@@ -501,25 +498,26 @@ public class Qso
   public static boolean isValidSerial(String serial)
   {
     // Remove white spaces
-    String str = serial.replaceAll("\\s", "");
+//    String str = serial.replaceAll("\\s", "");
+//
+//    if (str.length() < 6 || str.length() > 6)
+//    {
+//      return false;
+//    }
+//
+//    // should be only numbers
+//    try
+//    {
+//      int number = Integer.parseInt(str); 
+//      if(number<0)
+//        return false;
+//    }
+//    catch (Exception exc)
+//    {
+//      return false;
+//    }
 
-    if (str.length() < 6 || str.length() > 6)
-    {
-      return false;
-    }
-
-    // should be only numbers
-    try
-    {
-      int number = Integer.parseInt(str); 
-      if(number<0)
-        return false;
-    }
-    catch (Exception exc)
-    {
-      return false;
-    }
-
+    //TODO: include validation if needed
     return true;
   }
 

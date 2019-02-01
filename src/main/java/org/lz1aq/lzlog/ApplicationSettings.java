@@ -132,7 +132,7 @@ public final class ApplicationSettings
 
     this.LoadSettingsFromDisk();
   }
-
+  
   public Font getFonts(FontIndex index)
   {
     return fonts[index.toInt()];
@@ -726,7 +726,7 @@ public final class ApplicationSettings
 
     // Set texts for the direction buttons
     functionKeyTexts[0] = "test {mycall}";       // F1
-    functionKeyTexts[1] = "not defined by user"; // F2
+    functionKeyTexts[1] = "{#} {$}";             // F2
     functionKeyTexts[2] = "tu";                  // F3
     functionKeyTexts[3] = "not defined by user";
     functionKeyTexts[4] = "not defined by user";

@@ -43,26 +43,6 @@ public class Misc
   }
   
   
-  public static String leadingZerosToT(String serial)
-  {
-    String part1 = serial.substring(0, 3);
-    String part2 = serial.substring(3, 6);
-    
-    
-    
-    part1 = part1.replaceFirst("^0{3}", "TTT");
-    part1 = part1.replaceFirst("^0{2}", "TT");
-    part1 = part1.replaceFirst("^0{1}", "T");
-    part2 = part2.replaceFirst("^0{3}", "TTT");
-    part2 = part2.replaceFirst("^0{2}", "TT");
-    part2 = part2.replaceFirst("^0{1}", "T");
-    
-    
-    
-    return part1+part2;
-  }
-  
-  
   /**
    * Inserts "," between the thousands 
    * 
@@ -189,5 +169,43 @@ public class Misc
        
        else 
            return "160";
+  }
+    
+    
+    public static String getFirstPart(String exchange)
+    {
+      return exchange.split(" ",2)[0];
+    }
+    
+  public static boolean isInteger(String s)
+  {
+    return isInteger(s, 10);
+  }
+
+  public static boolean isInteger(String s, int radix)
+  {
+    if(s.isEmpty())
+    {
+      return false;
+    }
+    for(int i = 0; i < s.length(); i++)
+    {
+      if(i == 0 && s.charAt(i) == '-')
+      {
+        if(s.length() == 1)
+        {
+          return false;
+        }
+        else
+        {
+          continue;
+        }
+      }
+      if(Character.digit(s.charAt(i), radix) < 0)
+      {
+        return false;
+      }
+    }
+    return true;
   }
 }

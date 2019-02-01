@@ -217,18 +217,38 @@ public class Log
       return "001000";
     }
     // Else send serial number + first three digits of received report during previous Qso
-    else
+   
+    Qso qso = qsoList.get(qsoList.size() - 1);
+
+    String part1 = qso.getSnt().substring(0, 3);
+    int mySerial = Integer.parseInt(part1);
+    mySerial += 1;
+    part1 = String.format("%03d", mySerial);
+
+    String part2 = qso.getRcv().substring(0, 3);
+    return part1+part2;
+    
+  }
+  
+  /**
+   * Will return the first word in Rcv from the last QSO. If there are no QSOs in the log it will
+   * return "000".
+   * @return 
+   */
+  public synchronized String getFirstPartOfLastRcv()
+  {
+     // If the log is empty send "000"
+    if(getRowCount() == 0)
     {
-      Qso qso = qsoList.get(qsoList.size()-1);
-      
-      String part1 = qso.getSnt().substring(0, 3);
-      int mySerial = Integer.parseInt(part1);
-      mySerial += 1;
-      part1 = String.format("%03d", mySerial);
-      
-      String part2 = qso.getRcv().substring(0, 3);
-      return part1+part2;
+      return "000";
     }
+
+    Qso qso = qsoList.get(qsoList.size() - 1);
+
+    String lastRcv = qso.getRcv();
+    lastRcv = lastRcv.split(" ",2)[0];
+    
+    return lastRcv;
   }
  
   
