@@ -1,11 +1,12 @@
 High priority:
 - send CW morse code character by character ( this will allow to edit the callsign while sending is in progress)
+- Try to catch all keyboard presses (f4 should not close HDSDR)
 - Add all the SerialPort settings inside the Java app
 - Add ability to set bandmap start freq for different modes and bands (e.g. 3.700 instead of 3.600)
 - Remember the CQ frequency mode.
 - Update help (in Bulgarian)
 - last S&P qso per band and mode should be visible on the bandmap
-- add validation for the Log Window (now is possible to add invalid data)
+- add validation for the Log Window (now is possible to add invalid data); when correcting callsign in the log the call is written with small letters (similar for mode which causes exception)
 - there should be an option for entering worked frequency for people that do not use CAT
 - show qso rate
 - show hints when hovering over controls
@@ -13,8 +14,6 @@ High priority:
 - serial comm - needs to work fast. There were some problems with responsivnes during the contest when using it togather with HDSDR
 - the app should load the last used log. If there are no logs the app should ask you for name of the new log. Also add "New log" and "Open log" in the File menu
 - when generating cabrilo check for obvious mistakes
-- Try to catch all keyboard presses (f4 should not close HDSDR)
-- the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
 - bandmap - add reset button
 - input filter for the F messages
 - bandmap - when hovering over the cell it should show the current freq
@@ -22,39 +21,16 @@ High priority:
 
 Low priority:
 - Allow change of the CW speed in function messages
-- If default prefix is used it should always stay in the entry window
-- For some reason F10 is activating the Menu
-- when correcting callsign in the log the call is written with small letters
 - delete callsign when moving away from freq and enter into bandmap
 - enter frequency in callsign
 - note za wsqka vruzka 
 - remember the size of the columns in the tables
 - alt+k = 
 - first part of sent serial number is not updated (e.g. when changing the serial number from the table)
+- the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
 
-
-Solved:
+Last Solved:
+- If default prefix is used it should always stay in the entry window
 - The default is now visible in the entry window
 - send all zeros as T
-- pressing a key interrupts continuous 
-- Bandmap should be changing when the freq/mode changes (allow to set bandmap start for SSB and CW)
-- Time to next qso: the distance between the rows should be dynamic (adjust row sizes depending on the font)
-- update help so that it mentions the path problem
-- when EMS and S&P are enabled - pressing enter should send serial number
-- support Yaesu CAT
-- support Icom CAT
-- continuous CQ interval should work 
-- serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
-- Baud rate settings to be done from the App.
-- support for winkey
-- Focus change should be reliable now (using requestrequestFocusInWindow())
-- bandmap - hide the freq columns
-- For Elekraft when sending CW put space between F-keys (e.g. f5 i f2)
-- ;' - da rabotqt
-- mark CQ frequency on bandmap
-- show my cq freq on the bandmap
-- new bandmap spot should not be prevented if there is a same spot close to this frequency (was 500Hz now is 100Hz)
-- mouse press on bandmap should always work - get rid of the table borders if possible (events handled on mouse pressed)
-- bandmap - blue S&P entries were actually dupes (bug)
-- "do not show after" to be 4 hours
-- new settings options should not break window organization
+- Adif export supported
