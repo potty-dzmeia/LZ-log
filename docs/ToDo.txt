@@ -27,20 +27,22 @@ Low priority:
 - delete callsign when moving away from freq and enter into bandmap
 - enter frequency in callsign
 - note za wsqka vruzka 
-- opciq vsichki nuli da sa T
 - remember the size of the columns in the tables
 - alt+k = 
 - first part of sent serial number is not updated (e.g. when changing the serial number from the table)
 
 
 Solved:
+- The default is now visible in the entry window
+- send all zeros as T
+- pressing a key interrupts continuous 
 - Bandmap should be changing when the freq/mode changes (allow to set bandmap start for SSB and CW)
 - Time to next qso: the distance between the rows should be dynamic (adjust row sizes depending on the font)
 - update help so that it mentions the path problem
 - when EMS and S&P are enabled - pressing enter should send serial number
 - support Yaesu CAT
 - support Icom CAT
-- continious CQ interval should work 
+- continuous CQ interval should work 
 - serial comm  - commport should be "undefined" (or somthing similar) if the one selected is not active.
 - Baud rate settings to be done from the App.
 - support for winkey

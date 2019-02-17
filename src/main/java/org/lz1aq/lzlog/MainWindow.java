@@ -2092,7 +2092,7 @@ public class MainWindow extends javax.swing.JFrame
     });
     jMenu1.add(jmenuGenerateCabrillo);
 
-    jMenuItem7.setText("Generate Adif");
+    jMenuItem7.setText("Generate Adif File");
     jMenuItem7.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -2754,7 +2754,8 @@ public class MainWindow extends javax.swing.JFrame
 
     try
     {
-      radioController.setMode(jtablemodelIncomingQso.getMode(row)); //set the mode used for this contact
+      if(radioController.getMode() != jtablemodelIncomingQso.getMode(row))
+        radioController.setMode(jtablemodelIncomingQso.getMode(row)); //set the mode used for this contact
       radioController.setFrequency(jtablemodelIncomingQso.getFrequency(row)); // jump to the freq
       
       initEntryFields();  // clear the fields
@@ -2763,14 +2764,14 @@ public class MainWindow extends javax.swing.JFrame
       if(jtablemodelIncomingQso.isSpQso(row))
       {
         String callsign;
-        if (applicationSettings.isQuickCallsignModeEnabled()) // If quick mode is enabled add only the suffix
-        {
-          callsign = Misc.toShortCallsign(jtablemodelIncomingQso.getCallsign(row), applicationSettings.getDefaultPrefix());
-        }
-        else
-        {
+//        if (applicationSettings.isQuickCallsignModeEnabled()) // If quick mode is enabled add only the suffix
+//        {
+//          callsign = Misc.toShortCallsign(jtablemodelIncomingQso.getCallsign(row), applicationSettings.getDefaultPrefix());
+//        }
+//        else
+//        {
           callsign = jtablemodelIncomingQso.getCallsign(row);
-        }
+//        }
 
         jtextfieldCallsign.setText(callsign);// set the callsign inside the callsign field
       }
@@ -3272,10 +3273,10 @@ public class MainWindow extends javax.swing.JFrame
   {
     String callsign = jtextfieldCallsign.getText();
     
-    if(applicationSettings.isQuickCallsignModeEnabled())
-    {
-      callsign = applicationSettings.getDefaultPrefix()+callsign;
-    }
+//    if(applicationSettings.isQuickCallsignModeEnabled())
+//    {
+//      callsign = applicationSettings.getDefaultPrefix()+callsign;
+//    }
     
     return callsign;
   }
@@ -3330,7 +3331,11 @@ public class MainWindow extends javax.swing.JFrame
   private void initEntryFields()
   {
     // Clean the callsign field
-    jtextfieldCallsign.setText("");
+    if(applicationSettings.isQuickCallsignModeEnabled())
+      jtextfieldCallsign.setText(applicationSettings.getDefaultPrefix());
+    else
+      jtextfieldCallsign.setText("");
+    
     // Set the new Snt 
     setSntField();
     //jtextfieldSnt.setText(log.getNextSentReport());
