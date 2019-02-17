@@ -395,6 +395,7 @@ public class MainWindow extends javax.swing.JFrame
     checkboxSettingsQuickMode = new javax.swing.JCheckBox();
     textfieldSettingsDefaultPrefix = new javax.swing.JTextField();
     checkboxSendLeadingZeroAsT = new javax.swing.JCheckBox();
+    checkboxSendZeroAsT = new javax.swing.JCheckBox();
     checkboxESM = new javax.swing.JCheckBox();
     jLabel10 = new javax.swing.JLabel();
     jTextField1 = new javax.swing.JTextField();
@@ -902,11 +903,21 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jPanelOther.add(checkboxSendLeadingZeroAsT, gridBagConstraints);
 
+    checkboxSendZeroAsT.setText("Send all zeros as 'T'");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelOther.add(checkboxSendZeroAsT, gridBagConstraints);
+
     checkboxESM.setText("\"Enter\" sends mesage");
     checkboxESM.setToolTipText("When Enter is pressed in the EntryWindow exchange will be transmitted");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
@@ -917,7 +928,7 @@ public class MainWindow extends javax.swing.JFrame
     jLabel10.setToolTipText("Set how long should be a callsing kept in the TimeToNextQso window after expiration of the repeat period.");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -928,7 +939,7 @@ public class MainWindow extends javax.swing.JFrame
     jTextField1.setToolTipText("This should be a negative value!");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -946,7 +957,8 @@ public class MainWindow extends javax.swing.JFrame
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -1142,13 +1154,13 @@ public class MainWindow extends javax.swing.JFrame
     setTitle(PROGRAM_NAME+" by LZ1ABC");
     addWindowListener(new java.awt.event.WindowAdapter()
     {
-      public void windowOpened(java.awt.event.WindowEvent evt)
-      {
-        formWindowOpened(evt);
-      }
       public void windowClosing(java.awt.event.WindowEvent evt)
       {
         formWindowClosing(evt);
+      }
+      public void windowOpened(java.awt.event.WindowEvent evt)
+      {
+        formWindowOpened(evt);
       }
     });
 
@@ -1173,7 +1185,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
     jDesktopPane1.add(intframeTimeToNextQso);
-    intframeTimeToNextQso.setBounds(490, 10, 468, 447);
+    intframeTimeToNextQso.setBounds(490, 10, 468, 436);
 
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setResizable(true);
@@ -1378,7 +1390,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 670, 476);
+    intframeBandmap.setBounds(500, 520, 488, 459);
 
     intframeLog.setIconifiable(true);
     intframeLog.setResizable(true);
@@ -1899,7 +1911,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeEntryWindow.getContentPane().add(jPanelStatusBar, gridBagConstraints);
 
     jDesktopPane1.add(intframeEntryWindow);
-    intframeEntryWindow.setBounds(280, 20, 453, 251);
+    intframeEntryWindow.setBounds(280, 20, 453, 233);
 
     intframeMisc.setIconifiable(true);
     intframeMisc.setResizable(true);
@@ -3459,7 +3471,8 @@ public class MainWindow extends javax.swing.JFrame
     checkboxSettingsQuickMode.setSelected(applicationSettings.isQuickCallsignModeEnabled());
     checkboxESM.setSelected(applicationSettings.isEmsEnabled());
     //TODO checkboxF1JumpsToCq.setSelected(applicationSettings.isAutoCqJump());
-    checkboxSendLeadingZeroAsT.setSelected(applicationSettings.isSendZeroAsT_Enabled());
+    checkboxSendLeadingZeroAsT.setSelected(applicationSettings.isSendLeadingZeroAsT());
+    checkboxSendZeroAsT.setSelected(applicationSettings.isSendZeroAsT());
 
     // Set the text for the function keys
     jtextfieldfF1.setText(applicationSettings.getFunctionKeyMessage(0));
@@ -3541,7 +3554,8 @@ public class MainWindow extends javax.swing.JFrame
     applicationSettings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
     //TODO applicationSettings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
     applicationSettings.setEmsEnabled(checkboxESM.isSelected());
-    applicationSettings.setSendZeroAsT_Enabled(checkboxSendLeadingZeroAsT.isSelected());    
+    applicationSettings.setSendLeadingZeroAsT(checkboxSendLeadingZeroAsT.isSelected());    
+    applicationSettings.setSendZeroAsT(checkboxSendZeroAsT.isSelected()); 
     
     // Default prefix
     applicationSettings.setDefaultPrefix(textfieldSettingsDefaultPrefix.getText());
@@ -3775,14 +3789,16 @@ public class MainWindow extends javax.swing.JFrame
       serial = jtextfieldSnt.getText();//.replaceAll("\\s", ""); // Get the serial removing white spaces
     }
     
-
-    
-    if(applicationSettings.isSendZeroAsT_Enabled())
+    if(applicationSettings.isSendLeadingZeroAsT())
     {
       serial = RcvFormatter.leadingZerosToT(serial);
     }
-  
     
+    if(applicationSettings.isSendZeroAsT())
+    {
+      serial = serial.replace('0', 't');
+    }
+     
     sendCw(serial);
   }
   
@@ -4349,6 +4365,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.ButtonGroup buttonGroupTypeOfWork;
   private javax.swing.JCheckBox checkboxESM;
   private javax.swing.JCheckBox checkboxSendLeadingZeroAsT;
+  private javax.swing.JCheckBox checkboxSendZeroAsT;
   private javax.swing.JCheckBox checkboxSettingsQuickMode;
   private javax.swing.JInternalFrame intframeBandmap;
   private javax.swing.JInternalFrame intframeEntryWindow;

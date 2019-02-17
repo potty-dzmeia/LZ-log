@@ -56,7 +56,8 @@ public final class ApplicationSettings
   static final String PROPERTY_BANDMAP_ROW_COUNT = "bandmap_row_count";
   static final String PROPERTY_FONTS = "fonts";
   static final String PROPERTY_ESM = "ems"; // enter sends message
-  static final String PROPERTY_SEND_ZERO_AS_T = "zero_as_t";
+  static final String PROPERTY_SEND_LEADING_ZERO_AS_T = "leading_zero_as_t";
+  static final String PROPERTY_SEND_ZERO_AS_T = "all_zero_as_t";
   static final String PROPERTY_AUTO_CQ_FREQ_JUMP = "auto_cq_freq_jump";
   static final String PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS = "bandmap_show_freq_columns";
   static final String PROPERTY_BANDMAP_AUTO_FREQ = "bandmap_auto_freq";
@@ -102,7 +103,8 @@ public final class ApplicationSettings
   private boolean isQuickCallsignModeEnabled;
   private boolean emsEnabled;
   private boolean autoCqJumpEnabled;
-  private boolean sendZeroAsT_Enabled;
+  private boolean isSendLeadingZeroAsT;
+  private boolean isSendZeroAsT;
   private String defaultPrefix;
   private int qsoRepeatPeriodInSeconds;
   private final Rectangle[] framesDimensions; // Postition and size of all frames used by the program
@@ -294,14 +296,24 @@ public final class ApplicationSettings
     return this.autoCqJumpEnabled;
   }
   
-  public void setSendZeroAsT_Enabled(boolean isEnabled)
+  public void setSendLeadingZeroAsT(boolean isEnabled)
   {
-    this.sendZeroAsT_Enabled = isEnabled;
+    this.isSendLeadingZeroAsT = isEnabled;
   }
   
-  public boolean isSendZeroAsT_Enabled()
+  public boolean isSendLeadingZeroAsT()
   {
-    return this.sendZeroAsT_Enabled;
+    return this.isSendLeadingZeroAsT;
+  }
+  
+  public void setSendZeroAsT(boolean isEnabled)
+  {
+    this.isSendZeroAsT = isEnabled;
+  }
+  
+  public boolean isSendZeroAsT()
+  {
+    return this.isSendZeroAsT;
   }
           
   /**
@@ -506,7 +518,8 @@ public final class ApplicationSettings
     prop.setProperty(PROPERTY_QUICK_CALLSIGN_MODE, Boolean.toString(isQuickCallsignModeEnabled));
     prop.setProperty(PROPERTY_AUTO_CQ_FREQ_JUMP, Boolean.toString(autoCqJumpEnabled));
     prop.setProperty(PROPERTY_ESM, Boolean.toString(emsEnabled));
-    prop.setProperty(PROPERTY_SEND_ZERO_AS_T, Boolean.toString(sendZeroAsT_Enabled));
+    prop.setProperty(PROPERTY_SEND_LEADING_ZERO_AS_T, Boolean.toString(isSendLeadingZeroAsT));
+    prop.setProperty(PROPERTY_SEND_ZERO_AS_T, Boolean.toString(isSendZeroAsT));
     prop.setProperty(PROPERTY_DEFAULT_PREFIX, defaultPrefix);
     prop.setProperty(PROPERTY_QSO_REPEAT_PERIOD_SEC, Integer.toString(qsoRepeatPeriodInSeconds));
 
@@ -625,11 +638,17 @@ public final class ApplicationSettings
       else
         emsEnabled = Boolean.parseBoolean(temp);
       
+      temp = prop.getProperty(PROPERTY_SEND_LEADING_ZERO_AS_T);
+      if (temp == null)
+        SetSettingToDefault(PROPERTY_SEND_LEADING_ZERO_AS_T);
+      else
+        isSendLeadingZeroAsT = Boolean.parseBoolean(temp);
+      
       temp = prop.getProperty(PROPERTY_SEND_ZERO_AS_T);
       if (temp == null)
         SetSettingToDefault(PROPERTY_SEND_ZERO_AS_T);
       else
-        sendZeroAsT_Enabled = Boolean.parseBoolean(temp);
+        isSendZeroAsT = Boolean.parseBoolean(temp);
 
       
       // Default prefix
@@ -763,7 +782,9 @@ public final class ApplicationSettings
     
     emsEnabled = false;
 
-    sendZeroAsT_Enabled = false;
+    isSendLeadingZeroAsT = false;
+    
+    isSendZeroAsT = false;
 
     autoCqJumpEnabled = false;
 
@@ -881,8 +902,12 @@ public final class ApplicationSettings
         emsEnabled = false;
         break;
         
+      case PROPERTY_SEND_LEADING_ZERO_AS_T:
+        isSendLeadingZeroAsT = false; 
+        break;
+        
       case PROPERTY_SEND_ZERO_AS_T:
-        sendZeroAsT_Enabled = false; 
+        isSendZeroAsT = false; 
         break;
         
       case PROPERTY_AUTO_CQ_FREQ_JUMP:
