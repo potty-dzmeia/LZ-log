@@ -1,10 +1,9 @@
 High priority:
-- Add option to disable exchange validation (important for contests where strings are exchanged)
+- Add all the SerialPort settings inside the Java app
 - Add ability to set bandmap start freq for different modes and bands (e.g. 3.700 instead of 3.600)
 - Remember the CQ frequency mode.
-- create help in Bulgarian
+- Update help (in Bulgarian)
 - last S&P qso per band and mode should be visible on the bandmap
-- Add all the SerialPort settings inside the Java app
 - add validation for the Log Window (now is possible to add invalid data)
 - there should be an option for entering worked frequency for people that do not use CAT
 - show qso rate
@@ -21,7 +20,7 @@ High priority:
 
 
 Low priority:
-- add F2 to settings window - and allow change of the CW speed in single message.
+- Allow change of the CW speed in function messages
 - If default prefix is used it should always stay in the entry window
 - For some reason F10 is activating the Menu
 - when correcting callsign in the log the call is written with small letters
@@ -32,8 +31,6 @@ Low priority:
 - remember the size of the columns in the tables
 - alt+k = 
 - first part of sent serial number is not updated (e.g. when changing the serial number from the table)
-- remember which windows are maximized/minimized
-- Time to next qso: CQ entries to be in green (tested and it does not look good)
 
 
 Solved:

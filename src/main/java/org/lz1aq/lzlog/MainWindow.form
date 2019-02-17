@@ -335,6 +335,7 @@
                     <Component class="javax.swing.JTextField" name="jtextfieldfF1">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="jTextField1"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Instead of manually writing callsign you can use the macro  {mycall}"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="jLabel31">
@@ -793,6 +794,14 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jmenuGenerateCabrilloActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem7">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Generate Adif"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem7ActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>

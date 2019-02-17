@@ -496,6 +496,7 @@ public class MainWindow extends javax.swing.JFrame
     jMenuBar1 = new javax.swing.JMenuBar();
     jMenu1 = new javax.swing.JMenu();
     jmenuGenerateCabrillo = new javax.swing.JMenuItem();
+    jMenuItem7 = new javax.swing.JMenuItem();
     jMenu2 = new javax.swing.JMenu();
     jmenuSettings = new javax.swing.JMenuItem();
     jmenuFonts = new javax.swing.JMenuItem();
@@ -764,6 +765,7 @@ public class MainWindow extends javax.swing.JFrame
     jPanelFunctionKeys.add(jLabel3);
 
     jtextfieldfF1.setText("jTextField1");
+    jtextfieldfF1.setToolTipText("Instead of manually writing callsign you can use the macro  {mycall}");
     jPanelFunctionKeys.add(jtextfieldfF1);
 
     jLabel31.setText("F2 Exchange");
@@ -2078,6 +2080,16 @@ public class MainWindow extends javax.swing.JFrame
     });
     jMenu1.add(jmenuGenerateCabrillo);
 
+    jMenuItem7.setText("Generate Adif");
+    jMenuItem7.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        jMenuItem7ActionPerformed(evt);
+      }
+    });
+    jMenu1.add(jMenuItem7);
+
     jMenuBar1.add(jMenu1);
 
     jMenu2.setText("Tools");
@@ -2909,6 +2921,58 @@ public class MainWindow extends javax.swing.JFrame
       applicationSettings.setBandmapAutoFreq(false);
     }
   }//GEN-LAST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
+
+  private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem7ActionPerformed
+  {//GEN-HEADEREND:event_jMenuItem7ActionPerformed
+    JFileChooser fc = new JFileChooser();
+    fc.setFileFilter(new FileNameExtensionFilter("ADIF files (*.adif)", "adif"));
+    fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
+    try
+    {
+      int returnVal = fc.showSaveDialog(this.getParent());
+      if (returnVal != JFileChooser.APPROVE_OPTION)
+      {
+        return;
+      } 
+    }
+    catch (Exception exc)
+    {
+      JOptionPane.showMessageDialog(null, "Error when trying to acquire adif file.", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+    
+    String absPath = fc.getSelectedFile().getAbsolutePath();
+    if(!absPath.endsWith(".adif"))
+    {
+      absPath = absPath+".adif";
+    }
+        
+    File file = new File(absPath);
+    
+    if(file.exists())
+    {
+      JOptionPane.showMessageDialog(null, "File already exists: "+file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+    
+    // Write the cabrillo file
+    try (PrintWriter printWriter = new PrintWriter(absPath))
+    {
+      printWriter.println("<programid>" + PROGRAM_NAME);
+      printWriter.println("<programversion>" + PROGRAM_VERSION);
+      printWriter.println("<eoh>");
+      for (int i = 0; i < log.getQsoCount(); i++)
+      {
+        printWriter.println(log.get(i).toStringAdif());
+      }
+    }
+    catch (FileNotFoundException ex)
+    {
+      JOptionPane.showMessageDialog(null, "Couldn't generate the adif file", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    JOptionPane.showMessageDialog(null, "Adif file created successfully.", "Success...", JOptionPane.INFORMATION_MESSAGE);
+  }//GEN-LAST:event_jMenuItem7ActionPerformed
   
   
   private void increaseKeyerSpeed()
@@ -4359,6 +4423,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JMenuItem jMenuItem4;
   private javax.swing.JMenuItem jMenuItem5;
   private javax.swing.JMenuItem jMenuItem6;
+  private javax.swing.JMenuItem jMenuItem7;
   private javax.swing.JMenuItem jMenuItemAbout;
   private javax.swing.JMenuItem jMenuItemHelp;
   private javax.swing.JPanel jPanel1;

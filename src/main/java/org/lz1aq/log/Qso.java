@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.joda.time.DateTime;
 import org.lz1aq.lzlog.MainWindow;
 import org.lz1aq.radio.RadioModes;
+import org.lz1aq.utils.Misc;
 import org.lz1aq.utils.TimeUtils;
 
 /**
@@ -216,6 +217,40 @@ public class Qso
     
     return sbuf.toString();
   }
+  
+  public synchronized String toStringAdif()
+  {
+    StringBuilder sbuf = new StringBuilder();
+    Formatter fmt = new Formatter(sbuf);
+    
+    //<call:6>WN4AZY<band:3>20M<mode:4>RTTY<qso_date:8>19960513<time_on:4>1305<eor>
+    
+    // Band  <band:3>20M
+    String band = Misc.freqToBand(getFrequencyInt());
+    band = band+"m";
+    fmt.format("<band:%d>%-4s", band.length(), band);
+    
+    // mode <mode:4>RTTY
+     fmt.format("<mode:%d>%-4s", getModeAdifStyle().length(), getModeAdifStyle());
+    
+    // Date  <qso_date:8>19960513
+    String date = getDate().replace("-", "");
+    fmt.format("<qso_date:%d>%-9s", date.length(), date);
+    
+    // Time  <time_on:4>1305
+    fmt.format("<time_on:%d>%-5s", getTime().length(), getTime());
+    
+    // Callsign  <call:6>WN4AZY
+    fmt.format("<call:%d>%-10s", getHisCallsign().length(), getHisCallsign());
+    
+    // Exchange <comment: >
+    String exchange = qsoParams.get(SNT_INDEX).value + " " + qsoParams.get(RCV_INDEX).value;
+    fmt.format("<comment:%d>%s", exchange.length(), exchange);
+    
+    fmt.format("<eor>");
+    
+    return sbuf.toString();
+  }
 
   /**
    * @return The count of the total Qso parameters
@@ -286,6 +321,24 @@ public class Qso
        qsoParams.get(MODE_INDEX).value.equals("SSB")||
        qsoParams.get(MODE_INDEX).value.equals("PH")   )
       return "PH";
+    else if(qsoParams.get(MODE_INDEX).value.equals("CW")||
+            qsoParams.get(MODE_INDEX).value.equals("CWR"))
+      return "CW";
+    else
+      Logger.getLogger(Qso.class.getName()).log(Level.SEVERE, null, "Unknown Mode. Returning CW by default.");
+      return "CW";
+  }
+  
+  /**
+   * @return Returns "PH" or "CW"
+   */
+  public synchronized String getModeAdifStyle()
+  {
+    if(qsoParams.get(MODE_INDEX).value.equals("LSB")||
+       qsoParams.get(MODE_INDEX).value.equals("USB")||
+       qsoParams.get(MODE_INDEX).value.equals("SSB")||
+       qsoParams.get(MODE_INDEX).value.equals("PH")   )
+      return "SSB";
     else if(qsoParams.get(MODE_INDEX).value.equals("CW")||
             qsoParams.get(MODE_INDEX).value.equals("CWR"))
       return "CW";
