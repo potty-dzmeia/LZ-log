@@ -79,11 +79,11 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.6";
+  static final String PROGRAM_VERSION = "1.6.1";
   static final String PROGRAM_NAME    = "LZ-Log";
   static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
-  static final int    SERIAL_NUMBER_LENGTH = 6;
+  static final int    SERIAL_NUMBER_MAX_LENGTH = 15;
   
   private Log                           log;
   private LogTableModel                 jtablemodelLog;
@@ -216,8 +216,8 @@ public class MainWindow extends javax.swing.JFrame
     // Callsign text field should show capital letters only
     ((AbstractDocument) jtextfieldCallsign.getDocument()).setDocumentFilter(callsignFilter);
     // Serial number should be 6 digits long
-    //((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
-    //((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
+    ((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
+    ((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
     
     
     // Needed so that jTable to scroll automatically upon entering a new Qso
@@ -4340,8 +4340,8 @@ public class MainWindow extends javax.swing.JFrame
     @Override
     public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException
     {
-      text = text.replaceAll("[^0-9]*$", "");
-      int overlimit = fb.getDocument().getLength()+text.length() - SERIAL_NUMBER_LENGTH;
+      text = text.replaceAll("[^A-Za-z0-9 ]*$", "");
+      int overlimit = fb.getDocument().getLength()+text.length() - SERIAL_NUMBER_MAX_LENGTH;
       if(overlimit > 0)
       {
         fb.insertString(offset, text.substring(0, text.length()-overlimit), attr);
@@ -4354,13 +4354,13 @@ public class MainWindow extends javax.swing.JFrame
     public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
     {
       int currentLength = fb.getDocument().getLength();
-      int overLimit = (currentLength + text.length()) - SERIAL_NUMBER_LENGTH - length;
+      int overLimit = (currentLength + text.length()) - SERIAL_NUMBER_MAX_LENGTH - length;
       if (overLimit > 0)
       {
         text = text.substring(0, text.length() - overLimit);
       }
       
-      text = text.replaceAll("[^0-9]*$", "");
+      text = text.replaceAll("[^A-Za-z0-9 ]*$", "");
       fb.replace(offset, length, text, attrs);
     }
   }

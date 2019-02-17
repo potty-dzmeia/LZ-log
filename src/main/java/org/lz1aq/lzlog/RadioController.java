@@ -97,7 +97,7 @@ public class RadioController
       
     }catch(Exception exc)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, exc);
+      logger.log(Level.SEVERE, null, exc);
       return false;
     }
   }
@@ -160,7 +160,7 @@ public class RadioController
     }
     catch (SerialPortException ex)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
   
@@ -220,7 +220,7 @@ public class RadioController
       
     }catch (Exception ex) 
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
   
@@ -249,7 +249,7 @@ public class RadioController
       
     }catch (Exception ex) 
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
   
@@ -284,7 +284,7 @@ public class RadioController
     }
     catch (Exception ex)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
   
@@ -300,7 +300,7 @@ public class RadioController
     }
     catch (Exception ex)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
     
   }
@@ -317,7 +317,7 @@ public class RadioController
     }
     catch (Exception ex)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
 
@@ -333,7 +333,7 @@ public class RadioController
     }
     catch (Exception ex)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
   
@@ -348,7 +348,7 @@ public class RadioController
     }
     catch (Exception ex)
     {
-      Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
   }
   
@@ -506,7 +506,7 @@ public class RadioController
       }
       catch(Exception ex)
       {
-        Logger.getLogger(RadioController.class.getName()).log(Level.SEVERE, null, ex);
+        logger.log(Level.SEVERE, null, ex);
       }
     }
   }

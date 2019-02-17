@@ -24,10 +24,10 @@ import java.util.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTime;
-import org.lz1aq.lzlog.MainWindow;
 import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.Misc;
 import org.lz1aq.utils.TimeUtils;
+
 
 /**
  * The Qso class is describing a contact between two radio station by using QsoParameters (e.g.
@@ -35,6 +35,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class Qso
 {
+  private static final Logger logger = Logger.getLogger(Qso.class.getName());
 
   static public final String TYPE_OF_WORK_SP = "SP";
   static public final String TYPE_OF_WORK_CQ = "CQ";
@@ -308,7 +309,15 @@ public class Qso
    */
   public synchronized RadioModes getMode()
   {
-    return RadioModes.valueOf(qsoParams.get(MODE_INDEX).value);
+    try
+    {
+      return RadioModes.valueOf(qsoParams.get(MODE_INDEX).value);
+    }
+    catch(Exception ex)
+    {
+      logger.log(Level.SEVERE, "Bad string for mode: "+ qsoParams.get(MODE_INDEX).value);
+      return RadioModes.CW;
+    }
   }
 
   /**
@@ -325,7 +334,7 @@ public class Qso
             qsoParams.get(MODE_INDEX).value.equals("CWR"))
       return "CW";
     else
-      Logger.getLogger(Qso.class.getName()).log(Level.SEVERE, null, "Unknown Mode. Returning CW by default.");
+      logger.log(Level.SEVERE, null, "Unknown Mode. Returning CW by default.");
       return "CW";
   }
   
@@ -343,7 +352,7 @@ public class Qso
             qsoParams.get(MODE_INDEX).value.equals("CWR"))
       return "CW";
     else
-      Logger.getLogger(Qso.class.getName()).log(Level.SEVERE, null, "Unknown Mode. Returning CW by default.");
+      logger.log(Level.SEVERE, null, "Unknown Mode. Returning CW by default.");
       return "CW";
   }
   
