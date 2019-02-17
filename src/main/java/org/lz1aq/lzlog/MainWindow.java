@@ -2341,9 +2341,13 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jtogglebuttonConnectToRadioActionPerformed
     JToggleButton tBtn = (JToggleButton) evt.getSource();
     
+    if(applicationSettings.getRadioComPort().isEmpty())
+    {
+      JOptionPane.showMessageDialog(null, "Commport not set!");
+    } 
     // Connect
     // --------------------
-    if (tBtn.isSelected())
+    else if(tBtn.isSelected())
     {
       // Select the python file describing the radio protocol
       if(loadRadioProtocolParser())
@@ -2790,6 +2794,13 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
     JToggleButton tBtn = (JToggleButton) evt.getSource();
  
+    if(applicationSettings.getKeyerComPort().isEmpty())
+    {
+      JOptionPane.showMessageDialog(null, "Commport not set!");
+      jtogglebuttonConnectToKeyer.setSelected(false);
+      return;
+    }
+      
     // Connect
     if (tBtn.isSelected())
     {    
@@ -2819,6 +2830,8 @@ public class MainWindow extends javax.swing.JFrame
         catch(Exception ex)
         {
           JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          jtogglebuttonConnectToKeyer.setSelected(false);
+          return;
         }
       }
       // Port not in use
