@@ -2272,7 +2272,10 @@ public class MainWindow extends javax.swing.JFrame
   private void jtextfieldCallsignKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jtextfieldCallsignKeyTyped
   {//GEN-HEADEREND:event_jtextfieldCallsignKeyTyped
     if(timerContinuousCq.isRunning()) // Any key press stops the automatic CQ
+    {
       timerContinuousCq.stop();
+      keyer.stopSendingCw();
+    }
     
     switch(evt.getKeyChar())
     {
