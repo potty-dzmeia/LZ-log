@@ -1,4 +1,6 @@
 High priority:
+- Serial number like in N1mm
+- Check the install directory and open warning pop-up informing the user what directories are allowed.
 - send CW morse code character by character ( this will allow to edit the callsign while sending is in progress)
 - Try to catch all keyboard presses (f4 should not close HDSDR)
 - Add all the SerialPort settings inside the Java app
