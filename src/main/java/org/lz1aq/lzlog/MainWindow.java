@@ -177,7 +177,7 @@ public class MainWindow extends javax.swing.JFrame
     // Open log database
     try
     {
-      Qso example = new Qso(14190000, RadioModes.CW, "lz1abc", "lz0fs", "200 091", "200 091", "cq"); // We need to supply an example QSO whwn creating/opening new
+      Qso example = new Qso(14190000, RadioModes.CW, "lz1abc", "lz0fs", "200091", "200091", "cq"); // We need to supply an example QSO whwn creating/opening new
       log = new Log(new LogDatabase(logDbFile), example);
     }
     catch (Exception ex)
@@ -1185,7 +1185,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
     jDesktopPane1.add(intframeTimeToNextQso);
-    intframeTimeToNextQso.setBounds(490, 10, 468, 436);
+    intframeTimeToNextQso.setBounds(490, 10, 468, 447);
 
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setResizable(true);
@@ -1390,7 +1390,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 488, 459);
+    intframeBandmap.setBounds(500, 520, 670, 476);
 
     intframeLog.setIconifiable(true);
     intframeLog.setResizable(true);
@@ -1584,7 +1584,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeRadioConnection.getContentPane().add(jpanelKeyerConnection, gridBagConstraints);
 
     jDesktopPane1.add(intframeRadioConnection);
-    intframeRadioConnection.setBounds(30, 20, 402, 150);
+    intframeRadioConnection.setBounds(30, 10, 470, 160);
 
     intframeEntryWindow.setIconifiable(true);
     intframeEntryWindow.setResizable(true);
@@ -1911,7 +1911,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeEntryWindow.getContentPane().add(jPanelStatusBar, gridBagConstraints);
 
     jDesktopPane1.add(intframeEntryWindow);
-    intframeEntryWindow.setBounds(280, 20, 453, 233);
+    intframeEntryWindow.setBounds(280, 20, 453, 251);
 
     intframeMisc.setIconifiable(true);
     intframeMisc.setResizable(true);
@@ -2541,8 +2541,8 @@ public class MainWindow extends javax.swing.JFrame
     switch(evt.getKeyChar())
     {
       case KeyEvent.VK_SPACE: // Move to Rcv field    
-        //jtextfieldCallsign.requestFocusInWindow();
-        //evt.consume();
+        jtextfieldCallsign.requestFocusInWindow();
+        evt.consume();
         break;
     }
   }//GEN-LAST:event_jtextfieldRcvKeyTyped
@@ -3138,28 +3138,27 @@ public class MainWindow extends javax.swing.JFrame
       return false;
     }
 
+    if(!Qso.isValidSerial(jtextfieldSnt.getText()))
+    {
+      JOptionPane.showMessageDialog(null, "Invalid Snt!");
+      jtextfieldSnt.requestFocusInWindow();
+      return false;
+    }
     
-    
-    // Format Rcv
-    
-//    if(!Qso.isValidSerial(jtextfieldSnt.getText()))
-//    {
-//      JOptionPane.showMessageDialog(null, "Invalid Snt!");
-//      jtextfieldSnt.requestFocusInWindow();
-//      return false;
-//    }
-//    
-    if(jtextfieldRcv.getText().isEmpty())
+    if(!Qso.isValidSerial(jtextfieldRcv.getText()))
     {
       JOptionPane.showMessageDialog(null, "Invalid Rcv!");
       jtextfieldRcv.requestFocusInWindow();
       return false;
     }
+  
+    // Format
+    String Rcv = jtextfieldRcv.getText().replaceAll("\\s", ""); // Remove any empty spaces
+    Rcv = jtextfieldRcv.getText().substring(0, 3)+" "+jtextfieldRcv.getText().substring(3); // Add blank space between the two parts of the SNT
     
-    
-    // Format the RCV filed
-    String Rcv = jtextfieldRcv.getText().trim().replaceAll(" +", " "); // Remove trailing/leading white spaces and also more than one space between words
-    Rcv = RcvFormatter.padNumbersWithZeros(Rcv); // Add leading zeros to numbers (e.g. 1 --> 001)
+    String Snt = jtextfieldSnt.getText().replaceAll("\\s", ""); // Remove any empty spaces
+    Snt = Snt.substring(0, 3) + " " + Snt.substring(3);  // Add blank space between the two parts of the RCV
+
     
     // Add qso to log
     // ------------------------------
@@ -3170,7 +3169,7 @@ public class MainWindow extends javax.swing.JFrame
                     getMode(),     
                     applicationSettings.getMyCallsign(),
                     getCallsignFromTextField(),
-                    jtextfieldSnt.getText(),
+                    Snt, 
                     Rcv,
                     getTypeOfWork());
     }
@@ -4353,18 +4352,22 @@ public class MainWindow extends javax.swing.JFrame
     @Override
     public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException
     {
-      text = text.replaceAll("[^A-Za-z0-9 ]*$", "");
+      text = text.replaceAll("[^A-Za-z0-9]*$", "");
       int overlimit = fb.getDocument().getLength()+text.length() - SERIAL_NUMBER_MAX_LENGTH;
       if(overlimit > 0)
       {
         fb.insertString(offset, text.substring(0, text.length()-overlimit), attr);
         return;
       }
-      fb.insertString(offset, text, attr);
+      fb.insertString(offset, text.toUpperCase(), attr);
     }
 
     @Override
-    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+    public void replace(DocumentFilter.FilterBypass fb,   // FilterBypass that can be used to mutate Document
+                        int offset,                       // Location in Document where we are inserting text
+                        int length,                       // Length of text to delete (in case we delete and insert at the same time)
+                        String text,                      // Text to insert, null indicates no text to insert
+                        AttributeSet attrs) throws BadLocationException // the attributes to associate with the inserted content. This may be null if there are no attributes.
     {
       int currentLength = fb.getDocument().getLength();
       int overLimit = (currentLength + text.length()) - SERIAL_NUMBER_MAX_LENGTH - length;
@@ -4373,8 +4376,14 @@ public class MainWindow extends javax.swing.JFrame
         text = text.substring(0, text.length() - overLimit);
       }
       
-      text = text.replaceAll("[^A-Za-z0-9 ]*$", "");
-      fb.replace(offset, length, text, attrs);
+      text = text.replaceAll("[^A-Za-z0-9]*$", "");
+      fb.replace(offset, length, text.toUpperCase(), attrs);
+    }
+    
+    @Override
+    public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException
+    {
+      fb.remove(offset, length);
     }
   }
   

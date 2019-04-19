@@ -562,24 +562,23 @@ public class Qso
     // Remove white spaces
 //    String str = serial.replaceAll("\\s", "");
 //
-//    if (str.length() < 6 || str.length() > 6)
-//    {
-//      return false;
-//    }
-//
-//    // should be only numbers
-//    try
-//    {
-//      int number = Integer.parseInt(str); 
-//      if(number<0)
-//        return false;
-//    }
-//    catch (Exception exc)
-//    {
-//      return false;
-//    }
+    if(serial.length() < 4 )
+    {
+      return false;
+    }
 
-    //TODO: include validation if needed
+    // The first three symbols should be only digits
+    try
+    {
+      int number = Integer.parseInt(serial.substring(0, 3)); 
+      if(number <0 )
+        return false;
+    }
+    catch (Exception exc)
+    {
+      return false;
+    }
+
     return true;
   }
 

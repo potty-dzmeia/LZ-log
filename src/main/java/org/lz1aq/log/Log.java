@@ -245,10 +245,7 @@ public class Log
 
     Qso qso = qsoList.get(qsoList.size() - 1);
 
-    String lastRcv = qso.getRcv();
-    lastRcv = lastRcv.split(" ",2)[0];
-    
-    return lastRcv;
+    return qso.getRcv().substring(0, 3);
   }
  
   
