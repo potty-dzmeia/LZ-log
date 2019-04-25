@@ -79,7 +79,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.6.1";
+  static final String PROGRAM_VERSION = "1.6.2";
   static final String PROGRAM_NAME    = "LZ-Log";
   static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
@@ -2265,12 +2265,13 @@ public class MainWindow extends javax.swing.JFrame
     // Log Qso
     if(addEntryToLog())
     {
-      initEntryFields();
-      
       if(applicationSettings.isEmsEnabled() && jradiobuttonCQ.isSelected())
         pressedF3(); 
       else if(applicationSettings.isEmsEnabled() && jradiobuttonSP.isSelected())
         pressedF2();
+      
+      initEntryFields();
+      
     }
   }//GEN-LAST:event_jtextfieldRcvActionPerformed
 

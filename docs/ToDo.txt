@@ -1,5 +1,4 @@
 High priority:
-- Serial number like in N1mm
 - Check the install directory and open warning pop-up informing the user what directories are allowed.
 - send CW morse code character by character ( this will allow to edit the callsign while sending is in progress)
 - Try to catch all keyboard presses (f4 should not close HDSDR)
@@ -32,6 +31,7 @@ Low priority:
 - the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
 
 Last Solved:
+- Serial number like in N1mm
 - If default prefix is used it should always stay in the entry window
 - The default is now visible in the entry window
 - send all zeros as T
