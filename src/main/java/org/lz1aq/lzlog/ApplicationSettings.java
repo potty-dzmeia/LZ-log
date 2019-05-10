@@ -47,6 +47,7 @@ public final class ApplicationSettings
   static final String PROPERTY_QUICK_CALLSIGN_MODE = "quick_callsign_mode";
   static final String PROPERTY_DEFAULT_PREFIX = "default_prefix";
   static final String PROPERTY_QSO_REPEAT_PERIOD_SEC = "qso_repeat_period";
+  static final String PROPERTY_CONTEST_EXCHANGE = "contest_exchange";
   static final String PROPERTY_INCOMING_QSO_MAX_ENTRIES = "incoming_qso_max_entries";
   static final String PROPERTY_INCOMING_QSO_HIDE_AFTER = "incoming_qso_hide_after";
   static final String PROPERTY_FUNCTION_KEYS = "function_keys";
@@ -107,6 +108,7 @@ public final class ApplicationSettings
   private boolean isSendZeroAsT;
   private String defaultPrefix;
   private int qsoRepeatPeriodInSeconds;
+  private String contestExchange;
   private final Rectangle[] framesDimensions; // Postition and size of all frames used by the program
   private final Font[] fonts; // Fonts used by the program
   private final String[] functionKeyTexts;  // texts for the function keys
@@ -206,8 +208,6 @@ public final class ApplicationSettings
     isBandmapAutoFreq = isEnabled;
   }
   
-  
-  
   public String getRadioComPort()
   {
     return radioComPort;
@@ -257,6 +257,18 @@ public final class ApplicationSettings
   {
     this.radioComPortBaudRate = radioComPortBaudRate;
   }
+
+  
+  public String getContestExchange()
+  {
+    return contestExchange;
+  }
+
+  public void setContestExchange(String contestExchange)
+  {
+    this.contestExchange = contestExchange;
+  }
+  
   
   public String getMyCallsign()
   {
@@ -515,6 +527,7 @@ public final class ApplicationSettings
     //prop.setProperty(PROPERTY_KEYER_COMPORT_BAUDRATE, Integer.toString(keyerComPortBaudRate));
     prop.setProperty(PROPERTY_KEYER_TYPE, Integer.toString(keyerType.toInt()));
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
+    prop.setProperty(PROPERTY_CONTEST_EXCHANGE, contestExchange);
     prop.setProperty(PROPERTY_QUICK_CALLSIGN_MODE, Boolean.toString(isQuickCallsignModeEnabled));
     prop.setProperty(PROPERTY_AUTO_CQ_FREQ_JUMP, Boolean.toString(autoCqJumpEnabled));
     prop.setProperty(PROPERTY_ESM, Boolean.toString(emsEnabled));
@@ -607,6 +620,11 @@ public final class ApplicationSettings
       if (myCallsign == null)
         SetSettingToDefault(PROPERTY_MY_CALL_SIGN);
 
+     // Contest exchange
+      contestExchange = prop.getProperty(PROPERTY_CONTEST_EXCHANGE);
+      if (contestExchange == null)
+        SetSettingToDefault(PROPERTY_CONTEST_EXCHANGE);
+      
       // Now read the texts for the function keys
       getProperties(PROPERTY_FUNCTION_KEYS, functionKeyTexts);
       for (String str : functionKeyTexts)
@@ -721,75 +739,105 @@ public final class ApplicationSettings
   
   private void SetAllSettingsToDefault()
   {
-    radioComPort = "";
+    SetSettingToDefault(PROPERTY_RADIO_COMPORT);
+    SetSettingToDefault(PROPERTY_RADIO_COMPORT_BAUDRATE);
+    SetSettingToDefault(PROPERTY_KEYER_COMPORT);
+    //SetSettingToDefault(PROPERTY_KEYER_COMPORT_BAUDRATE);
+    SetSettingToDefault(PROPERTY_KEYER_TYPE);
+    SetSettingToDefault(PROPERTY_MY_CALL_SIGN);
+    SetSettingToDefault(PROPERTY_QUICK_CALLSIGN_MODE);
+    SetSettingToDefault(PROPERTY_DEFAULT_PREFIX);
+    SetSettingToDefault(PROPERTY_QSO_REPEAT_PERIOD_SEC);
+    SetSettingToDefault(PROPERTY_CONTEST_EXCHANGE);
+    SetSettingToDefault(PROPERTY_INCOMING_QSO_MAX_ENTRIES);
+    SetSettingToDefault(PROPERTY_INCOMING_QSO_HIDE_AFTER);
+    SetSettingToDefault(PROPERTY_FUNCTION_KEYS);
+    SetSettingToDefault(PROPERTY_FRAMES_DIMENSIONS);
+    SetSettingToDefault(PROPERTY_BANDMAP_STEP);
+    SetSettingToDefault(PROPERTY_BANDMAP_COLUMN_COUNT);
+    SetSettingToDefault(PROPERTY_BANDMAP_ROW_COUNT);
+    SetSettingToDefault(PROPERTY_FONTS);
+    SetSettingToDefault(PROPERTY_ESM);
+    SetSettingToDefault(PROPERTY_SEND_LEADING_ZERO_AS_T);
+    SetSettingToDefault(PROPERTY_SEND_ZERO_AS_T);
+    SetSettingToDefault(PROPERTY_AUTO_CQ_FREQ_JUMP);
+    SetSettingToDefault(PROPERTY_BANDMAP_SHOW_FREQ_COLUMNS);
+    SetSettingToDefault(PROPERTY_BANDMAP_AUTO_FREQ);
 
-    keyerComPort = "";
-
-    radioComPortBaudRate = 19200;
-
-//    keyerComPortBaudRate = 1200;
-
-    keyerType = KeyerTypes.DTR;
-
-    myCallsign = "LZ1ABC";
-
-    isQuickCallsignModeEnabled = false;
-
-    defaultPrefix = "LZ";
-
-    qsoRepeatPeriodInSeconds = 1800;
-
-    incomingQsoMaxEntries = 20;  // Number of entries visible on the Incoming Qso panel
-
-    incomingQsoHiderAfter = -14400; // If overtime is 4 hours don't show the entry
-
-    // Set texts for the direction buttons
-    functionKeyTexts[0] = "test {mycall}";       // F1
-    functionKeyTexts[1] = "{#} {$}";             // F2
-    functionKeyTexts[2] = "tu";                  // F3
-    functionKeyTexts[3] = "not defined by user";
-    functionKeyTexts[4] = "not defined by user";
-    functionKeyTexts[5] = "nr?";
-    functionKeyTexts[6] = "?";
-    functionKeyTexts[7] = "qsob4";
-    functionKeyTexts[8] = "hello";
-    functionKeyTexts[9] = "";
-    functionKeyTexts[10] = "not defined by user";
-    functionKeyTexts[11] = "not defined by user";
-
-    // Default positions for the different frames               x  y  width height
-    framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(48, 1, 1374, 744);
-    framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(9, 6, 383, 244);
-    framesDimensions[FrameIndex.LOG.toInt()]  = new Rectangle(430, 473, 943, 164);
-    framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(9, 254, 384, 375);
-    framesDimensions[FrameIndex.BANDMAP.toInt()]  = new Rectangle(440, 4, 932, 471);
-    framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(236, 318, 394, 223);
-    framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(306, 32, 265, 277);
     
-    bandmapStepInHz = 200;
-
-    bandmapColumnCount = 18;
-
-    bandmapRowCount = 24;
-
-    // Fonts  
-    fonts[FontIndex.BANDMAP.toInt()] = new Font("Dialog", Font.PLAIN, 12);
-    fonts[FontIndex.CALLSIGN.toInt()] = new Font("Dialog", Font.PLAIN, 24);
-    fonts[FontIndex.INCOMING_QSO.toInt()] = new Font("Dialog", 1, 18);
-    fonts[FontIndex.LOG.toInt()] = new Font("Dialog", Font.PLAIN, 12);
-    fonts[FontIndex.RCV.toInt()] = new Font("Dialog", Font.PLAIN, 24);
-    fonts[FontIndex.SNT.toInt()] = new Font("Dialog", Font.PLAIN, 24);
     
-    emsEnabled = false;
-
-    isSendLeadingZeroAsT = false;
     
-    isSendZeroAsT = false;
-
-    autoCqJumpEnabled = false;
-
-    isShowBandmapFreqColumnsEnabled = true;
-    isBandmapAutoFreq = false;
+//    radioComPort = "";
+//
+//    keyerComPort = "";
+//
+//    radioComPortBaudRate = 19200;
+//
+////    keyerComPortBaudRate = 1200;
+//
+//    keyerType = KeyerTypes.DTR;
+//
+//    myCallsign = "LZ1ABC";
+//    
+//    contestExchange = "{#} {$}"; 
+//
+//    isQuickCallsignModeEnabled = false;
+//
+//    defaultPrefix = "LZ";
+//
+//    qsoRepeatPeriodInSeconds = 1800;
+//
+//    incomingQsoMaxEntries = 20;  // Number of entries visible on the Incoming Qso panel
+//
+//    incomingQsoHiderAfter = -14400; // If overtime is 4 hours don't show the entry
+//
+//    // Set texts for the direction buttons
+//    functionKeyTexts[0] = "test {mycall}";       // F1
+//    functionKeyTexts[1] = "{exch}";              // F2
+//    functionKeyTexts[2] = "tu";                  // ...
+//    functionKeyTexts[3] = "not defined by user";
+//    functionKeyTexts[4] = "not defined by user";
+//    functionKeyTexts[5] = "nr?";
+//    functionKeyTexts[6] = "?";
+//    functionKeyTexts[7] = "qsob4";
+//    functionKeyTexts[8] = "hello";
+//    functionKeyTexts[9] = "";
+//    functionKeyTexts[10] = "not defined by user";
+//    functionKeyTexts[11] = "not defined by user";
+//
+//    // Default positions for the different frames               x  y  width height
+//    framesDimensions[FrameIndex.JFRAME.toInt()] = new Rectangle(48, 1, 1374, 744);
+//    framesDimensions[FrameIndex.ENTRY.toInt()] = new Rectangle(9, 6, 383, 244);
+//    framesDimensions[FrameIndex.LOG.toInt()]  = new Rectangle(430, 473, 943, 164);
+//    framesDimensions[FrameIndex.INCOMING_QSO.toInt()] = new Rectangle(9, 254, 384, 375);
+//    framesDimensions[FrameIndex.BANDMAP.toInt()]  = new Rectangle(440, 4, 932, 471);
+//    framesDimensions[FrameIndex.RADIO.toInt()] = new Rectangle(236, 318, 394, 223);
+//    framesDimensions[FrameIndex.SETTINGS.toInt()] = new Rectangle(306, 32, 265, 277);
+//    
+//    bandmapStepInHz = 200;
+//
+//    bandmapColumnCount = 18;
+//
+//    bandmapRowCount = 24;
+//
+//    // Fonts  
+//    fonts[FontIndex.BANDMAP.toInt()] = new Font("Dialog", Font.PLAIN, 12);
+//    fonts[FontIndex.CALLSIGN.toInt()] = new Font("Dialog", Font.PLAIN, 24);
+//    fonts[FontIndex.INCOMING_QSO.toInt()] = new Font("Dialog", 1, 18);
+//    fonts[FontIndex.LOG.toInt()] = new Font("Dialog", Font.PLAIN, 12);
+//    fonts[FontIndex.RCV.toInt()] = new Font("Dialog", Font.PLAIN, 24);
+//    fonts[FontIndex.SNT.toInt()] = new Font("Dialog", Font.PLAIN, 24);
+//    
+//    emsEnabled = false;
+//
+//    isSendLeadingZeroAsT = false;
+//    
+//    isSendZeroAsT = false;
+//
+//    autoCqJumpEnabled = false;
+//
+//    isShowBandmapFreqColumnsEnabled = true;
+//    isBandmapAutoFreq = false;
   }
     
   /**
@@ -822,6 +870,10 @@ public final class ApplicationSettings
       case PROPERTY_MY_CALL_SIGN:
         myCallsign = "LZ1ABC";
         break;
+
+      case PROPERTY_CONTEST_EXCHANGE:
+        contestExchange = "{#} {$}";
+        break;
         
       case PROPERTY_QUICK_CALLSIGN_MODE:
         isQuickCallsignModeEnabled = false;
@@ -846,7 +898,7 @@ public final class ApplicationSettings
       case PROPERTY_FUNCTION_KEYS:
         // Set texts for the direction buttons
         functionKeyTexts[0] = "test {mycall}";       // F1
-        functionKeyTexts[1] = "not defined by user"; // F2
+        functionKeyTexts[1] = "{exch}"; // F2
         functionKeyTexts[2] = "tu";                  // F3
         functionKeyTexts[3] = "not defined by user";
         functionKeyTexts[4] = "not defined by user";
