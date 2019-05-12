@@ -1,6 +1,8 @@
 // ***************************************************************************
 package org.lz1aq.keyer;
 
+import javax.swing.DefaultComboBoxModel;
+
 /**
  *
  * @author potty
@@ -19,5 +21,25 @@ public enum KeyerTypes
   {
     return code;
   }
-  
+
+  static public DefaultComboBoxModel getComboxModel()
+  {
+    return new DefaultComboBoxModel(new String[]
+    {
+      WINKEYER.toString(), DTR.toString(), RTS.toString()
+    });
+  }
+
+  static public String getName(int value)
+  {
+    for(KeyerTypes e : KeyerTypes.values())
+    {
+      if(e.code == value)
+      {
+        return e.toString();
+      }
+    }
+    return null;// not found
+  }
+
 }

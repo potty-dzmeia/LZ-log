@@ -296,7 +296,7 @@ class JsonMsgParser
       int i = Integer.parseInt(jso.getString(VFO_PAR));
       for(RadioVfos vfo: RadioVfos.values())
       {
-        if(vfo.getCode() == i)
+        if(vfo.getValue() == i)
           return vfo;
       }
     } 

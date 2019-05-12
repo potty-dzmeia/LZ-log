@@ -52,8 +52,8 @@ class SerialSettings(I_SerialSettings):
         jsonBlock["data_bits"] = self.data_bits_
         jsonBlock["parity"] = self.parity
         jsonBlock["handshake"] = self.handshake
-        jsonBlock["rts"] = self.rts_
-        jsonBlock["dtr"] = self.dtr_
+        jsonBlock["rts"] = "Check you app settings"
+        jsonBlock["dtr"] = "Check you app settings"
 
         if self.stop_bits_ == self.STOPBITS_ONE:
             st_bits = 1

@@ -55,7 +55,8 @@ public class Radio
   
   private final CopyOnWriteArrayList<RadioListener>  eventListeners;    
   private final String              serialPortName;       
-  private final int                 baudRate;             
+  private final int                 baudRate;    
+  private final boolean             rts, dtr;
   private       SerialPort          serialPort;           // Used for writing to serialPort
   private final I_Radio             radioProtocolParser;  // Used for decoding/encoding msg from/to the radio (jython object)
   private final Thread              threadPortWriter;     // Thread that writes transaction to the serial port
@@ -82,11 +83,13 @@ public class Radio
    * @param portName -  name of the serial port that will be used for communicating with the radio
    * @param baudRate -  baud rate to be used for the serial port
    */
-  public Radio(I_Radio protocolParser, String portName, int baudRate)
-  {
-    radioProtocolParser   = protocolParser;           // Store the reference to the jython object
-    serialPortName        = portName;
-    this.baudRate         = baudRate;
+  public Radio(I_Radio protocolParser, String portName, int baudRate, boolean dtr, boolean rts)
+   {
+     radioProtocolParser   = protocolParser;           // Store the reference to the jython object
+     serialPortName        = portName;
+     this.baudRate         = baudRate;
+     this.dtr              = dtr;
+     this.rts              = rts;
     queueWithTransactions = new LinkedBlockingQueue<>(); 
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
     receiveBuffer         = new DynamicByteArray(200);  // Set the initial size to some reasonable value
@@ -118,9 +121,10 @@ public class Radio
     
     // Open the serial port using the settings from the python file
     serialPort = new SerialPort(serialPortName);
+    
     serialPort.openPort();
     setComPortParams(serialPort, radioProtocolParser.getSerialPortSettings());
-    
+
     // Register a local listener - this class is interested in the confirmation events
     eventListeners.add(new LocalRadioListener());
     
@@ -178,7 +182,7 @@ public class Radio
    */
   public void setFrequency(long freq, RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeSetFreq(freq, vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeSetFreq(freq, vfo.getValue()));
   }
   
   
@@ -193,7 +197,7 @@ public class Radio
    */
   public void getFrequency(RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeGetFreq(vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeGetFreq(vfo.getValue()));
   }
   
     
@@ -205,7 +209,7 @@ public class Radio
    */
   public void setMode(RadioModes mode, RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeSetMode(mode.toString(), vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeSetMode(mode.toString(), vfo.getValue()));
   }
   
     
@@ -219,7 +223,7 @@ public class Radio
    */
   public void getMode(RadioVfos vfo) throws Exception
   {
-    this.queueTransactions(radioProtocolParser.encodeGetMode(vfo.getCode()));
+    this.queueTransactions(radioProtocolParser.encodeGetMode(vfo.getValue()));
   }
   
   
@@ -598,7 +602,7 @@ public class Radio
         stopbits = SerialPort.STOPBITS_1_5;
         break;
       case 3:
-        stopbits = serialPort.STOPBITS_2;
+        stopbits = SerialPort.STOPBITS_2;
         break;
     }
     
@@ -607,29 +611,9 @@ public class Radio
                    stopbits,
                    parity);
     
-    switch (settings.getDtr().toLowerCase())
-    {
-      case "none":
-        break;
-      case "on":
-        port.setDTR(true);
-        break;
-      case "off":
-        port.setDTR(false);
-        break;
-    }
-
-    switch (settings.getRts().toLowerCase())
-    {
-      case "none":
-        break;
-      case "on":
-        port.setRTS(true);
-        break;
-      case "off":
-        port.setRTS(false);
-        break;
-    }
+    port.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN);
+    port.setDTR(this.dtr);
+    port.setRTS(this.rts);
   }
   
 }

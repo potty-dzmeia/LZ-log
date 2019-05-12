@@ -17,39 +17,35 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.radio;
+package org.lz1aq.ptt;
 
-import javax.swing.DefaultComboBoxModel;
-
-public enum RadioModes
+/**
+ *
+ * @author levkov_cha_ext
+ */
+public class SerialportPtt implements Ptt
 {
-  AM,       // AM -- Amplitude Modulation 
-  CW,       // CW - CW "normal" sideband
-  USB,      // USB - Upper Side Band
-  LSB,      // LSB - Lower Side Band 
-  RTTY,     // RTTY - Radio Teletype 
-  FM,       // FM - "narrow" band FM 
-  WFM,      // WFM - broadcast wide FM 
-  CWR,      // CWR - CW "reverse" sideband
-  RTTYR,    // RTTYR - RTTY "reverse" sideband
-  AMS,      // AMS - Amplitude Modulation Synchronous 
-  PKTLSB,   // PKTLSB - Packet/Digital LSB mode (dedicated port) 
-  PKTUSB,   // PKTUSB - Packet/Digital USB mode (dedicated port) 
-  PKTFM,    // PKTFM - Packet/Digital FM mode (dedicated port) 
-  ECSSUSB,  // ECSSUSB - Exalted Carrier Single Sideband USB 
-  ECSSLSB,  // ECSSLSB - Exalted Carrier Single Sideband LSB 
-  FAX,      // FAX - Facsimile M  ode
-  SAM,      // SAM - Synchronous AM double sideband
-  SAL,      // SAL - Synchronous AM lower sideband
-  SAH,      // SAH - Synchronous AM upper (higher) sideband
-  DSB;      // DSB - Double sideband suppressed carrier
-  
-  static public DefaultComboBoxModel getComboxModel()
+   
+  public void CommportPtt(String portName)
   {
-    return new DefaultComboBoxModel(new String[]
-    {
-      CW.toString(), LSB.toString(), USB.toString(), RTTY.toString()
-    }); 
+    
   }
-  
+
+  @Override
+  public boolean connect()
+  {
+    return true;
+  }
+
+  @Override
+  public void disconnect()
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void set(boolean pttState)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
 }

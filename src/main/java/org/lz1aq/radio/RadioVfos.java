@@ -29,7 +29,7 @@ public enum RadioVfos {
    F(5), 
    G(6);
 
-   private final int code;
-   RadioVfos(int code)  { this.code = code; }
-   public int getCode() { return code; }
+   private final int value;
+   RadioVfos(int code)  { this.value = code; }
+   public int getValue() { return value; }
 }
