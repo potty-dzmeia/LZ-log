@@ -44,7 +44,6 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
@@ -57,7 +56,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import jssc.SerialPort;
-import jssc.SerialPortException;
 import jssc.SerialPortList;
 import org.lz1aq.keyer.Keyer;
 import org.lz1aq.keyer.KeyerFactory;
@@ -65,7 +63,6 @@ import org.lz1aq.log.Log;
 import org.lz1aq.log.LogDatabase;
 import org.lz1aq.log.LogTableModel;
 import org.lz1aq.log.Qso;
-import org.lz1aq.ptt.DtrRtsPtt;
 import org.lz1aq.ptt.Ptt;
 import org.lz1aq.ptt.PttTypes;
 import org.lz1aq.radio.Radio;
@@ -112,8 +109,7 @@ public class MainWindow extends javax.swing.JFrame
   private DocumentFilter                pttDelayFilter = new PttDelayDocumentFilter();
   private DocumentFilter                qsoRepeatPeriodFilter = new DigitsOnlyFilter();
   private DocumentFilter                dontShowAfterFilter = new DigitsOnlyFilter();
-  
-  
+
   
   private static final Logger logger = Logger.getLogger(Radio.class.getName());
   
@@ -2512,18 +2508,13 @@ public class MainWindow extends javax.swing.JFrame
       // Select the python file describing the radio protocol
       if(loadRadioProtocolParser())
       {
-        connectToRadio(); // now we can try to connect
+        connectRadio(); // now we can try to connect
       } 
     }
     // Disconnect
     // --------------------
     else
-    {
-      if (radioController != null)
-      {
-        radioController.disconnect();
-      }
-    }
+      disconnectRadio();
     
     
     if(radioController.isConnected())
@@ -3164,7 +3155,7 @@ public class MainWindow extends javax.swing.JFrame
   
   /**
    * Will open the Commport for the Keyer
-   * @return true if connection was succesful 
+   * @return true if connection was successful 
    */
   private boolean connectKeyer()
   {
@@ -3183,7 +3174,7 @@ public class MainWindow extends javax.swing.JFrame
     }
     
     // Commport is free to use
-    if( !CommUtils.isPortOpened(keyerCommName) )
+    if( !CommUtils.isBusy(keyerCommName) )
     {
       keyer = KeyerFactory.create(settings.getKeyerType(), keyerCommName);
     }
@@ -3242,7 +3233,7 @@ public class MainWindow extends javax.swing.JFrame
     
     
      // Commport is free to use
-    if( !CommUtils.isPortOpened(pttCommName) )
+    if( !CommUtils.isBusy(pttCommName) )
     {
       keyer = KeyerFactory.create(settings.getKeyerType(), pttCommName);
     }
@@ -3263,7 +3254,7 @@ public class MainWindow extends javax.swing.JFrame
       }
       else
       {
-        JOptionPane.showMessageDialog(null, "Commport "+keyerCommName + " already in use.", "Error", JOptionPane.ERROR_MESSAGE);
+        //------------------>JOptionPane.showMessageDialog(null, "Commport "+keyerCommName + " already in use.", "Error", JOptionPane.ERROR_MESSAGE);
         return false; // Commport used by another program
       }
     }
@@ -3291,19 +3282,27 @@ public class MainWindow extends javax.swing.JFrame
   }
       
   
-  private boolean connectToRadio()
+  private boolean connectRadio()
   {
-    boolean result = radioController.connect(new LocalRadioControllerListener(),
-                                             settings.getRadioCommportName(), 
-                                             settings.getRadioCommportBaudRate(),
-                                             settings.isRadioCommportDtrOn(),
-                                             settings.isRadioCommportRtsOn());
-    if (!result)
-    {
-      JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
-    }
     
-    return result;
+//    boolean result = radioController.connect(new LocalRadioControllerListener(),
+//                                             serialcomportRadio, 
+//                                             settings.getRadioCommportBaudRate(),
+//                                             settings.isRadioCommportDtrOn(),
+//                                             settings.isRadioCommportRtsOn());
+//    if (!result)
+//    {
+//      JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
+//    }
+//    
+//    return result;
+    return true;
+  }
+  
+  private boolean disconnectRadio()
+  {
+    radioController.disconnect();
+    return true;
   }
   
   

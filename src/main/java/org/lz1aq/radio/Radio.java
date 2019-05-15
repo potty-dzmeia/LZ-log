@@ -51,12 +51,10 @@ import org.lz1aq.radio.event.EmptyRadioListener;
  */
 public class Radio
 {
+  private static final Logger       logger = Logger.getLogger(Radio.class.getName());
   private static final int QUEUE_SIZE = 30;   // Max number of commands that queueWithTransactions can hold
   
-  private final CopyOnWriteArrayList<RadioListener>  eventListeners;    
-  private final String              serialPortName;       
-  private final int                 baudRate;    
-  private final boolean             rts, dtr;
+  private final CopyOnWriteArrayList<RadioListener>  eventListeners;      
   private       SerialPort          serialPort;           // Used for writing to serialPort
   private final I_Radio             radioProtocolParser;  // Used for decoding/encoding msg from/to the radio (jython object)
   private final Thread              threadPortWriter;     // Thread that writes transaction to the serial port
@@ -64,41 +62,28 @@ public class Radio
    
   private final BlockingQueue<I_EncodedTransaction>  queueWithTransactions; // Transactions waiting to be sent to the radio
   
-  private static final Logger       logger = Logger.getLogger(Radio.class.getName());
- 
-  
-  
-  private enum ConfirmationTypes{EMPTY,    // No confirmation has arrived yet
-                                 POSITIVE, // Positive confirmation
-                                 NEGATIVE} // Negative confirmation
+  private enum ConfirmationTypes{EMPTY, POSITIVE, NEGATIVE} 
   private ConfirmationTypes  confirmationStatus = ConfirmationTypes.EMPTY; // Holds type of last confirmation that came from radio
   private boolean            isWaitingForConfirmation = false;             // If we are waiting from the radio to send us positive or negative confirmation
   
-  
-  
+ 
   /**   
    * Constructor 
    * 
    * @param protocolParser - provides the protocol for communicating with the radio
-   * @param portName -  name of the serial port that will be used for communicating with the radio
-   * @param baudRate -  baud rate to be used for the serial port
+   * @param commport -  name of the serial port that will be used for communicating with the radio
    */
-  public Radio(I_Radio protocolParser, String portName, int baudRate, boolean dtr, boolean rts)
-   {
-     radioProtocolParser   = protocolParser;           // Store the reference to the jython object
-     serialPortName        = portName;
-     this.baudRate         = baudRate;
-     this.dtr              = dtr;
-     this.rts              = rts;
+  public Radio(I_Radio protocolParser, SerialPort commport)
+  {
+    radioProtocolParser   = protocolParser;           // Store the reference to the jython object
+    serialPort            = commport;
     queueWithTransactions = new LinkedBlockingQueue<>(); 
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
     receiveBuffer         = new DynamicByteArray(200);  // Set the initial size to some reasonable value
     eventListeners        = new CopyOnWriteArrayList<>();
   }
   
-  
-  
-    
+ 
   
   //----------------------------------------------------------------------
   //                           Public methods
@@ -114,17 +99,12 @@ public class Radio
    */
   public void connect() throws Exception
   {
-    if(isConnected())
-      logger.warning("Radio already disconnected!");
+    if(!isConnected())
+      throw new Exception("Commport for the Radio is not open!");
+     
     if(threadPortWriter.getState() != Thread.State.NEW )
       throw new Exception("Please create a new Radio object");
     
-    // Open the serial port using the settings from the python file
-    serialPort = new SerialPort(serialPortName);
-    
-    serialPort.openPort();
-    setComPortParams(serialPort, radioProtocolParser.getSerialPortSettings());
-
     // Register a local listener - this class is interested in the confirmation events
     eventListeners.add(new LocalRadioListener());
     
@@ -157,11 +137,10 @@ public class Radio
     try{Thread.sleep(150);} catch (InterruptedException ex){logger.log(Level.SEVERE, null, ex);}
     
     threadPortWriter.interrupt();
-    serialPort.removeEventListener();
-    serialPort.closePort();
-    
+    serialPort.removeEventListener();    
     serialPort = null;
   }
+  
   
   /**
    * Checks if currently connected to the radio
@@ -169,7 +148,7 @@ public class Radio
    */
   public boolean isConnected()
   {
-    return !(serialPort==null || serialPort.isOpened()==false);   
+    return serialPort!=null && serialPort.isOpened();   
   }
   
   
@@ -558,62 +537,5 @@ public class Radio
       threadPortWriter.notify();  // wake up the thread so that it can continue sending transactions
     }
   }
-  
-   /**
-   * Sets Com port parameters
-   * 
-   * @param port The serial port which parameters will be adjusted
-   * @param settings Source from which the values will be taken
-   */
-  private void setComPortParams(SerialPort port, I_SerialSettings settings) throws SerialPortException
-  {
-    int parity = SerialPort.PARITY_NONE;
-    int stopbits = SerialPort.STOPBITS_2;
-    
-    switch(settings.getParity().toLowerCase())
-    {
-      case "none":
-        parity = SerialPort.PARITY_NONE;
-        break;
-
-      case "odd":
-        parity = SerialPort.PARITY_ODD;
-        break;
-
-      case "even":
-        parity = SerialPort.PARITY_EVEN;
-        break;
-
-      case "mark":
-        parity = SerialPort.PARITY_MARK;
-        break;
-
-      case "space":
-        parity = SerialPort.PARITY_SPACE;
-        break;
-    }
-    
-    switch(settings.getStopBits()) // stopbits values are defined in serial_setting.py
-    {
-      case 1:
-         stopbits = SerialPort.STOPBITS_1;
-        break;
-      case 2:
-        stopbits = SerialPort.STOPBITS_1_5;
-        break;
-      case 3:
-        stopbits = SerialPort.STOPBITS_2;
-        break;
-    }
-    
-    port.setParams(baudRate,
-                   settings.getDataBits(),
-                   stopbits,
-                   parity);
-    
-    port.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN);
-    port.setDTR(this.dtr);
-    port.setRTS(this.rts);
-  }
-  
+ 
 }

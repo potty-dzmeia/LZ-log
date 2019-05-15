@@ -33,38 +33,38 @@ public class CommUtils
 {
 
   /**
-   * Find out if the com port is already in use
+   * Find out if the com port is already in use or maybe not available
    * 
    * @param commPortName - the name of the commport 
-   * @return true if port is already in use
+   * @return true if port cannot be opened
    */
-  public static boolean isPortOpened(String commPortName)
+  public static boolean isBusy(String commPortName)
   {
-//    boolean isSuccess = false;
-//   
-//    try
-//    {
-//      SerialPort port = new SerialPort(commPortName);
-//      isSuccess = port.openPort();
-//      if(isSuccess)
-//      {
-//        port.closePort();
-//      }
-//    }
-//    catch(SerialPortException ex)
-//    {
-//      isSuccess = false;
-//      Logger.getLogger(CommUtils.class.getName()).log(Level.INFO, null, ex);
-//    }
-//    
-//    if(isSuccess) // We opened port successfully 
-//      return false;
-//    else          // Opening the port failed - it is in use
-//      return true;
+    boolean isSuccess;
+   
+    try
+    {
+      SerialPort port = new SerialPort(commPortName);
+      isSuccess = port.openPort();
+      if(isSuccess)
+      {
+        isSuccess = port.closePort();
+      }
+    }
+    catch(SerialPortException ex)
+    {
+      isSuccess = false;
+    }
+    
+    if(isSuccess) // We opened port successfully 
+      return false;
+    else          // Opening the port failed - it is in use
+      return true;
   
-    SerialPort port = new SerialPort(commPortName);
-    return port.isOpened();
+//    SerialPort port = new SerialPort(commPortName); // This is not working always
+//    return port.isOpened();
   }
+  
   
   
   public enum BaudRate

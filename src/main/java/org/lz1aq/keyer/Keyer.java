@@ -37,8 +37,7 @@ public interface Keyer
   public void disconnect();
   
   public boolean isConnected();
-  
-  public SerialPort getSerialPort();
+ 
    
   /**
    * Ptt object should be initialized and ready to use

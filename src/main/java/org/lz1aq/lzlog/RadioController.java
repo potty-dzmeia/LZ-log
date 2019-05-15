@@ -93,7 +93,7 @@ public class RadioController
 
       // Create radioParser object from the python Class
       JythonObjectFactory f2 = new JythonObjectFactory(I_Radio.class, moduleName, className);
-      radioParser = (I_Radio) f2.createObject(); 
+      radioParser = (I_Radio) f2.createObject();
       return true;
       
     }catch(Exception exc)
@@ -103,21 +103,34 @@ public class RadioController
     }
   }
   
-  
-  public boolean connect(RadioControllerListener listener, String commport, int baudRate, boolean dtr, boolean rts)
+  /**
+   * Establishes connection with the Radio.
+   * Preconditions:
+   * - Call loadProtocolParser() before using this function.
+   * @param listener
+   * @param commport  - should be an already opened commport
+   * @return 
+   */
+  public boolean connect(RadioControllerListener listener, SerialPort commport, int baudRate)
   {
     if(radioParser == null)
       return false;
     
+    if(commport==null || !commport.isOpened())
+    {
+      logger.warning("The supplied commport is not opened!");
+      return false;
+    }
+ 
     
     try
     {
       //Create the radio object using the selected Com port
-      radio = new Radio(radioParser, commport, baudRate, dtr, rts);
+      radio = new Radio(radioParser, commport);
+      setComPortParams(commport, baudRate);
       radio.addEventListener(new RadioController.LocalRadioListener());
       radio.connect(); // Let's not forget to call connect(). Calling disconnects() later will close the Com Port
       eventListeners.add(listener);
-      
       
       radio.getFrequency(RadioVfos.A);
       radio.getMode(RadioVfos.A);
@@ -370,7 +383,101 @@ public class RadioController
   {
     return radio.getSerialPort();
   }
+  
+  
+  
+  /**
+   * Sets Com port parameters
+   *
+   * @param port The serial port which parameters will be adjusted
+   * @param settings Source from which the values will be taken
+   */
+  private void setComPortParams(SerialPort commport, int baudrate) throws Exception
+  {
+    I_SerialSettings serialSettings = radioParser.getSerialPortSettings();
     
+    int databits; 
+    int stopbits;
+    int handshake;
+    int parity;
+
+    
+    switch(serialSettings.getStopBits()) // stopbits values are defined in serial_setting.py
+    {
+      case 1:
+        stopbits = SerialPort.STOPBITS_1;
+        break;
+      case 2:
+        stopbits = SerialPort.STOPBITS_1_5;
+        break;
+      case 3:
+        stopbits = SerialPort.STOPBITS_2;
+        break;
+      default:
+        throw new Exception("Unsupported StopBits: " + serialSettings.getStopBits() + ". Correct the python configuration file!");
+    }
+    
+    switch(serialSettings.getDataBits()) // stopbits values are defined in serial_setting.py
+    {
+      case 5:
+        databits = SerialPort.DATABITS_5;
+        break;
+      case 6:
+        databits = SerialPort.DATABITS_6;
+        break;
+      case 7:
+        databits = SerialPort.DATABITS_7;
+        break;
+      case 8:
+        databits = SerialPort.DATABITS_8;
+        break;
+      default:
+        throw new Exception("Unsupported Databits: " + serialSettings.getDataBits() + ". Correct the python configuration file!");
+    }
+
+    switch(serialSettings.getHandshake().toLowerCase())
+    {
+      case "none":
+        handshake = SerialPort.FLOWCONTROL_NONE;
+        break;
+      default:
+        throw new Exception("Unsupported Handshake: " + serialSettings.getHandshake() + ". Correct the python configuration file!");
+    }
+    
+    switch(serialSettings.getParity().toLowerCase())
+    {
+      case "none":
+        parity = SerialPort.PARITY_NONE;
+        break;
+
+      case "odd":
+        parity = SerialPort.PARITY_ODD;
+        break;
+
+      case "even":
+        parity = SerialPort.PARITY_EVEN;
+        break;
+
+      case "mark":
+        parity = SerialPort.PARITY_MARK;
+        break;
+
+      case "space":
+        parity = SerialPort.PARITY_SPACE;
+        break;
+        
+      default:
+        throw new Exception("Unsupported Parity: " + serialSettings.getParity() + ". Correct the python configuration file!");
+    }
+
+    
+    commport.setFlowControlMode(handshake);
+    commport.setParams(baudrate,
+                       databits,
+                       stopbits,
+                       parity);
+  }
+  
   
   public void addEventListener(RadioControllerListener listener) throws Exception
   {
@@ -567,4 +674,6 @@ public class RadioController
       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
   }
+  
+  
 }
