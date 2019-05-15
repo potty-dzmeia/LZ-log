@@ -159,7 +159,7 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     for(String callsign : callsigns)
     {
       Qso lastQso = log.getLastQso(callsign);
-      if(log.getSecondsLeft(lastQso, appsettings.getQsoRepeatPeriod()) < appsettings.getIncomingQsoHiderAfter())
+      if( log.getSecondsLeft(lastQso, appsettings.getQsoRepeatPeriod()) < appsettings.getIncomingQsoHiderAfter()*(-1) )
         continue;
       IncomingQso incoming = new IncomingQso(lastQso.getHisCallsign(),
                                             lastQso.getType(),

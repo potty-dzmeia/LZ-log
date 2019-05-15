@@ -28,6 +28,7 @@ import jssc.SerialPort;
 import jssc.SerialPortException;
 import org.apache.commons.lang3.StringUtils;
 import org.lz1aq.keyer.Keyer;
+import org.lz1aq.ptt.Ptt;
 import org.lz1aq.py.rig.I_Radio;
 import org.lz1aq.py.rig.I_SerialSettings;
 import org.lz1aq.radio.Radio;
@@ -558,6 +559,12 @@ public class RadioController
     public void setCwSpeed(int wpm)
     {
       setCwWpm(wpm);
+    }
+
+    @Override
+    public void includePtt(Ptt ptt)
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
   }
 }

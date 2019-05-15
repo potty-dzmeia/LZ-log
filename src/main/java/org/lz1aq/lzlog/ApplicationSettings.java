@@ -39,14 +39,14 @@ public final class ApplicationSettings
 
   static final String SETTINGS_FILE_NAME = "settings.properties";
 
-  static final String PROPERTY_RADIO_COMPORT = "radio_com_port";
-  static final String PROPERTY_RADIO_COMPORT_BAUDRATE = "radio_com_port_baudrate";
-  static final String PROPERTY_RADIO_COMPORT_DTR = "radio_comport_dtr";
-  static final String PROPERTY_RADIO_COMPORT_RTS = "radio_comport_rts";
-  static final String PROPERTY_KEYER_COMPORT = "keyer_com_port";
+  static final String PROPERTY_RADIO_COMMPORT_NAME = "radio_com_port_name";
+  static final String PROPERTY_RADIO_COMMPORT_BAUDRATE = "radio_com_port_baudrate";
+  static final String PROPERTY_RADIO_COMMPORT_DTR_IS_ON = "radio_comport_dtr_is_on";
+  static final String PROPERTY_RADIO_COMMPORT_RTS_IS_ON = "radio_comport_rts_is_on";
+  static final String PROPERTY_KEYER_COMMPORT_NAME = "keyer_com_port_name";
   static final String PROPERTY_KEYER_TYPE = "keyer_type";
   static final String PROPERTY_PTT_TYPE = "ptt_type";
-  static final String PROPERTY_PTT_COMPORT = "ptt_com_port";
+  static final String PROPERTY_PTT_COMMPORT_NAME = "ptt_com_port_name";
   static final String PROPERTY_PTT_DELAY = "ptt_delay";
         
   static final String PROPERTY_MY_CALL_SIGN = "my_callsign";
@@ -101,13 +101,13 @@ public final class ApplicationSettings
   }
   
 
-  private String  radioComPort;
-  private int     radioComPortBaudRate;
-  private boolean radioComportDtr;
-  private boolean radioComportRts;
-  private String keyerComPort;
+  private String   radioCommportName;
+  private int      radioCommportBaudRate;
+  private boolean  isRadioCommportDtrOn;
+  private boolean  isRadioCommportRtsOn;
+  private String   keyerCommportName;
   private PttTypes pttType;
-  private String   pttComportName;
+  private String   pttCommportName;
   private int      pttDelayInMilliseconds;
 
   private KeyerTypes keyerType;
@@ -154,9 +154,9 @@ public final class ApplicationSettings
     this.pttType = pttType;
   }
 
-  public void setPttComportName(String pttComportName)
+  public void setPttCommportName(String pttComportName)
   {
-    this.pttComportName = pttComportName;
+    this.pttCommportName = pttComportName;
   }
 
   public void setPttDelayInMilliseconds(int pttDelayInMs)
@@ -169,9 +169,9 @@ public final class ApplicationSettings
     return pttType;
   }
 
-  public String getPttComportName()
+  public String getPttCommportName()
   {
-    return pttComportName;
+    return pttCommportName;
   }
 
   public int getPttDelayInMilliseconds()
@@ -179,24 +179,24 @@ public final class ApplicationSettings
     return pttDelayInMilliseconds;
   }
 
-  public void setRadioComportDtr(boolean radioComportDtr)
+  public void setRadioCommportDtr(boolean radioComportDtr)
   {
-    this.radioComportDtr = radioComportDtr;
+    this.isRadioCommportDtrOn = radioComportDtr;
   }
 
-  public void setRadioComportRts(boolean radioComportRts)
+  public void setRadioCommportRts(boolean radioComportRts)
   {
-    this.radioComportRts = radioComportRts;
+    this.isRadioCommportRtsOn = radioComportRts;
   }
   
-  public boolean isRadioComportDtr()
+  public boolean isRadioCommportDtrOn()
   {
-    return radioComportDtr;
+    return isRadioCommportDtrOn;
   }
 
-  public boolean isRadioComportRts()
+  public boolean isRadioCommportRtsOn()
   {
-    return radioComportRts;
+    return isRadioCommportRtsOn;
   }
 
   public Font getFonts(FontIndex index)
@@ -270,24 +270,24 @@ public final class ApplicationSettings
     isBandmapAutoFreq = isEnabled;
   }
   
-  public String getRadioComPort()
+  public String getRadioCommportName()
   {
-    return radioComPort;
+    return radioCommportName;
   }
 
-  public void setRadioComPort(String comPort)
+  public void setRadioCommportName(String comPort)
   {
-    this.radioComPort = comPort;
+    this.radioCommportName = comPort;
   }
   
-  public String getKeyerComPort()
+  public String getKeyerCommportName()
   {
-    return keyerComPort;
+    return keyerCommportName;
   }
 
-  public void setKeyerComPort(String comPort)
+  public void setKeyerCommPortName(String comPort)
   {
-    this.keyerComPort = comPort;
+    this.keyerCommportName = comPort;
   }
   
   public KeyerTypes getKeyerType()
@@ -300,24 +300,14 @@ public final class ApplicationSettings
     this.keyerType = keyerType;
   }
 
-  public int getRadioComPortBaudRate()
+  public int getRadioCommportBaudRate()
   {
-    return radioComPortBaudRate;
+    return radioCommportBaudRate;
   }
 
-//  public int getKeyerComPortBaudRate()
-//  {
-//    return keyerComPortBaudRate;
-//  }
-//
-//  public void setKeyerComPortBaudRate(int keyerComPortBaudRate)
-//  {
-//    this.keyerComPortBaudRate = keyerComPortBaudRate;
-//  }
-
-  public void setRadioComPortBaudRate(int radioComPortBaudRate)
+  public void setRadioCommportBaudRate(int radioComPortBaudRate)
   {
-    this.radioComPortBaudRate = radioComPortBaudRate;
+    this.radioCommportBaudRate = radioComPortBaudRate;
   }
 
   
@@ -583,14 +573,14 @@ public final class ApplicationSettings
    */
   public void SaveSettingsToDisk()
   {
-    prop.setProperty(PROPERTY_RADIO_COMPORT, radioComPort);
-    prop.setProperty(PROPERTY_KEYER_COMPORT, keyerComPort);
-    prop.setProperty(PROPERTY_RADIO_COMPORT_BAUDRATE, Integer.toString(radioComPortBaudRate));
-    prop.setProperty(PROPERTY_RADIO_COMPORT_DTR, Boolean.toString(radioComportDtr));
-    prop.setProperty(PROPERTY_RADIO_COMPORT_RTS, Boolean.toString(radioComportRts));
+    prop.setProperty(PROPERTY_RADIO_COMMPORT_NAME, radioCommportName);
+    prop.setProperty(PROPERTY_KEYER_COMMPORT_NAME, keyerCommportName);
+    prop.setProperty(PROPERTY_RADIO_COMMPORT_BAUDRATE, Integer.toString(radioCommportBaudRate));
+    prop.setProperty(PROPERTY_RADIO_COMMPORT_DTR_IS_ON, Boolean.toString(isRadioCommportDtrOn));
+    prop.setProperty(PROPERTY_RADIO_COMMPORT_RTS_IS_ON, Boolean.toString(isRadioCommportRtsOn));
     prop.setProperty(PROPERTY_KEYER_TYPE, Integer.toString(keyerType.toInt()));
     prop.setProperty(PROPERTY_PTT_TYPE, Integer.toString(pttType.getValue()));
-    prop.setProperty(PROPERTY_PTT_COMPORT, pttComportName);
+    prop.setProperty(PROPERTY_PTT_COMMPORT_NAME, pttCommportName);
     prop.setProperty(PROPERTY_PTT_DELAY, Integer.toString(pttDelayInMilliseconds));
     
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
@@ -652,38 +642,38 @@ public final class ApplicationSettings
         SetSettingToDefault(PROPERTY_FONTS);
       
       // Radio Comport
-      radioComPort = prop.getProperty(PROPERTY_RADIO_COMPORT);
-      if (radioComPort == null)
-        SetSettingToDefault(PROPERTY_RADIO_COMPORT);
+      radioCommportName = prop.getProperty(PROPERTY_RADIO_COMMPORT_NAME);
+      if (radioCommportName == null)
+        SetSettingToDefault(PROPERTY_RADIO_COMMPORT_NAME);
       
       // Radio Comport baud rate
-      String temp = prop.getProperty(PROPERTY_RADIO_COMPORT_BAUDRATE);
+      String temp = prop.getProperty(PROPERTY_RADIO_COMMPORT_BAUDRATE);
       if (temp == null)
-        SetSettingToDefault(PROPERTY_RADIO_COMPORT_BAUDRATE);
+        SetSettingToDefault(PROPERTY_RADIO_COMMPORT_BAUDRATE);
       else
-        radioComPortBaudRate = Integer.parseInt(temp);
+        radioCommportBaudRate = Integer.parseInt(temp);
       
-      temp = prop.getProperty(PROPERTY_RADIO_COMPORT_DTR);
+      temp = prop.getProperty(PROPERTY_RADIO_COMMPORT_DTR_IS_ON);
       if (temp == null)
-        SetSettingToDefault(PROPERTY_RADIO_COMPORT_DTR);
+        SetSettingToDefault(PROPERTY_RADIO_COMMPORT_DTR_IS_ON);
       else
-        radioComportDtr = Boolean.parseBoolean(temp);
+        isRadioCommportDtrOn = Boolean.parseBoolean(temp);
       
-      temp = prop.getProperty(PROPERTY_RADIO_COMPORT_RTS);
+      temp = prop.getProperty(PROPERTY_RADIO_COMMPORT_RTS_IS_ON);
       if (temp == null)
-        SetSettingToDefault(PROPERTY_RADIO_COMPORT_RTS);
+        SetSettingToDefault(PROPERTY_RADIO_COMMPORT_RTS_IS_ON);
       else
-        radioComportRts = Boolean.parseBoolean(temp);
+        isRadioCommportRtsOn = Boolean.parseBoolean(temp);
       
       // Keyer Comport
-      keyerComPort = prop.getProperty(PROPERTY_KEYER_COMPORT);
-      if (keyerComPort == null)
-        SetSettingToDefault(PROPERTY_KEYER_COMPORT);
+      keyerCommportName = prop.getProperty(PROPERTY_KEYER_COMMPORT_NAME);
+      if (keyerCommportName == null)
+        SetSettingToDefault(PROPERTY_KEYER_COMMPORT_NAME);
       
       // PTT
-      pttComportName = prop.getProperty(PROPERTY_PTT_COMPORT);
-      if (pttComportName == null)
-        SetSettingToDefault(PROPERTY_PTT_COMPORT);
+      pttCommportName = prop.getProperty(PROPERTY_PTT_COMMPORT_NAME);
+      if (pttCommportName == null)
+        SetSettingToDefault(PROPERTY_PTT_COMMPORT_NAME);
       
       temp = prop.getProperty(PROPERTY_PTT_TYPE);
       if (temp == null)
@@ -829,13 +819,13 @@ public final class ApplicationSettings
   
   private void SetAllSettingsToDefault()
   {
-    SetSettingToDefault(PROPERTY_RADIO_COMPORT);
-    SetSettingToDefault(PROPERTY_RADIO_COMPORT_BAUDRATE);
-    SetSettingToDefault(PROPERTY_KEYER_COMPORT);
+    SetSettingToDefault(PROPERTY_RADIO_COMMPORT_NAME);
+    SetSettingToDefault(PROPERTY_RADIO_COMMPORT_BAUDRATE);
+    SetSettingToDefault(PROPERTY_KEYER_COMMPORT_NAME);
     //SetSettingToDefault(PROPERTY_KEYER_COMPORT_BAUDRATE);
     SetSettingToDefault(PROPERTY_KEYER_TYPE);
     SetSettingToDefault(PROPERTY_PTT_TYPE);
-    SetSettingToDefault(PROPERTY_PTT_COMPORT);
+    SetSettingToDefault(PROPERTY_PTT_COMMPORT_NAME);
     SetSettingToDefault(PROPERTY_PTT_DELAY);
     SetSettingToDefault(PROPERTY_MY_CALL_SIGN);
     SetSettingToDefault(PROPERTY_QUICK_CALLSIGN_MODE);
@@ -865,40 +855,36 @@ public final class ApplicationSettings
   {
     switch (propertyname)
     {
-      case PROPERTY_RADIO_COMPORT:
-        radioComPort = "";
+      case PROPERTY_RADIO_COMMPORT_NAME:
+        radioCommportName = "";
         break;
         
-      case PROPERTY_KEYER_COMPORT:
-        keyerComPort = "";
+      case PROPERTY_KEYER_COMMPORT_NAME:
+        keyerCommportName = "";
         break;
       
-      case PROPERTY_RADIO_COMPORT_BAUDRATE:
-        radioComPortBaudRate = 38400;
+      case PROPERTY_RADIO_COMMPORT_BAUDRATE:
+        radioCommportBaudRate = 38400;
         break;
 
-      case PROPERTY_RADIO_COMPORT_DTR:
-        radioComportDtr = true;
+      case PROPERTY_RADIO_COMMPORT_DTR_IS_ON:
+        isRadioCommportDtrOn = true;
         break;
 
-      case PROPERTY_RADIO_COMPORT_RTS:
-        radioComportRts = true;
+      case PROPERTY_RADIO_COMMPORT_RTS_IS_ON:
+        isRadioCommportRtsOn = true;
         break;
         
-//      case PROPERTY_KEYER_COMPORT_BAUDRATE:
-//        keyerComPortBaudRate = 1200;
-//        break;
-      
       case PROPERTY_KEYER_TYPE:
-        keyerType = KeyerTypes.DTR;
+        keyerType = KeyerTypes.NONE;
         break;
         
       case PROPERTY_PTT_TYPE:
         pttType = PttTypes.NONE;
         break;
 
-      case PROPERTY_PTT_COMPORT:
-        pttComportName = "";
+      case PROPERTY_PTT_COMMPORT_NAME:
+        pttCommportName = "";
         break;
 
       case PROPERTY_PTT_DELAY:
@@ -930,7 +916,7 @@ public final class ApplicationSettings
         break;
         
       case PROPERTY_INCOMING_QSO_HIDE_AFTER:
-        incomingQsoHiderAfter = -14400; // If overtime is 4 hours don't show the entry
+        incomingQsoHiderAfter = 14400; // If overtime is 4 hours don't show the entry
         break;
         
       case PROPERTY_FUNCTION_KEYS:

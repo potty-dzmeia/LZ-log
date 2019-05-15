@@ -25,7 +25,25 @@ package org.lz1aq.ptt;
  */
 public interface Ptt
 {
-  public boolean connect();
+  /**
+   * Will initialize the PTT object so that is ready to be used (i.e. Open the serial port)
+   * @return 
+   * @throws java.lang.Exception 
+   */
+  public void connect() throws Exception;
+  
+  /**
+   * Will deinitialize the PTT object (i.e. Close the serial port)
+   */
   public void disconnect();
-  public void set(boolean pttState);
+  
+  /**
+   * Will engage the PTT. Will introduce the required delay.
+   */
+  public void on();
+  
+  /**
+   * Will disengage the PTT. Will introduce the required delay.
+   */
+  public void off();
 }

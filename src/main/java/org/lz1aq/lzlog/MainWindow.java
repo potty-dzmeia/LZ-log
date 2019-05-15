@@ -65,6 +65,9 @@ import org.lz1aq.log.Log;
 import org.lz1aq.log.LogDatabase;
 import org.lz1aq.log.LogTableModel;
 import org.lz1aq.log.Qso;
+import org.lz1aq.ptt.DtrRtsPtt;
+import org.lz1aq.ptt.Ptt;
+import org.lz1aq.ptt.PttTypes;
 import org.lz1aq.radio.Radio;
 import org.lz1aq.utils.FontChooser;
 import org.lz1aq.utils.Misc;
@@ -90,9 +93,10 @@ public class MainWindow extends javax.swing.JFrame
   private LogTableModel                 jtablemodelLog;
   private TimeToNextQsoTableModel       jtablemodelIncomingQso;
   private BandmapTableModel             jtablemodelBandmap;
-  private final ApplicationSettings     applicationSettings;
+  private final ApplicationSettings     settings;
   private final RadioController         radioController;
-  private Keyer                         keyer; // Dedicated Keyer or Radio
+  private Keyer                         keyer; 
+  private Ptt                           ptt;
   private int                           cqFrequency =3500000;
   private int                           keyerSpeed = 28;
   private final Timer                   timer1sec;
@@ -105,6 +109,10 @@ public class MainWindow extends javax.swing.JFrame
           
   private DocumentFilter                callsignFilter = new CallsignDocumentFilter();
   private DocumentFilter                serialNumberFilter = new SerialNumberDocumentFilter();
+  private DocumentFilter                pttDelayFilter = new PttDelayDocumentFilter();
+  private DocumentFilter                qsoRepeatPeriodFilter = new DigitsOnlyFilter();
+  private DocumentFilter                dontShowAfterFilter = new DigitsOnlyFilter();
+  
   
   
   private static final Logger logger = Logger.getLogger(Radio.class.getName());
@@ -115,8 +123,8 @@ public class MainWindow extends javax.swing.JFrame
     @Override
     public void actionPerformed(ActionEvent evt)
     {
-      jtablemodelIncomingQso.refresh(applicationSettings);
-      jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
+      jtablemodelIncomingQso.refresh(settings);
+      jtablemodelBandmap.refresh(settings, getBandmapStartFreq());
     }
   };
 
@@ -164,7 +172,7 @@ public class MainWindow extends javax.swing.JFrame
     }
     
     // Load user settings from the properties file
-    this.applicationSettings = new ApplicationSettings();
+    this.settings = new ApplicationSettings();
     
     // Init GUI
     initComponents();
@@ -194,7 +202,7 @@ public class MainWindow extends javax.swing.JFrame
     jtablemodelIncomingQso = new TimeToNextQsoTableModel(log);
     jtableIncomingQso.setModel(jtablemodelIncomingQso);
     
-    jtablemodelBandmap = new BandmapTableModel(log, getBandmapStartFreq(), applicationSettings);
+    jtablemodelBandmap = new BandmapTableModel(log, getBandmapStartFreq(), settings);
     jtableBandmap.setModel(jtablemodelBandmap);
     
     
@@ -219,8 +227,11 @@ public class MainWindow extends javax.swing.JFrame
     // Serial number should be 6 digits long
     ((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
     ((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
+    ((AbstractDocument) jTextFieldPttDelay.getDocument()).setDocumentFilter(pttDelayFilter);
+    ((AbstractDocument) jtextfieldQsoRepeatPeriod.getDocument()).setDocumentFilter(qsoRepeatPeriodFilter);
+    ((AbstractDocument) jTextFieldTimeToNextQso.getDocument()).setDocumentFilter(dontShowAfterFilter);
     
-    
+
     // Needed so that jTable to scroll automatically upon entering a new Qso
     jtableLog.addComponentListener(new ComponentAdapter()
     {
@@ -261,7 +272,7 @@ public class MainWindow extends javax.swing.JFrame
     for (int column = 0; column < table.getColumnCount(); column++)
     {    
       // If frequency column
-      if( applicationSettings.isShowBandmapFreqColumns() && (column%2==0) )
+      if( settings.isShowBandmapFreqColumns() && (column%2==0) )
       {
         columnModel.getColumn(column).setPreferredWidth(size);
       }
@@ -370,14 +381,19 @@ public class MainWindow extends javax.swing.JFrame
     jRadioButtonRadioRtsOn = new javax.swing.JRadioButton();
     jRadioButtonRadioRtsOff = new javax.swing.JRadioButton();
     jLabel27 = new javax.swing.JLabel();
-    jPanelKeyer = new javax.swing.JPanel();
+    jPanelKeyerAndPtt = new javax.swing.JPanel();
+    jPanel3 = new javax.swing.JPanel();
     jLabel19 = new javax.swing.JLabel();
     jComboBoxKeyerComPort = new javax.swing.JComboBox();
-    jRadioButtonWinkeyer = new javax.swing.JRadioButton();
-    jRadioButtonDtrKeyer = new javax.swing.JRadioButton();
-    jRadioButtonRtsKeyer = new javax.swing.JRadioButton();
     jLabel25 = new javax.swing.JLabel();
+    jComboBoxKeyerType = new javax.swing.JComboBox<>();
+    jPanel4 = new javax.swing.JPanel();
     jLabel26 = new javax.swing.JLabel();
+    jLabel30 = new javax.swing.JLabel();
+    jLabel33 = new javax.swing.JLabel();
+    jComboBoxPttCommport = new javax.swing.JComboBox<>();
+    jComboBoxPttType = new javax.swing.JComboBox<>();
+    jTextFieldPttDelay = new javax.swing.JTextField();
     jPanelFunctionKeys = new javax.swing.JPanel();
     jLabel3 = new javax.swing.JLabel();
     jtextfieldfF1 = new javax.swing.JTextField();
@@ -409,7 +425,7 @@ public class MainWindow extends javax.swing.JFrame
     checkboxSendZeroAsT = new javax.swing.JCheckBox();
     checkboxESM = new javax.swing.JCheckBox();
     jLabel10 = new javax.swing.JLabel();
-    jTextField1 = new javax.swing.JTextField();
+    jTextFieldTimeToNextQso = new javax.swing.JTextField();
     jCheckBoxAutoBandmapStartFreq = new javax.swing.JCheckBox();
     jDialogFontChooser = new javax.swing.JDialog();
     jPanel10 = new javax.swing.JPanel();
@@ -423,7 +439,6 @@ public class MainWindow extends javax.swing.JFrame
     jdialogLogSelection = new LogSelectionDialog();
     jbuttonCreateNewLog = new javax.swing.JButton();
     jbuttonOpenExistingLog = new javax.swing.JButton();
-    buttonGroupKeyer = new javax.swing.ButtonGroup();
     jDialogAbout = new javax.swing.JDialog();
     jPanel13 = new javax.swing.JPanel();
     jScrollPane6 = new javax.swing.JScrollPane();
@@ -746,82 +761,118 @@ public class MainWindow extends javax.swing.JFrame
 
     jTabbedPane1.addTab("Radio", jPanelRadio);
 
-    jPanelKeyer.setLayout(new java.awt.GridBagLayout());
+    jPanelKeyerAndPtt.setLayout(new java.awt.GridBagLayout());
+
+    jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Keyer"));
+    jPanel3.setLayout(new java.awt.GridBagLayout());
 
     jLabel19.setText("CommPort");
     jLabel19.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 0.8;
-    jPanelKeyer.add(jLabel19, gridBagConstraints);
+    jPanel3.add(jLabel19, gridBagConstraints);
 
     jComboBoxKeyerComPort.setModel(getComportsComboboxModel());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 0.8;
-    jPanelKeyer.add(jComboBoxKeyerComPort, gridBagConstraints);
+    jPanel3.add(jComboBoxKeyerComPort, gridBagConstraints);
 
-    buttonGroupKeyer.add(jRadioButtonWinkeyer);
-    jRadioButtonWinkeyer.setText("WinKeyer");
-    jRadioButtonWinkeyer.setToolTipText("See http://k1el.tripod.com/WK3Serial.html");
+    jLabel25.setText("Type");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    jPanel3.add(jLabel25, gridBagConstraints);
+
+    jComboBoxKeyerType.setModel(KeyerTypes.getComboxModel());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    jPanel3.add(jComboBoxKeyerType, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanelKeyerAndPtt.add(jPanel3, gridBagConstraints);
+
+    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("PTT"));
+    jPanel4.setLayout(new java.awt.GridBagLayout());
+
+    jLabel26.setText("Type");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    jPanel4.add(jLabel26, gridBagConstraints);
+
+    jLabel30.setText("CommPort");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.8;
-    jPanelKeyer.add(jRadioButtonWinkeyer, gridBagConstraints);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    jPanel4.add(jLabel30, gridBagConstraints);
 
-    buttonGroupKeyer.add(jRadioButtonDtrKeyer);
-    jRadioButtonDtrKeyer.setText("DTR");
-    jRadioButtonDtrKeyer.setToolTipText("If set the DTR pin will be used to generate CW");
+    jLabel33.setText("Delay in [msec]");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel4.add(jLabel33, gridBagConstraints);
+
+    jComboBoxPttCommport.setModel(getComportsComboboxModel());
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.8;
-    jPanelKeyer.add(jRadioButtonDtrKeyer, gridBagConstraints);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    jPanel4.add(jComboBoxPttCommport, gridBagConstraints);
 
-    buttonGroupKeyer.add(jRadioButtonRtsKeyer);
-    jRadioButtonRtsKeyer.setText("RTS");
-    jRadioButtonRtsKeyer.setToolTipText("If set, the RTS pin will be used to generate CW");
+    jComboBoxPttType.setModel(PttTypes.getComboxModel());
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    jPanel4.add(jComboBoxPttType, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel4.add(jTextFieldPttDelay, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.8;
-    jPanelKeyer.add(jRadioButtonRtsKeyer, gridBagConstraints);
-
-    jLabel25.setText(" ");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelKeyer.add(jLabel25, gridBagConstraints);
+    jPanelKeyerAndPtt.add(jPanel4, gridBagConstraints);
 
-    jLabel26.setText(" ");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanelKeyer.add(jLabel26, gridBagConstraints);
-
-    jTabbedPane1.addTab("Keyer", jPanelKeyer);
+    jTabbedPane1.addTab("Keyer/PTT", jPanelKeyerAndPtt);
 
     jPanelFunctionKeys.setLayout(new java.awt.GridLayout(0, 2));
 
@@ -1025,8 +1076,8 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     jPanelOther.add(jLabel10, gridBagConstraints);
 
-    jTextField1.setText("jTextField1");
-    jTextField1.setToolTipText("This should be a negative value!");
+    jTextFieldTimeToNextQso.setText("jTextField1");
+    jTextFieldTimeToNextQso.setToolTipText("");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
@@ -1034,7 +1085,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelOther.add(jTextField1, gridBagConstraints);
+    jPanelOther.add(jTextFieldTimeToNextQso, gridBagConstraints);
 
     jCheckBoxAutoBandmapStartFreq.setText("Automatic bandmap frequency change");
     jCheckBoxAutoBandmapStartFreq.setToolTipText("If enabled your bandmap start frequency will change depending on the Selected Frequency and Band.");
@@ -1244,13 +1295,13 @@ public class MainWindow extends javax.swing.JFrame
     setTitle(PROGRAM_NAME+" by LZ1ABC");
     addWindowListener(new java.awt.event.WindowAdapter()
     {
-      public void windowClosing(java.awt.event.WindowEvent evt)
-      {
-        formWindowClosing(evt);
-      }
       public void windowOpened(java.awt.event.WindowEvent evt)
       {
         formWindowOpened(evt);
+      }
+      public void windowClosing(java.awt.event.WindowEvent evt)
+      {
+        formWindowClosing(evt);
       }
     });
 
@@ -1643,7 +1694,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weighty = 1.0;
     intframeRadioConnection.getContentPane().add(jpanelRadioConnection, gridBagConstraints);
 
-    jpanelKeyerConnection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Keyer"));
+    jpanelKeyerConnection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(""), "Keyer/PTT"));
     jpanelKeyerConnection.setMinimumSize(new java.awt.Dimension(235, 85));
     jpanelKeyerConnection.setName(""); // NOI18N
     jpanelKeyerConnection.setPreferredSize(new java.awt.Dimension(353, 87));
@@ -1857,7 +1908,7 @@ public class MainWindow extends javax.swing.JFrame
     });
     jpanelFunctionKeys.add(jButton3);
 
-    jButton4.setText("F4 "+applicationSettings.getMyCallsign());
+    jButton4.setText("F4 "+settings.getMyCallsign());
     jButton4.setFocusable(false);
     jButton4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     jButton4.addActionListener(new java.awt.event.ActionListener()
@@ -2339,17 +2390,17 @@ public class MainWindow extends javax.swing.JFrame
   private void formWindowClosing(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowClosing
   {//GEN-HEADEREND:event_formWindowClosing
     // Read the dimensions of the different frames
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.ENTRY, intframeEntryWindow.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP, intframeBandmap.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO, intframeTimeToNextQso.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.JFRAME, this.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.LOG, intframeLog.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.RADIO, intframeRadioConnection.getBounds());
-    applicationSettings.setFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS, intframeMisc.getBounds());
+    settings.setFrameDimensions(ApplicationSettings.FrameIndex.ENTRY, intframeEntryWindow.getBounds());
+    settings.setFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP, intframeBandmap.getBounds());
+    settings.setFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO, intframeTimeToNextQso.getBounds());
+    settings.setFrameDimensions(ApplicationSettings.FrameIndex.JFRAME, this.getBounds());
+    settings.setFrameDimensions(ApplicationSettings.FrameIndex.LOG, intframeLog.getBounds());
+    settings.setFrameDimensions(ApplicationSettings.FrameIndex.RADIO, intframeRadioConnection.getBounds());
+    settings.setFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS, intframeMisc.getBounds());
             
     storeFonts();
     
-    applicationSettings.SaveSettingsToDisk(); // Save all settings to disk
+    settings.SaveSettingsToDisk(); // Save all settings to disk
   }//GEN-LAST:event_formWindowClosing
 
   private void jmenuSettingsActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jmenuSettingsActionPerformed
@@ -2373,9 +2424,9 @@ public class MainWindow extends javax.swing.JFrame
     // Log Qso
     if(addEntryToLog())
     {
-      if(applicationSettings.isEmsEnabled() && jradiobuttonCQ.isSelected())
+      if(settings.isEmsEnabled() && jradiobuttonCQ.isSelected())
         pressedF3(); 
-      else if(applicationSettings.isEmsEnabled() && jradiobuttonSP.isSelected())
+      else if(settings.isEmsEnabled() && jradiobuttonSP.isSelected())
         pressedF2();
       
       initEntryFields();
@@ -2406,7 +2457,7 @@ public class MainWindow extends javax.swing.JFrame
         break;
 
       case KeyEvent.VK_ENTER: // Move to Rcv field      
-        if(applicationSettings.isEmsEnabled())
+        if(settings.isEmsEnabled())
         {
           if(sendEnterSendsMessage())
           {
@@ -2450,7 +2501,7 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jtogglebuttonConnectToRadioActionPerformed
     JToggleButton tBtn = (JToggleButton) evt.getSource();
     
-    if(applicationSettings.getRadioComPort().isEmpty())
+    if(settings.getRadioCommportName().isEmpty())
     {
       JOptionPane.showMessageDialog(null, "Commport not set!");
     } 
@@ -2553,7 +2604,7 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jcomboboxColumnCountItemStateChanged
      if (evt.getStateChange() == ItemEvent.SELECTED) 
      {
-       applicationSettings.setBandmapColumnCount(Integer.parseInt((String)jcomboboxColumnCount.getSelectedItem()));
+       settings.setBandmapColumnCount(Integer.parseInt((String)jcomboboxColumnCount.getSelectedItem()));
        jtablemodelBandmap.fireTableStructureChanged();
      }
   }//GEN-LAST:event_jcomboboxColumnCountItemStateChanged
@@ -2562,7 +2613,7 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jcomboboxRowCountItemStateChanged
      if (evt.getStateChange() == ItemEvent.SELECTED) 
      {
-       applicationSettings.setBandmapRowCount(Integer.parseInt((String)jcomboboxRowCount.getSelectedItem()));
+       settings.setBandmapRowCount(Integer.parseInt((String)jcomboboxRowCount.getSelectedItem()));
        jtablemodelBandmap.fireTableStructureChanged();
      }
   }//GEN-LAST:event_jcomboboxRowCountItemStateChanged
@@ -2571,7 +2622,7 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jcomboboxStepInHzItemStateChanged
      if (evt.getStateChange() == ItemEvent.SELECTED) 
      {
-       applicationSettings.setBandmapStepInHz(Integer.parseInt((String)jcomboboxStepInHz.getSelectedItem()));
+       settings.setBandmapStepInHz(Integer.parseInt((String)jcomboboxStepInHz.getSelectedItem()));
      }
   }//GEN-LAST:event_jcomboboxStepInHzItemStateChanged
 
@@ -2733,7 +2784,7 @@ public class MainWindow extends javax.swing.JFrame
     try (PrintWriter printWriter = new PrintWriter(absPath))
     {
       printWriter.println("START-OF-LOG: 2.0");
-      printWriter.println("CALLSIGN: " + applicationSettings.getMyCallsign());
+      printWriter.println("CALLSIGN: " + settings.getMyCallsign());
       printWriter.println("CONTEST: ");
       printWriter.println("CATEGORY: ");
       printWriter.println("CLAIMED-SCORE: ");
@@ -2877,9 +2928,9 @@ public class MainWindow extends javax.swing.JFrame
       if(jtablemodelIncomingQso.isSpQso(row))
       {
         String callsign;
-//        if (applicationSettings.isQuickCallsignModeEnabled()) // If quick mode is enabled add only the suffix
+//        if (settings.isQuickCallsignModeEnabled()) // If quick mode is enabled add only the suffix
 //        {
-//          callsign = Misc.toShortCallsign(jtablemodelIncomingQso.getCallsign(row), applicationSettings.getDefaultPrefix());
+//          callsign = Misc.toShortCallsign(jtablemodelIncomingQso.getCallsign(row), settings.getDefaultPrefix());
 //        }
 //        else
 //        {
@@ -2901,82 +2952,28 @@ public class MainWindow extends javax.swing.JFrame
 
   private void jtogglebuttonConnectToKeyerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToKeyerActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
-    JToggleButton tBtn = (JToggleButton) evt.getSource();
- 
-    if(applicationSettings.getKeyerComPort().isEmpty())
+    boolean isConnected = false;
+    JToggleButton connectButton = (JToggleButton) evt.getSource();
+    
+    if(connectButton.isSelected())
     {
-      JOptionPane.showMessageDialog(null, "Commport not set!");
-      jtogglebuttonConnectToKeyer.setSelected(false);
-      return;
+      isConnected = connectKeyer();
+      if(isConnected)
+        isConnected = connectPtt();
     }
-      
-    // Connect
-    if (tBtn.isSelected())
-    {    
-      boolean isNotUsed = false; 
-      
-      // Find out if the com port is already in use
-      try {
-        SerialPort port = new SerialPort(applicationSettings.getKeyerComPort());
-        isNotUsed = port.openPort();
-        if(isNotUsed) 
-          port.closePort();
-      }
-      catch(SerialPortException ex) 
-      {
-        isNotUsed = false;
-        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-      }
-     
-      
-      // Port is in use try to share it
-      if(isNotUsed == false)
-      {
-        try
-        {
-          keyer = KeyerFactory.create(applicationSettings.getKeyerType(), radioController.getSerialPort());
-        }
-        catch(Exception ex)
-        {
-          JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-          jtogglebuttonConnectToKeyer.setSelected(false);
-          return;
-        }
-      }
-      // Port not in use
-      else
-      {
-        keyer = KeyerFactory.create(applicationSettings.getKeyerType(), applicationSettings.getKeyerComPort());
-      }
-      
-      
-      try
-      {
-        keyer.connect();
-      }
-      catch(Exception ex)
-      {
-        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      }
-    }
-    // Disconnect
     else
     {
-        keyer.disconnect();
+      disconnectKeyer();
+      disconnectPtt();
+      isConnected =  false;
     }
     
-    
-    if(keyer.isConnected())
-    {
+    if(isConnected)
       jtogglebuttonConnectToKeyer.setSelected(true);
-    }
     else
     {
-      keyer = radioController.getKeyer(); // If disconnected keying will be redirected to the radio (hopefully it will supported)
-      jtogglebuttonConnectToKeyer.setSelected(false);
-    }
-    
-    keyer.setCwSpeed(keyerSpeed);
+     jtogglebuttonConnectToKeyer.setSelected(false);
+    }  
   }//GEN-LAST:event_jtogglebuttonConnectToKeyerActionPerformed
 
   private void jDialogSettingsComponentShown(java.awt.event.ComponentEvent evt)//GEN-FIRST:event_jDialogSettingsComponentShown
@@ -3038,25 +3035,25 @@ public class MainWindow extends javax.swing.JFrame
   {//GEN-HEADEREND:event_jCheckBoxShowFreqItemStateChanged
     if(jCheckBoxShowFreq.isSelected())
     {
-      applicationSettings.setShowBandmapFreqColumns(true);
+      settings.setShowBandmapFreqColumns(true);
     }
     else
     {
-      applicationSettings.setShowBandmapFreqColumns(false);
+      settings.setShowBandmapFreqColumns(false);
     }
 
-    jtablemodelBandmap.refresh(applicationSettings, getBandmapStartFreq());
+    jtablemodelBandmap.refresh(settings, getBandmapStartFreq());
   }//GEN-LAST:event_jCheckBoxShowFreqItemStateChanged
 
   private void jCheckBoxAutoBandmapStartFreqItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
   {//GEN-HEADEREND:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
     if(jCheckBoxAutoBandmapStartFreq.isSelected())
     {
-      applicationSettings.setBandmapAutoFreq(true);
+      settings.setBandmapAutoFreq(true);
     }
     else
     {
-      applicationSettings.setBandmapAutoFreq(false);
+      settings.setBandmapAutoFreq(false);
     }
   }//GEN-LAST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
 
@@ -3165,14 +3162,142 @@ public class MainWindow extends javax.swing.JFrame
     
   }
   
+  /**
+   * Will open the Commport for the Keyer
+   * @return true if connection was succesful 
+   */
+  private boolean connectKeyer()
+  {
+    String keyerCommName = settings.getKeyerCommportName();
+    
+    if(keyerCommName.isEmpty())
+    {
+      JOptionPane.showMessageDialog(null, "Select a Commport from the Settings menu!");
+      return false;
+    }
+    
+    if(settings.getKeyerType() == KeyerTypes.NONE)
+    {
+      JOptionPane.showMessageDialog(null, "Select a Keyer type from the Settings menu!");
+      return false;
+    }
+    
+    // Commport is free to use
+    if( !CommUtils.isPortOpened(keyerCommName) )
+    {
+      keyer = KeyerFactory.create(settings.getKeyerType(), keyerCommName);
+    }
+    // Shared port 
+    else
+    {
+      if(keyerCommName.compareTo(settings.getRadioCommportName()) == 0) // Is it used by the radio?
+      {
+        try
+        {
+          keyer = KeyerFactory.create(settings.getKeyerType(), radioController.getSerialPort());
+        }
+        catch(Exception ex)
+        { 
+          JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          return false; // Winkeyer or other unknown type
+        }
+      }
+      else
+      {
+        JOptionPane.showMessageDialog(null, "Commport "+keyerCommName + " already in use.", "Error", JOptionPane.ERROR_MESSAGE);
+        return false; // Commport used by another program
+      }
+    }
+    
+    try
+    {
+      keyer.connect();
+    }
+    catch(Exception ex)
+    {
+      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      return false;
+    }
+    
+    keyer.setCwSpeed(keyerSpeed);
+    return true;
+  }
+   
+  private void disconnectKeyer()
+  {
+    keyer.disconnect();
+    keyer = radioController.getKeyer(); // If disconnected keying will be redirected to the radio (hopefully it will supported)
+    keyer.setCwSpeed(keyerSpeed);
+  }
+
+  
+  private boolean connectPtt()
+  {
+    String pttCommName = settings.getPttCommportName();
+    
+    if(pttCommName.isEmpty())
+      return true;
+    if(settings.getPttType()== PttTypes.NONE)
+      return true;
+    
+    
+     // Commport is free to use
+    if( !CommUtils.isPortOpened(pttCommName) )
+    {
+      keyer = KeyerFactory.create(settings.getKeyerType(), pttCommName);
+    }
+    // Shared port 
+    else
+    {
+      if(pttCommName.compareTo(settings.getRadioCommportName()) == 0) // Is it used by the radio?
+      {
+        try
+        {
+          keyer = KeyerFactory.create(settings.getKeyerType(), radioController.getSerialPort());
+        }
+        catch(Exception ex)
+        { 
+          JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          return false; // Winkeyer or other unknown type
+        }
+      }
+      else
+      {
+        JOptionPane.showMessageDialog(null, "Commport "+keyerCommName + " already in use.", "Error", JOptionPane.ERROR_MESSAGE);
+        return false; // Commport used by another program
+      }
+    }
+    
+    try
+    {
+      keyer.connect();
+    }
+    catch(Exception ex)
+    {
+      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      return false;
+    }
+    
+    return true;
+  }
+  
+
+  private boolean disconnectPtt()
+  {
+    if(ptt!=null)
+      ptt.disconnect();
+    
+    return true;
+  }
+      
   
   private boolean connectToRadio()
   {
     boolean result = radioController.connect(new LocalRadioControllerListener(),
-                                             applicationSettings.getRadioComPort(), 
-                                             applicationSettings.getRadioComPortBaudRate(),
-                                             applicationSettings.isRadioComportDtr(),
-                                             applicationSettings.isRadioComportRts());
+                                             settings.getRadioCommportName(), 
+                                             settings.getRadioCommportBaudRate(),
+                                             settings.isRadioCommportDtrOn(),
+                                             settings.isRadioCommportRtsOn());
     if (!result)
     {
       JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
@@ -3278,7 +3403,7 @@ public class MainWindow extends javax.swing.JFrame
     {
       qso = new Qso(getFreq(),
                     getMode(),     
-                    applicationSettings.getMyCallsign(),
+                    settings.getMyCallsign(),
                     getCallsignFromTextField(),
                     Snt, 
                     Rcv,
@@ -3307,36 +3432,24 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   
-  private KeyerTypes getSelectedKey()
+  private KeyerTypes getSelectedKeyerType()
   {
-    if(jRadioButtonDtrKeyer.isSelected())
-    {
-      return KeyerTypes.DTR;
-    }
-    else if(jRadioButtonRtsKeyer.isSelected())
-    {
-      return KeyerTypes.RTS;
-    }
-    else //(jRadioButtonWinkeyer.isSelected())
-    {
-      return KeyerTypes.WINKEYER;
-    }
+    return KeyerTypes.valueOf(jComboBoxKeyerType.getSelectedItem().toString());
   }
   
-  private void setSelectedKey(KeyerTypes keyerType)
+  private void setSelectedKeyerType(KeyerTypes keyerType)
   {
-    if(keyerType == KeyerTypes.WINKEYER)
-    {
-      jRadioButtonWinkeyer.setSelected(true);
-    }
-    else if(keyerType == KeyerTypes.DTR)
-    {
-      jRadioButtonDtrKeyer.setSelected(true);
-    }
-    else if(keyerType == KeyerTypes.RTS)
-    {
-      jRadioButtonRtsKeyer.setSelected(true);
-    }
+    jComboBoxKeyerType.setSelectedItem(keyerType.toString());
+  }
+  
+  private PttTypes getSelectedPttType()
+  {
+    return PttTypes.valueOf(jComboBoxPttType.getSelectedItem().toString());
+  }
+  
+  private void setSelectedPttType(PttTypes pttType)
+  {
+    jComboBoxPttType.setSelectedItem(pttType.toString());
   }
   
   /**
@@ -3396,9 +3509,9 @@ public class MainWindow extends javax.swing.JFrame
   {
     String callsign = jtextfieldCallsign.getText();
     
-//    if(applicationSettings.isQuickCallsignModeEnabled())
+//    if(settings.isQuickCallsignModeEnabled())
 //    {
-//      callsign = applicationSettings.getDefaultPrefix()+callsign;
+//      callsign = settings.getDefaultPrefix()+callsign;
 //    }
     
     return callsign;
@@ -3427,14 +3540,14 @@ public class MainWindow extends javax.swing.JFrame
     else
     {
       // DUPE
-      if (log.getSecondsLeft(qso, applicationSettings.getQsoRepeatPeriod()) > 0)
+      if (log.getSecondsLeft(qso, settings.getQsoRepeatPeriod()) > 0)
       {
         // Print DUPE
         statusText = statusText.concat("DUPE   ");
 
         //Print the time left till next possible contact
         statusText = statusText.concat("time left " + 
-                TimeUtils.getTimeLeftFormatted(log.getSecondsLeft(qso, applicationSettings.getQsoRepeatPeriod())));
+                TimeUtils.getTimeLeftFormatted(log.getSecondsLeft(qso, settings.getQsoRepeatPeriod())));
         // Make it red
         statusText = "<html><font color=red>"+statusText+"</font></html>";
       }
@@ -3454,8 +3567,8 @@ public class MainWindow extends javax.swing.JFrame
   private void initEntryFields()
   {
     // Clean the callsign field
-    if(applicationSettings.isQuickCallsignModeEnabled())
-      jtextfieldCallsign.setText(applicationSettings.getDefaultPrefix());
+    if(settings.isQuickCallsignModeEnabled())
+      jtextfieldCallsign.setText(settings.getDefaultPrefix());
     else
       jtextfieldCallsign.setText("");
     
@@ -3473,7 +3586,7 @@ public class MainWindow extends javax.swing.JFrame
   
   private void setSntField()
   {
-    String snt = applicationSettings.getContestExchange();
+    String snt = settings.getContestExchange();
     
     // {#} - is [serial number]
     String serial = String.format("%03d", log.getQsoCount()+1);
@@ -3500,24 +3613,24 @@ public class MainWindow extends javax.swing.JFrame
   private void storeFonts()
   {
     // Store the fonts being in use
-    applicationSettings.setFont(ApplicationSettings.FontIndex.BANDMAP, jtableBandmap.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.CALLSIGN, jtextfieldCallsign.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.INCOMING_QSO, jtableIncomingQso.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.LOG, jtableLog.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.RCV, jtextfieldRcv.getFont());
-    applicationSettings.setFont(ApplicationSettings.FontIndex.SNT, jtextfieldSnt.getFont());
+    settings.setFont(ApplicationSettings.FontIndex.BANDMAP, jtableBandmap.getFont());
+    settings.setFont(ApplicationSettings.FontIndex.CALLSIGN, jtextfieldCallsign.getFont());
+    settings.setFont(ApplicationSettings.FontIndex.INCOMING_QSO, jtableIncomingQso.getFont());
+    settings.setFont(ApplicationSettings.FontIndex.LOG, jtableLog.getFont());
+    settings.setFont(ApplicationSettings.FontIndex.RCV, jtextfieldRcv.getFont());
+    settings.setFont(ApplicationSettings.FontIndex.SNT, jtextfieldSnt.getFont());
   }
   
   
   private void restoreFonts()
   {
     // Restore the fonts
-    jtextfieldCallsign.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.CALLSIGN));
-    jtextfieldSnt.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.SNT));
-    jtextfieldRcv.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.RCV));
-    jtableBandmap.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.BANDMAP));
-    jtableIncomingQso.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.INCOMING_QSO));
-    jtableLog.setFont(applicationSettings.getFonts(ApplicationSettings.FontIndex.LOG));
+    jtextfieldCallsign.setFont(settings.getFonts(ApplicationSettings.FontIndex.CALLSIGN));
+    jtextfieldSnt.setFont(settings.getFonts(ApplicationSettings.FontIndex.SNT));
+    jtextfieldRcv.setFont(settings.getFonts(ApplicationSettings.FontIndex.RCV));
+    jtableBandmap.setFont(settings.getFonts(ApplicationSettings.FontIndex.BANDMAP));
+    jtableIncomingQso.setFont(settings.getFonts(ApplicationSettings.FontIndex.INCOMING_QSO));
+    jtableLog.setFont(settings.getFonts(ApplicationSettings.FontIndex.LOG));
   }
   
   /**
@@ -3528,31 +3641,31 @@ public class MainWindow extends javax.swing.JFrame
     if(isStartup)
     {
       // Restore the last used dimensions for the different frames
-      this.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.JFRAME));
-      intframeBandmap.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP));
-      intframeEntryWindow.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.ENTRY));
-      intframeTimeToNextQso.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO));
-      intframeLog.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.LOG));
-      intframeRadioConnection.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.RADIO));
-      intframeMisc.setBounds(applicationSettings.getFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS));
+      this.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.JFRAME));
+      intframeBandmap.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP));
+      intframeEntryWindow.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.ENTRY));
+      intframeTimeToNextQso.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO));
+      intframeLog.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.LOG));
+      intframeRadioConnection.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.RADIO));
+      intframeMisc.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS));
 
       // Restore the bandmap settings
-      jcomboboxStepInHz.setSelectedItem(Integer.toString(applicationSettings.getBandmapStepInHz()));
-      jcomboboxColumnCount.setSelectedItem(Integer.toString(applicationSettings.getBandmapColumnCount()));
-      jcomboboxRowCount.setSelectedItem(Integer.toString(applicationSettings.getBandmapRowCount()));
-      jCheckBoxShowFreq.setSelected(applicationSettings.isShowBandmapFreqColumns());
-      //jtextfieldFreqWidth.setText(applicationSettings.get);
+      jcomboboxStepInHz.setSelectedItem(Integer.toString(settings.getBandmapStepInHz()));
+      jcomboboxColumnCount.setSelectedItem(Integer.toString(settings.getBandmapColumnCount()));
+      jcomboboxRowCount.setSelectedItem(Integer.toString(settings.getBandmapRowCount()));
+      jCheckBoxShowFreq.setSelected(settings.isShowBandmapFreqColumns());
+      //jtextfieldFreqWidth.setText(settings.get);
   
       restoreFonts();
     }
     
     // Update the Function keys button text
-    jButton4.setText("F4 "+applicationSettings.getMyCallsign());
-    jButton6.setText("F6 "+applicationSettings.getFunctionKeyMessage(5));
-    jButton7.setText("F7 "+applicationSettings.getFunctionKeyMessage(6));
-    jButton8.setText("F8 "+applicationSettings.getFunctionKeyMessage(7));
-    jButton9.setText("F9 "+applicationSettings.getFunctionKeyMessage(8));
-    //jButton10.setText("F10 "+applicationSettings.getFunctionKeyText(9));
+    jButton4.setText("F4 "+settings.getMyCallsign());
+    jButton6.setText("F6 "+settings.getFunctionKeyMessage(5));
+    jButton7.setText("F7 "+settings.getFunctionKeyMessage(6));
+    jButton8.setText("F8 "+settings.getFunctionKeyMessage(7));
+    jButton9.setText("F9 "+settings.getFunctionKeyMessage(8));
+    //jButton10.setText("F10 "+settings.getFunctionKeyText(9));
     
     // Set the CQ frequency
     jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency))); 
@@ -3566,80 +3679,99 @@ public class MainWindow extends javax.swing.JFrame
    */
   private void initSettingsDialog()
   {
+    //--------------------------------
     // Radio
     //--------------------------------
     // Commport
-    if(((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).getIndexOf(applicationSettings.getRadioComPort()) < 0)
+    if(((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).getIndexOf(settings.getRadioCommportName()) < 0)
     {
-      ((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).addElement(applicationSettings.getRadioComPort()); // Add last used commport if not in the list
+      ((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).addElement(settings.getRadioCommportName()); // Add last used commport if not in the list
     }
-    jComboBoxRadioComPort.setSelectedItem(applicationSettings.getRadioComPort());
-    jComboBoxRadioComPortBaudRate.setSelectedItem(CommUtils.BaudRate.getName(applicationSettings.getRadioComPortBaudRate()));
-    if(applicationSettings.isRadioComportDtr())
+    jComboBoxRadioComPort.setSelectedItem(settings.getRadioCommportName());
+    // Baud rate
+    jComboBoxRadioComPortBaudRate.setSelectedItem(CommUtils.BaudRate.getName(settings.getRadioCommportBaudRate()));
+    // DTR
+    if(settings.isRadioCommportDtrOn())
       jRadioButtonRadioDtrOn.setSelected(true);
     else
       jRadioButtonRadioDtrOff.setSelected(true);
-    if(applicationSettings.isRadioComportRts())
+    // RTS
+    if(settings.isRadioCommportRtsOn())
       jRadioButtonRadioRtsOn.setSelected(true);
     else
       jRadioButtonRadioRtsOff.setSelected(true);
     
-    // Keyer/PTT
     //--------------------------------
-    // Keyer Comport selection
-    if(((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).getIndexOf(applicationSettings.getKeyerComPort()) < 0)
+    // Keyer
+    //--------------------------------
+    // Type
+     setSelectedKeyerType(settings.getKeyerType());
+    // Commport
+    if(((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).getIndexOf(settings.getKeyerCommportName()) < 0)
     {
       // Add last used commport if not in the list
-      ((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).addElement(applicationSettings.getKeyerComPort());
+      ((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).addElement(settings.getKeyerCommportName());
     }
-    jComboBoxKeyerComPort.setSelectedItem(applicationSettings.getKeyerComPort());
+    jComboBoxKeyerComPort.setSelectedItem(settings.getKeyerCommportName());
 
-    // Keyer baud rate selection
-    //jComboBoxKeyerComPortBaudRate.setSelectedItem(Integer.toString(applicationSettings.getKeyerComPortBaudRate()));
-    
-    // Set the selected Keyer radiobutton
-    setSelectedKey(applicationSettings.getKeyerType());
-    
-    
-    // my callsing texts
-    textfieldSettingsMyCallsign.setText(applicationSettings.getMyCallsign().toUpperCase());
-
-    // Misc 
-    checkboxSettingsQuickMode.setSelected(applicationSettings.isQuickCallsignModeEnabled());
-    checkboxESM.setSelected(applicationSettings.isEmsEnabled());
-    //TODO checkboxF1JumpsToCq.setSelected(applicationSettings.isAutoCqJump());
-    checkboxSendLeadingZeroAsT.setSelected(applicationSettings.isSendLeadingZeroAsT());
-    checkboxSendZeroAsT.setSelected(applicationSettings.isSendZeroAsT());
-
-    // Set the text for the function keys
-    jtextfieldfF1.setText(applicationSettings.getFunctionKeyMessage(0));
-    jTextFieldF2.setText(applicationSettings.getFunctionKeyMessage(1));
-    jtextfieldfF3.setText(applicationSettings.getFunctionKeyMessage(2));
-    jtextfieldfF6.setText(applicationSettings.getFunctionKeyMessage(5));
-    jtextfieldfF7.setText(applicationSettings.getFunctionKeyMessage(6));
-    jtextfieldF8.setText(applicationSettings.getFunctionKeyMessage(7));
-    jtextfieldF9.setText(applicationSettings.getFunctionKeyMessage(8));
-    jtextfieldF10.setText(applicationSettings.getFunctionKeyMessage(9));
-
-    // Default prefix
-    textfieldSettingsDefaultPrefix.setText(applicationSettings.getDefaultPrefix());
-
-    if (applicationSettings.isQuickCallsignModeEnabled() == false)
+    //--------------------------------
+    // PTT
+    //--------------------------------
+    // Type
+    setSelectedPttType(settings.getPttType());
+     // Commport
+    if(((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).getIndexOf(settings.getPttCommportName()) < 0)
     {
-      textfieldSettingsDefaultPrefix.setEnabled(false); // Disable the "default prefix" text field if the "Quick callsign mode" is disabled
+      ((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).addElement(settings.getPttCommportName()); // Add last used commport if not in the list
     }
+    jComboBoxPttCommport.setSelectedItem(settings.getPttCommportName());
+    // Delay
+    jTextFieldPttDelay.setText(Integer.toString(settings.getPttDelayInMilliseconds()));
     
-    // Repeat period in seconds
-    jtextfieldQsoRepeatPeriod.setText(Integer.toString(applicationSettings.getQsoRepeatPeriod()));
-    jTextFieldContestExchange.setText(applicationSettings.getContestExchange());
+    //--------------------------------
+    // Callsign
+    //--------------------------------
+    textfieldSettingsMyCallsign.setText(settings.getMyCallsign().toUpperCase());
 
-    // Incoming qso hide after
-    jTextField1.setText(Integer.toString(applicationSettings.getIncomingQsoHiderAfter()));
-
+    //--------------------------------
+    // Other 
+    //--------------------------------
+    // Default prefix
+    checkboxSettingsQuickMode.setSelected(settings.isQuickCallsignModeEnabled());
+    textfieldSettingsDefaultPrefix.setText(settings.getDefaultPrefix());
+    if (settings.isQuickCallsignModeEnabled() == false)
+      textfieldSettingsDefaultPrefix.setEnabled(false); // Disable the "default prefix" text field if the "Quick callsign mode" is disabled
+    // T as 0
+    checkboxSendLeadingZeroAsT.setSelected(settings.isSendLeadingZeroAsT());
+    checkboxSendZeroAsT.setSelected(settings.isSendZeroAsT());
     // Bandmap auto set start frequncy
-    jCheckBoxAutoBandmapStartFreq.setSelected(applicationSettings.isBandmapAutoFreq());
-    // Incoming qso max entries
-    //jTextField2.setText(Integer.toString(applicationSettings.getIncomingQsoMaxEntries()));
+    jCheckBoxAutoBandmapStartFreq.setSelected(settings.isBandmapAutoFreq());
+    // ESM 
+    checkboxESM.setSelected(settings.isEmsEnabled());
+    //TODO checkboxF1JumpsToCq.setSelected(settings.isAutoCqJump()); 
+     // Incoming qso hide after
+    jTextFieldTimeToNextQso.setText(Integer.toString(settings.getIncomingQsoHiderAfter()));
+    
+    
+    //--------------------------------
+    // Function keys 
+    //--------------------------------
+    jtextfieldfF1.setText(settings.getFunctionKeyMessage(0));
+    jTextFieldF2.setText(settings.getFunctionKeyMessage(1));
+    jtextfieldfF3.setText(settings.getFunctionKeyMessage(2));
+    jtextfieldfF6.setText(settings.getFunctionKeyMessage(5));
+    jtextfieldfF7.setText(settings.getFunctionKeyMessage(6));
+    jtextfieldF8.setText(settings.getFunctionKeyMessage(7));
+    jtextfieldF9.setText(settings.getFunctionKeyMessage(8));
+    jtextfieldF10.setText(settings.getFunctionKeyMessage(9));
+
+    //--------------------------------
+    // Contest rules
+    //--------------------------------
+    // Repeat period in seconds
+    jtextfieldQsoRepeatPeriod.setText(Integer.toString(settings.getQsoRepeatPeriod()));
+    // Exchange rule
+    jTextFieldContestExchange.setText(settings.getContestExchange());
   }
     
     
@@ -3648,97 +3780,84 @@ public class MainWindow extends javax.swing.JFrame
    */
   private boolean storeSettings()
   { 
-    
-    // Radio 
-    // ----------------------------------------
+    //--------------------------------
+    // Radio
+    //--------------------------------
+    // Commport
     if(jComboBoxRadioComPort.getSelectedItem() != null)
-      applicationSettings.setRadioComPort(jComboBoxRadioComPort.getSelectedItem().toString());
+      settings.setRadioCommportName(jComboBoxRadioComPort.getSelectedItem().toString());
+    // Baud rate
     String comport = jComboBoxRadioComPortBaudRate.getSelectedItem().toString();
-    applicationSettings.setRadioComPortBaudRate(CommUtils.BaudRate.getBaudRate(comport));
-    applicationSettings.setRadioComportDtr(jRadioButtonRadioDtrOn.isSelected());
-    applicationSettings.setRadioComportRts(jRadioButtonRadioRtsOn.isSelected());
-    
-    // Keyer/PTT
-    // ----------------------------------------
+    settings.setRadioCommportBaudRate(CommUtils.BaudRate.getBaudRate(comport));
+    // DTR
+    settings.setRadioCommportDtr(jRadioButtonRadioDtrOn.isSelected());
+    // RTS
+    settings.setRadioCommportRts(jRadioButtonRadioRtsOn.isSelected());
+   
+    //--------------------------------
+    // Keyer
+    //--------------------------------
+    // Type
+    settings.setKeyerType(getSelectedKeyerType());
+    // Commport
     if(jComboBoxKeyerComPort.getSelectedItem() != null)
-    {
-      applicationSettings.setKeyerComPort(jComboBoxKeyerComPort.getSelectedItem().toString());
-    }
-    //applicationSettings.setKeyerComPortBaudRate(Integer.parseInt(jComboBoxKeyerComPortBaudRate.getSelectedItem().toString()));
+      settings.setKeyerCommPortName(jComboBoxKeyerComPort.getSelectedItem().toString());
+
+    //--------------------------------
+    // PTT
+    //--------------------------------
+    // Type
+    settings.setPttType(getSelectedPttType());
+    // Commport
+    if(jComboBoxPttCommport.getSelectedItem() != null)
+      settings.setPttCommportName(jComboBoxPttCommport.getSelectedItem().toString());
+    // Delay
+    settings.setPttDelayInMilliseconds(Integer.parseInt(jTextFieldPttDelay.getText()));
     
-    // Keyer type
-    if(jRadioButtonDtrKeyer.isSelected())
-      applicationSettings.setKeyerType(KeyerTypes.DTR);
-    else if(jRadioButtonWinkeyer.isSelected())
-       applicationSettings.setKeyerType(KeyerTypes.WINKEYER);
-    else if(jRadioButtonRtsKeyer.isSelected())
-       applicationSettings.setKeyerType(KeyerTypes.RTS);
-    
-    // Callsign  
-    // ----------------------------------------
+    //--------------------------------
+    // Callsign
+    //--------------------------------
     if(!Qso.isValidCallsign(textfieldSettingsMyCallsign.getText()))
     {
       JOptionPane.showMessageDialog(null, "Invalid callsign!"); // Validate myCallsign
       return false;
     }
-    applicationSettings.setMyCallsign(textfieldSettingsMyCallsign.getText());
-    
-    // Function keys texts
-    // ----------------------------------------
-    applicationSettings.setFunctionKeyMessage(0, jtextfieldfF1.getText());
-    applicationSettings.setFunctionKeyMessage(1, jTextFieldF2.getText());
-    applicationSettings.setFunctionKeyMessage(2, jtextfieldfF3.getText());
-    applicationSettings.setFunctionKeyMessage(5, jtextfieldfF6.getText());
-    applicationSettings.setFunctionKeyMessage(6, jtextfieldfF7.getText());
-    applicationSettings.setFunctionKeyMessage(7, jtextfieldF8.getText());
-    applicationSettings.setFunctionKeyMessage(8, jtextfieldF9.getText());
-    applicationSettings.setFunctionKeyMessage(9, jtextfieldF10.getText());
-    
-    // Misc settings
-    // ----------------------------------------
-    applicationSettings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
-    //TODO applicationSettings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
-    applicationSettings.setEmsEnabled(checkboxESM.isSelected());
-    applicationSettings.setSendLeadingZeroAsT(checkboxSendLeadingZeroAsT.isSelected());    
-    applicationSettings.setSendZeroAsT(checkboxSendZeroAsT.isSelected()); 
-    
+    settings.setMyCallsign(textfieldSettingsMyCallsign.getText());
+
+    //--------------------------------
+    // Other 
+    //--------------------------------
     // Default prefix
-    applicationSettings.setDefaultPrefix(textfieldSettingsDefaultPrefix.getText());
+    settings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
+    settings.setDefaultPrefix(textfieldSettingsDefaultPrefix.getText());
+    //TODO settings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
+    settings.setEmsEnabled(checkboxESM.isSelected());
+    settings.setSendLeadingZeroAsT(checkboxSendLeadingZeroAsT.isSelected());    
+    settings.setSendZeroAsT(checkboxSendZeroAsT.isSelected()); 
+    // Hide after
+    settings.setIncomingQsoHiderAfter(Integer.parseInt(jTextFieldTimeToNextQso.getText()));
     
-    // Contest Rules
-    // ----------------------------------------
-    //Qso repeat period
-    try
-    {
-      int temp = Integer.parseInt(jtextfieldQsoRepeatPeriod.getText());
-      if(temp<=0)
-        throw new Exception("invalid Qso repeat period!");
-        
-      applicationSettings.setQsoRepeatPeriod(temp);
-    }catch(Exception exc)
-    {
-      JOptionPane.showMessageDialog(null, "Invalid repeat Qso period! Must be a number.");
-      return false;
-    }
+    //--------------------------------
+    // Function keys 
+    //--------------------------------
+    settings.setFunctionKeyMessage(0, jtextfieldfF1.getText());
+    settings.setFunctionKeyMessage(1, jTextFieldF2.getText());
+    settings.setFunctionKeyMessage(2, jtextfieldfF3.getText());
+    settings.setFunctionKeyMessage(5, jtextfieldfF6.getText());
+    settings.setFunctionKeyMessage(6, jtextfieldfF7.getText());
+    settings.setFunctionKeyMessage(7, jtextfieldF8.getText());
+    settings.setFunctionKeyMessage(8, jtextfieldF9.getText());
+    settings.setFunctionKeyMessage(9, jtextfieldF10.getText());
+
+    //--------------------------------
+    // Contest rules
+    //--------------------------------
+    // Repeat period 
+    settings.setQsoRepeatPeriod(Integer.parseInt(jtextfieldQsoRepeatPeriod.getText()));
+    // Exchange rule
+    settings.setContestExchange(jTextFieldContestExchange.getText());
     
-    // Exchange
-    applicationSettings.setContestExchange(jTextFieldContestExchange.getText());
-    
-    // Incoming Qso "hideAfter" and "maxEntries"
-    try
-    {
-      int temp = Integer.parseInt(jTextField1.getText());
-      if(temp>=0)
-        throw new Exception("Invalid hideAfter entry!");
-      applicationSettings.setIncomingQsoHiderAfter(temp);
-      //applicationSettings.setIncomingQsoMaxEntries(Integer.parseInt(jTextField2.getText()));
-    }catch(Exception exc)
-    {
-      JOptionPane.showMessageDialog(null, "Incoming Qso panel - invalid entry");
-      return false;
-    }
-    
-    applicationSettings.SaveSettingsToDisk(); // Save all settings to disk
+    settings.SaveSettingsToDisk(); // Save all settings to disk
     
     initEntryFields();
     return true;
@@ -3822,8 +3941,8 @@ public class MainWindow extends javax.swing.JFrame
       jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
     }
     
-    String text = applicationSettings.getFunctionKeyMessage(0);  // Get the text for the F1 key
-    text = text.replaceAll("\\{mycall\\}", applicationSettings.getMyCallsign()); // Substitute {mycall} with my callsign
+    String text = settings.getFunctionKeyMessage(0);  // Get the text for the F1 key
+    text = text.replaceAll("\\{mycall\\}", settings.getMyCallsign()); // Substitute {mycall} with my callsign
     text = text + " ";
     sendCw(text); // Send to keyer
    
@@ -3858,7 +3977,7 @@ public class MainWindow extends javax.swing.JFrame
   
   private void pressedF2()
   {  
-    String toSend =  applicationSettings.getFunctionKeyMessage(1).toLowerCase();
+    String toSend =  settings.getFunctionKeyMessage(1).toLowerCase();
     
     // Check if "{exch}" is present 
     if(toSend.contains("{exch}"))
@@ -3875,12 +3994,12 @@ public class MainWindow extends javax.swing.JFrame
         exchange = jtextfieldSnt.getText();
       }
       
-      if(applicationSettings.isSendLeadingZeroAsT())
+      if(settings.isSendLeadingZeroAsT())
       {
         exchange = RcvFormatter.leadingZerosToT(exchange);
       }
 
-      if(applicationSettings.isSendZeroAsT())
+      if(settings.isSendZeroAsT())
       {
         exchange = exchange.replace('0', 't');
       }
@@ -3888,19 +4007,19 @@ public class MainWindow extends javax.swing.JFrame
       toSend = toSend.replaceAll("\\{exch\\}", exchange);  // Substitute all "{exch}"
     }
     
-    toSend = toSend.replaceAll("\\{mycall\\}", applicationSettings.getMyCallsign());  // Substitute all "{mycall}"
+    toSend = toSend.replaceAll("\\{mycall\\}", settings.getMyCallsign());  // Substitute all "{mycall}"
   
     sendCw(toSend + " ");
   }
   
   private void pressedF3()
   {
-    sendCw(applicationSettings.getFunctionKeyMessage(2)+" ");
+    sendCw(settings.getFunctionKeyMessage(2)+" ");
   }
   
   private void pressedF4()
   {
-    sendCw(applicationSettings.getMyCallsign()+" ");
+    sendCw(settings.getMyCallsign()+" ");
   }
   
   private void pressedF5()
@@ -3910,27 +4029,27 @@ public class MainWindow extends javax.swing.JFrame
   
   private void pressedF6()
   {
-    sendCw(applicationSettings.getFunctionKeyMessage(5)+" ");
+    sendCw(settings.getFunctionKeyMessage(5)+" ");
   }
   
   private void pressedF7()
   {
-    sendCw(applicationSettings.getFunctionKeyMessage(6)+" ");
+    sendCw(settings.getFunctionKeyMessage(6)+" ");
   }
   
   private void pressedF8()
   {
-    sendCw(applicationSettings.getFunctionKeyMessage(7)+" ");
+    sendCw(settings.getFunctionKeyMessage(7)+" ");
   }
   
   private void pressedF9()
   {
-    sendCw(applicationSettings.getFunctionKeyMessage(8)+" ");
+    sendCw(settings.getFunctionKeyMessage(8)+" ");
   }
   
   private void pressedF10()
   {
-    sendCw(applicationSettings.getFunctionKeyMessage(9)+" ");
+    sendCw(settings.getFunctionKeyMessage(9)+" ");
   }
   
   private void pressedF11()
@@ -4059,7 +4178,7 @@ public class MainWindow extends javax.swing.JFrame
           jtableBandmap.repaint();
           
           
-          if(applicationSettings.isBandmapAutoFreq())
+          if(settings.isBandmapAutoFreq())
           {
             updateBandmapStartFreq(radioController.getFrequency(), radioController.getMode());
           }
@@ -4468,6 +4587,48 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   
+  class DigitsOnlyFilter extends DocumentFilter
+  {
+    @Override
+    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
+    {
+      fb.insertString(offset, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+    }
+
+    @Override
+    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+    {
+      fb.replace(offset, length, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+    }
+  }
+  
+  class PttDelayDocumentFilter extends DocumentFilter
+  {
+    @Override
+    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
+    {
+      int overlimit = fb.getDocument().getLength()+text.length() - 3/*max length*/;
+      if(overlimit > 0)
+      {
+        fb.insertString(offset, text.substring(0, text.length()-overlimit), attrs);
+        return;
+      }
+      fb.insertString(offset, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+    }
+
+    @Override
+    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+    {
+      int overlimit = fb.getDocument().getLength()+text.length() - 3/*max length*/;
+      if(overlimit > 0)
+      {
+        fb.insertString(offset, text.substring(0, text.length()-overlimit), attrs);
+        return;
+      }
+      fb.replace(offset, length, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+    }
+  }
+  
   
   class CallsignDocumentFilter extends DocumentFilter
   {
@@ -4528,7 +4689,6 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroupKeyer;
   private javax.swing.ButtonGroup buttonGroupRadioDtr;
   private javax.swing.ButtonGroup buttonGroupRadioRts;
   private javax.swing.ButtonGroup buttonGroupTypeOfWork;
@@ -4567,6 +4727,9 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JCheckBox jCheckBoxAutoBandmapStartFreq;
   private javax.swing.JCheckBox jCheckBoxShowFreq;
   private javax.swing.JComboBox jComboBoxKeyerComPort;
+  private javax.swing.JComboBox<String> jComboBoxKeyerType;
+  private javax.swing.JComboBox<String> jComboBoxPttCommport;
+  private javax.swing.JComboBox<String> jComboBoxPttType;
   private javax.swing.JComboBox jComboBoxRadioComPort;
   private javax.swing.JComboBox jComboBoxRadioComPortBaudRate;
   private javax.swing.JDesktopPane jDesktopPane1;
@@ -4596,8 +4759,10 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel28;
   private javax.swing.JLabel jLabel29;
   private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel30;
   private javax.swing.JLabel jLabel31;
   private javax.swing.JLabel jLabel32;
+  private javax.swing.JLabel jLabel33;
   private javax.swing.JLabel jLabel34;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
@@ -4624,22 +4789,21 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JPanel jPanel11;
   private javax.swing.JPanel jPanel13;
   private javax.swing.JPanel jPanel2;
+  private javax.swing.JPanel jPanel3;
+  private javax.swing.JPanel jPanel4;
   private javax.swing.JPanel jPanel5;
   private javax.swing.JPanel jPanel8;
   private javax.swing.JPanel jPanelCallSign;
   private javax.swing.JPanel jPanelContestRules;
   private javax.swing.JPanel jPanelFunctionKeys;
-  private javax.swing.JPanel jPanelKeyer;
+  private javax.swing.JPanel jPanelKeyerAndPtt;
   private javax.swing.JPanel jPanelOther;
   private javax.swing.JPanel jPanelRadio;
   private javax.swing.JPanel jPanelStatusBar;
-  private javax.swing.JRadioButton jRadioButtonDtrKeyer;
   private javax.swing.JRadioButton jRadioButtonRadioDtrOff;
   private javax.swing.JRadioButton jRadioButtonRadioDtrOn;
   private javax.swing.JRadioButton jRadioButtonRadioRtsOff;
   private javax.swing.JRadioButton jRadioButtonRadioRtsOn;
-  private javax.swing.JRadioButton jRadioButtonRtsKeyer;
-  private javax.swing.JRadioButton jRadioButtonWinkeyer;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JScrollPane jScrollPane3;
@@ -4647,9 +4811,10 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JScrollPane jScrollPane6;
   private javax.swing.JTabbedPane jTabbedPane1;
   private javax.swing.JTextArea jTextArea1;
-  private javax.swing.JTextField jTextField1;
   private javax.swing.JTextField jTextFieldContestExchange;
   private javax.swing.JTextField jTextFieldF2;
+  private javax.swing.JTextField jTextFieldPttDelay;
+  private javax.swing.JTextField jTextFieldTimeToNextQso;
   private javax.swing.JButton jbuttonCreateNewLog;
   private javax.swing.JButton jbuttonDeleteEntry;
   private javax.swing.JButton jbuttonJumpToCqFreq;

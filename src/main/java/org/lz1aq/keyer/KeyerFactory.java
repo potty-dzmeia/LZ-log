@@ -38,11 +38,17 @@ public class KeyerFactory
     {
       return new DtrRtsKeyer(portName, DtrRtsKeyer.CONTROL_PIN.RTS);
     }
-    else //if(type == KeyerTypes.WINKEYER)
+    else if(type == KeyerTypes.WINKEYER)
     {
       return new WinKeyer(portName);
     }
+    else
+    {
+      return null;
+    }  
   }
+  
+  
   public static Keyer create(KeyerTypes type, SerialPort serialPort) throws Exception
   {
     if(type==KeyerTypes.DTR)
@@ -53,10 +59,13 @@ public class KeyerFactory
     {
       return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.RTS);
     }
-    else //if(type == KeyerTypes.WINKEYER)
+    else if(type == KeyerTypes.WINKEYER)
     {
       throw new Exception("Can't connect to Winkeyer using com port which is already in use.");
     }
-    
+    else
+    {
+      throw new Exception("Unknown Keyer type: "+type.toString());
+    }
   }
 }

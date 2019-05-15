@@ -20,6 +20,7 @@
 package org.lz1aq.keyer;
 
 import jssc.SerialPort;
+import org.lz1aq.ptt.Ptt;
 
 /**
  *
@@ -37,20 +38,28 @@ public interface Keyer
   
   public boolean isConnected();
   
+  public SerialPort getSerialPort();
+   
+  /**
+   * Ptt object should be initialized and ready to use
+   * @param ptt 
+   */
+  public void includePtt(Ptt ptt);
+  
   /**
    * Send the specified text as Morse code
    * @param text what we are about to send
    */
-  void sendCw(String text);
+  public void sendCw(String text);
   
   /**
    * Interrupt Morse sending
    */
-  void stopSendingCw();
+  public void stopSendingCw();
   
   /**
    * Set the speed with which we will transmit
    * @param wpm - speed in words per minute
    */
-  void setCwSpeed(int wpm);
+  public void setCwSpeed(int wpm);
 }

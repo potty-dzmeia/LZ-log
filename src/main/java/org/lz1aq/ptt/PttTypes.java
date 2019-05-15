@@ -27,7 +27,7 @@ import javax.swing.DefaultComboBoxModel;
  */
 public enum PttTypes
 {
-  NONE(0), DTR(1), RTS(2), RADIO_CONTROLLED(3);
+  NONE(0), DTR(1), RTS(2)/*, WINKEY(3)*/;
   private final int value;
 
   PttTypes(int value)
@@ -56,7 +56,7 @@ public enum PttTypes
   {
     return new DefaultComboBoxModel(new String[]
     {
-      NONE.toString(), DTR.toString(), RTS.toString(), /*RADIO_CONTROLLED.toString()*/
+      NONE.toString(), DTR.toString(), RTS.toString(), /*WINKEY.toString()*/ /*RADIO_CONTROLLED.toString()*/
     });
   }
 }

@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import org.lz1aq.ptt.Ptt;
 import org.lz1aq.utils.MorseCode;
 
 
@@ -53,9 +54,10 @@ public class DtrRtsKeyer implements Keyer
   public static enum CONTROL_PIN{DTR, RTS};
   
   private final String serialPortName;
-  private boolean isUsingAlreadyOpenComPort; // If the keyer must use an already open com port (sharing a com port is useful when people have the same cable for controlling the radio and the keyer)
+  private boolean isSharingCommPort; // If the keyer must use an already open com port (sharing a com port is useful when people have the same cable for controlling the radio and the keyer)
   private SerialPort   serialPort = null;
   private CONTROL_PIN  control_pin = CONTROL_PIN.DTR;
+  private Ptt ptt = null;
   
   private static final int QUEUE_SIZE = 30;   // Max number of texts that queueWithTexts can hold
   private final BlockingQueue<String>  queueWithTexts = new LinkedBlockingQueue<>(QUEUE_SIZE); 
@@ -83,12 +85,12 @@ public class DtrRtsKeyer implements Keyer
   public DtrRtsKeyer(String portName, CONTROL_PIN pin) 
   {
     this.serialPortName = portName;
-    control_pin = pin;
-    isUsingAlreadyOpenComPort = false;
+    this.control_pin = pin;
+    this.isSharingCommPort = false;
   }
   
   /**
-   * Connect to the keyer by using an already open com port
+   * Connect to the Keyer by using an already open com port
    * @param serialPort
    * @param pin 
    * @throws java.lang.Exception 
@@ -97,12 +99,15 @@ public class DtrRtsKeyer implements Keyer
   {
     if(serialPort==null || !serialPort.isOpened())
     {
-      throw new Exception("Trying to share the com port but it is still not open.");
+      throw new Exception("Keyer trying to share use Commport" + serialPort.getPortName() + ", but it is still not open.");
     }
-    this.serialPort = serialPort;
+    
+    this.serialPort     = serialPort;
     this.serialPortName = serialPort.getPortName();
-    isUsingAlreadyOpenComPort= true;
-    control_pin = pin;
+    isSharingCommPort   = true;
+    control_pin         = pin;
+    
+    
   }
 
   
@@ -116,7 +121,7 @@ public class DtrRtsKeyer implements Keyer
     }
 
     // Open new com port (not shared with the radio)
-    if(isUsingAlreadyOpenComPort == false)
+    if(isSharingCommPort == false)
     {
       if(isConnected())
       {
@@ -178,7 +183,7 @@ public class DtrRtsKeyer implements Keyer
   public void disconnect()
   {
     // Close the port if not shared
-    if(isUsingAlreadyOpenComPort == false)
+    if(isSharingCommPort == false)
     {
       if(!isConnected())
       {
@@ -218,7 +223,14 @@ public class DtrRtsKeyer implements Keyer
   @Override
   public boolean isConnected()
   {
-    return !(serialPort==null || serialPort.isOpened()==false);   
+    return serialPort!=null && serialPort.isOpened();   
+  }
+  
+  
+  @Override
+  public void includePtt(Ptt ptt)
+  {
+    this.ptt = ptt;
   }
   
   
@@ -312,6 +324,7 @@ public class DtrRtsKeyer implements Keyer
     @Override
     public void run() 
     {  
+      ptt.on();
       this.setPriority(Thread.MAX_PRIORITY -1); // highest prio needed so that the CW is not choppy
       
       while(true)
@@ -341,6 +354,7 @@ public class DtrRtsKeyer implements Keyer
         }
       }
        
+      ptt.off();
     }
   
     

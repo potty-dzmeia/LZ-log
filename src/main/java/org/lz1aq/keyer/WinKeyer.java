@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import org.lz1aq.ptt.Ptt;
 
 /**
  *
@@ -38,7 +39,7 @@ public class WinKeyer implements Keyer
 
   public WinKeyer(String portName)
   {
-    serialPortName        = portName;
+    serialPortName = portName;
   }
   
   
@@ -181,7 +182,7 @@ public class WinKeyer implements Keyer
   @Override
   public void setCwSpeed(int wpm)
   {
-    if(wpm<10 && wpm>60)
+    if(wpm<10 || wpm>60)
       return;
     
     try
@@ -242,7 +243,13 @@ public class WinKeyer implements Keyer
     }
     catch(InterruptedException ex)
     {
-      logger.getLogger(WinKeyer.class.getName()).log(Level.SEVERE, null, ex);
+      logger.log(Level.SEVERE, null, ex);
     }
+  }
+
+  @Override
+  public void includePtt(Ptt ptt)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 }

@@ -19,8 +19,11 @@
 // ***************************************************************************
 package org.lz1aq.utils;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import jssc.SerialPort;
+import jssc.SerialPortException;
 
 /**
  *
@@ -29,6 +32,41 @@ import jssc.SerialPort;
 public class CommUtils
 {
 
+  /**
+   * Find out if the com port is already in use
+   * 
+   * @param commPortName - the name of the commport 
+   * @return true if port is already in use
+   */
+  public static boolean isPortOpened(String commPortName)
+  {
+//    boolean isSuccess = false;
+//   
+//    try
+//    {
+//      SerialPort port = new SerialPort(commPortName);
+//      isSuccess = port.openPort();
+//      if(isSuccess)
+//      {
+//        port.closePort();
+//      }
+//    }
+//    catch(SerialPortException ex)
+//    {
+//      isSuccess = false;
+//      Logger.getLogger(CommUtils.class.getName()).log(Level.INFO, null, ex);
+//    }
+//    
+//    if(isSuccess) // We opened port successfully 
+//      return false;
+//    else          // Opening the port failed - it is in use
+//      return true;
+  
+    SerialPort port = new SerialPort(commPortName);
+    return port.isOpened();
+  }
+  
+  
   public enum BaudRate
   {
     B_1200(1200),
