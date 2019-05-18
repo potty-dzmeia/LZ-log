@@ -28,44 +28,22 @@ import jssc.SerialPort;
  */
 public class KeyerFactory
 {
-  public static Keyer create(KeyerTypes type, String portName)
-  {
-    if(type==KeyerTypes.DTR)
-    {
-      return new DtrRtsKeyer(portName, DtrRtsKeyer.CONTROL_PIN.DTR);
-    }
-    else if(type==KeyerTypes.RTS)
-    {
-      return new DtrRtsKeyer(portName, DtrRtsKeyer.CONTROL_PIN.RTS);
-    }
-    else if(type == KeyerTypes.WINKEYER)
-    {
-      return new WinKeyer(portName);
-    }
-    else
-    {
-      return null;
-    }  
-  }
-  
-  
   public static Keyer create(KeyerTypes type, SerialPort serialPort) throws Exception
   {
-    if(type==KeyerTypes.DTR)
-    {
-      return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.DTR);
-    }
-    else if(type==KeyerTypes.RTS)
-    {
-      return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.RTS);
-    }
-    else if(type == KeyerTypes.WINKEYER)
-    {
-      throw new Exception("Can't connect to Winkeyer using com port which is already in use.");
-    }
-    else
+    if(null==type)
     {
       throw new Exception("Unknown Keyer type: "+type.toString());
+    }
+    else switch(type)
+    {
+      case DTR:
+        return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.DTR);
+      case RTS:
+        return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.RTS);
+      case WINKEYER:
+        return new WinKeyer2(serialPort);
+      default:
+        throw new Exception("Unknown Keyer type: "+type.toString());
     }
   }
 }

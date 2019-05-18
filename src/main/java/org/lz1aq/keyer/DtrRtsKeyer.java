@@ -112,7 +112,7 @@ public class DtrRtsKeyer implements Keyer
 
   
   @Override
-  public void connect() throws Exception
+  public void init() throws Exception
   {
     
     if(threadKeyer.getState() != Thread.State.NEW)
@@ -123,11 +123,6 @@ public class DtrRtsKeyer implements Keyer
     // Open new com port (not shared with the radio)
     if(isSharingCommPort == false)
     {
-      if(isConnected())
-      {
-        logger.warning("Keyer already connected!.");
-        return;
-      }
       serialPort = new SerialPort(serialPortName);
       try
       {
@@ -180,18 +175,11 @@ public class DtrRtsKeyer implements Keyer
    * Disconnect the keyer from the comport and also kill the threadKeyer responsible for sending CW
    */
   @Override
-  public void disconnect()
+  public void terminate()
   {
     // Close the port if not shared
     if(isSharingCommPort == false)
     {
-      if(!isConnected())
-      {
-        logger.warning("Keyer already disconnected!");
-        serialPort = null;
-        return;
-      }
-
       threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
       while(threadKeyer.isAlive()); // wait till the threadKeyer is closed
 
@@ -205,30 +193,17 @@ public class DtrRtsKeyer implements Keyer
       }
       serialPort = null;
     }
-    // Com port is shared - do close com port
+    // Com port is shared - do not close com port
     else
     {
       threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
       while(threadKeyer.isAlive()); // wait till the threadKeyer is closed   
-      
-      serialPort = null;
     }
   }
-  
-  
-  /**
-   * Checks if currently connected to the radio
-   * @return false if not connected
-   */
-  @Override
-  public boolean isConnected()
-  {
-    return serialPort!=null && serialPort.isOpened();   
-  }
-  
+ 
   
   @Override
-  public void includePtt(Ptt ptt)
+  public void usePtt(Ptt ptt)
   {
     this.ptt = ptt;
   }
@@ -324,7 +299,8 @@ public class DtrRtsKeyer implements Keyer
     @Override
     public void run() 
     {  
-      ptt.on();
+      if(ptt!=null)
+        ptt.on();
       this.setPriority(Thread.MAX_PRIORITY -1); // highest prio needed so that the CW is not choppy
       
       while(true)
@@ -354,7 +330,8 @@ public class DtrRtsKeyer implements Keyer
         }
       }
        
-      ptt.off();
+      if(ptt!=null)
+        ptt.off();
     }
   
     
@@ -437,6 +414,13 @@ public class DtrRtsKeyer implements Keyer
     {
       sleep(wordSpaceMillis);
     }
+  }
+  
+  
+  @Override
+  public SerialPort getCommport()
+  {
+    return serialPort;
   }
   
 }

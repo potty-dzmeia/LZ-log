@@ -29,63 +29,30 @@ import org.lz1aq.ptt.Ptt;
  *
  * @author potty
  */
-public class WinKeyer implements Keyer
-{
- 
-  private final String              serialPortName;        
+public class WinKeyer2 implements Keyer
+{       
   private final int                 baudRate = 1200;             
-  private       SerialPort          serialPort;           
+  private final SerialPort          serialPort;           
   private static final Logger       logger = Logger.getLogger(WinKeyer.class.getName());
 
-  public WinKeyer(String portName)
+  public WinKeyer2(SerialPort port)
   {
-    serialPortName = portName;
+    serialPort = port;
   }
-  
-  
+
   @Override
   public void init() throws Exception
   {
-    serialPort = new SerialPort(serialPortName);
-    try
+    if(!serialPort.isOpened())
     {
-      serialPort.openPort();
+      throw new Exception("Supplied serial port is not open: " + serialPort.getPortName());
     }
-    catch(SerialPortException ex)
-    {
-      serialPort = null;
-      throw new Exception("Couldn't open com port: "+serialPortName);
-    }
+    serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+    serialPort.setParams(baudRate, SerialPort.DATABITS_8, SerialPort.STOPBITS_2, SerialPort.PARITY_NONE);
+    serialPort.purgePort(SerialPort.PURGE_RXCLEAR);
+    serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
     
-    try
-    {
-      serialPort.setParams(baudRate, SerialPort.DATABITS_8, SerialPort.STOPBITS_2, SerialPort.PARITY_NONE);
-      serialPort.setDTR(true);
-      serialPort.setRTS(false);
-    }
-    catch(SerialPortException ex)
-    {
-      try
-      {
-        serialPort.closePort();
-      }
-      catch(SerialPortException ex1)
-      {
-        logger.log(Level.SEVERE, null, ex1);
-      }
-      serialPort = null;
-      throw new Exception("Couldn't set setting for "+serialPortName);
-    }
-
-    try
-    {
-      initKeyer();
-    }
-    catch(Exception ex)
-    {
-      terminate();
-      throw new Exception("Com port opened successfuly but couldn't communicate with WinKeyer");
-    }
+    initKeyer();
   }
   
   
@@ -103,19 +70,9 @@ public class WinKeyer implements Keyer
     {
       logger.log(Level.SEVERE, null, ex);
     }
-    
-    try
-    {
-      serialPort.closePort();
-    }
-    catch(SerialPortException ex)
-    {
-      logger.log(Level.SEVERE, null, ex);
-    }
-    serialPort = null;
   }
   
- 
+  
   @Override
   public void sendCw(String textToSend)
   {
@@ -183,9 +140,7 @@ public class WinKeyer implements Keyer
   private void initKeyer() throws Exception
   {
     // This delay is important - giveWK time to power up
-    Thread.sleep(400);
-    
-    serialPort.purgePort(SerialPort.PURGE_RXCLEAR);
+    Thread.sleep(100);
 
     // Send three "NOP" commands
     serialPort.writeByte((byte)0x13);
@@ -222,17 +177,18 @@ public class WinKeyer implements Keyer
       logger.log(Level.SEVERE, null, ex);
     }
   }
-
-  @Override
-  public void usePtt(Ptt ptt)
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
   
   
   @Override
   public SerialPort getCommport()
   {
     return serialPort;
+  }
+
+  
+  @Override
+  public void usePtt(Ptt ptt)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 }

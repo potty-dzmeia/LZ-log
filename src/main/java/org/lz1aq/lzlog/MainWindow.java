@@ -57,12 +57,14 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import jssc.SerialPort;
 import jssc.SerialPortList;
+import org.lz1aq.keyer.DtrRtsKeyer;
 import org.lz1aq.keyer.Keyer;
 import org.lz1aq.keyer.KeyerFactory;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.LogDatabase;
 import org.lz1aq.log.LogTableModel;
 import org.lz1aq.log.Qso;
+import org.lz1aq.ptt.DtrRtsPtt;
 import org.lz1aq.ptt.Ptt;
 import org.lz1aq.ptt.PttTypes;
 import org.lz1aq.radio.Radio;
@@ -72,6 +74,7 @@ import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.CommUtils;
 import org.lz1aq.utils.MorseCode;
 import org.lz1aq.utils.RcvFormatter;
+import org.lz1aq.utils.SerialportShare;
 import org.lz1aq.utils.TimeUtils;
 
 /**
@@ -103,7 +106,8 @@ public class MainWindow extends javax.swing.JFrame
   private FontChooser                   fontchooser = new FontChooser();
   private String                        logDbFile;
   private String                        pathToWorkingDir; // where the jar file is located
-          
+  private SerialportShare               serialportShare = new SerialportShare();
+  
   private DocumentFilter                callsignFilter = new CallsignDocumentFilter();
   private DocumentFilter                serialNumberFilter = new SerialNumberDocumentFilter();
   private DocumentFilter                pttDelayFilter = new PttDelayDocumentFilter();
@@ -2943,14 +2947,15 @@ public class MainWindow extends javax.swing.JFrame
 
   private void jtogglebuttonConnectToKeyerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToKeyerActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
-    boolean isConnected = false;
+    boolean isConnected;
     JToggleButton connectButton = (JToggleButton) evt.getSource();
     
     if(connectButton.isSelected())
     {
-      isConnected = connectKeyer();
+      // First connect the PTT as we need to inform Keyer to use it if needed
+      isConnected = connectPtt();
       if(isConnected)
-        isConnected = connectPtt();
+        isConnected = connectKeyer();
     }
     else
     {
@@ -3154,55 +3159,16 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   /**
-   * Will open the Commport for the Keyer
+   * Will connect serial port (if needed) and init the keyer
+   * 
    * @return true if connection was successful 
    */
   private boolean connectKeyer()
   {
-    String keyerCommName = settings.getKeyerCommportName();
-    
-    if(keyerCommName.isEmpty())
-    {
-      JOptionPane.showMessageDialog(null, "Select a Commport from the Settings menu!");
-      return false;
-    }
-    
-    if(settings.getKeyerType() == KeyerTypes.NONE)
-    {
-      JOptionPane.showMessageDialog(null, "Select a Keyer type from the Settings menu!");
-      return false;
-    }
-    
-    // Commport is free to use
-    if( !CommUtils.isBusy(keyerCommName) )
-    {
-      keyer = KeyerFactory.create(settings.getKeyerType(), keyerCommName);
-    }
-    // Shared port 
-    else
-    {
-      if(keyerCommName.compareTo(settings.getRadioCommportName()) == 0) // Is it used by the radio?
-      {
-        try
-        {
-          keyer = KeyerFactory.create(settings.getKeyerType(), radioController.getSerialPort());
-        }
-        catch(Exception ex)
-        { 
-          JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-          return false; // Winkeyer or other unknown type
-        }
-      }
-      else
-      {
-        JOptionPane.showMessageDialog(null, "Commport "+keyerCommName + " already in use.", "Error", JOptionPane.ERROR_MESSAGE);
-        return false; // Commport used by another program
-      }
-    }
-    
     try
     {
-      keyer.connect();
+      keyer = KeyerFactory.create(settings.getKeyerType(), 
+                                  serialportShare.getPort(settings.getKeyerCommportName()));
     }
     catch(Exception ex)
     {
@@ -3210,58 +3176,83 @@ public class MainWindow extends javax.swing.JFrame
       return false;
     }
     
+    try
+    {
+      keyer.init();
+    }
+    catch(Exception ex)
+    {
+      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      return false;
+    }
+    
+    keyer.usePtt(ptt);
     keyer.setCwSpeed(keyerSpeed);
     return true;
   }
+  
    
   private void disconnectKeyer()
   {
-    keyer.disconnect();
-    keyer = radioController.getKeyer(); // If disconnected keying will be redirected to the radio (hopefully it will supported)
+    keyer.terminate();
+    try
+    {
+      serialportShare.releasePort(keyer.getCommport());
+    }
+    catch(Exception ex)
+    {
+      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    // When disconnected keying will be redirected to the radio (hopefully it will be supported)
+    keyer = radioController.getKeyer(); 
     keyer.setCwSpeed(keyerSpeed);
   }
 
   
   private boolean connectPtt()
   {
-    String pttCommName = settings.getPttCommportName();
-    
-    if(pttCommName.isEmpty())
-      return true;
-    if(settings.getPttType()== PttTypes.NONE)
-      return true;
-    
-    
-     // Commport is free to use
-    if( !CommUtils.isBusy(pttCommName) )
+    try
     {
-      keyer = KeyerFactory.create(settings.getKeyerType(), pttCommName);
+      ptt = new DtrRtsPtt(serialportShare.getPort(settings.getPttCommportName()),
+                          settings.getPttType(),
+                          settings.getPttDelayInMilliseconds());
+      ptt.init();
     }
-    // Shared port 
-    else
+    catch(Exception ex)
     {
-      if(pttCommName.compareTo(settings.getRadioCommportName()) == 0) // Is it used by the radio?
-      {
-        try
-        {
-          keyer = KeyerFactory.create(settings.getKeyerType(), radioController.getSerialPort());
-        }
-        catch(Exception ex)
-        { 
-          JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-          return false; // Winkeyer or other unknown type
-        }
-      }
-      else
-      {
-        //------------------>JOptionPane.showMessageDialog(null, "Commport "+keyerCommName + " already in use.", "Error", JOptionPane.ERROR_MESSAGE);
-        return false; // Commport used by another program
-      }
+      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      return false;
     }
+      
+    return true;
+  }
+  
+
+  private void disconnectPtt()
+  {
+    ptt.terminate();
     
     try
     {
-      keyer.connect();
+      serialportShare.releasePort(ptt.getCommport());
+    }
+    catch(Exception ex)
+    {
+      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+  }
+      
+  
+  private boolean connectRadio()
+  {
+    boolean result;
+    
+    try
+    {
+      result = radioController.connect(new LocalRadioControllerListener(),
+                                       serialportShare.getPort(settings.getRadioCommportName()),
+                                       settings.getRadioCommportBaudRate());
     }
     catch(Exception ex)
     {
@@ -3269,40 +3260,26 @@ public class MainWindow extends javax.swing.JFrame
       return false;
     }
     
-    return true;
-  }
-  
-
-  private boolean disconnectPtt()
-  {
-    if(ptt!=null)
-      ptt.disconnect();
+    if(!result)
+    {
+      JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Unknown Error...", JOptionPane.ERROR_MESSAGE);
+    }
     
-    return true;
-  }
-      
-  
-  private boolean connectRadio()
-  {
-    
-//    boolean result = radioController.connect(new LocalRadioControllerListener(),
-//                                             serialcomportRadio, 
-//                                             settings.getRadioCommportBaudRate(),
-//                                             settings.isRadioCommportDtrOn(),
-//                                             settings.isRadioCommportRtsOn());
-//    if (!result)
-//    {
-//      JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Serial connection error...", JOptionPane.ERROR_MESSAGE);
-//    }
-//    
-//    return result;
-    return true;
+    return result;
   }
   
-  private boolean disconnectRadio()
+  private void disconnectRadio()
   {
     radioController.disconnect();
-    return true;
+    
+    try
+    {
+      serialportShare.releasePort(radioController.getSerialPort());
+    }
+    catch(Exception ex)
+    {
+      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
   
   
@@ -4606,7 +4583,8 @@ public class MainWindow extends javax.swing.JFrame
     @Override
     public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
     {
-      int overlimit = fb.getDocument().getLength()+text.length() - 3/*max length*/;
+      int currentLength = fb.getDocument().getLength();
+      int overlimit =  (currentLength+text.length()) - 3/*max length*/ - length;
       if(overlimit > 0)
       {
         fb.insertString(offset, text.substring(0, text.length()-overlimit), attrs);
@@ -4618,7 +4596,8 @@ public class MainWindow extends javax.swing.JFrame
     @Override
     public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
     {
-      int overlimit = fb.getDocument().getLength()+text.length() - 3/*max length*/;
+      int currentLength = fb.getDocument().getLength();
+      int overlimit =  (currentLength+text.length()) - 3/*max length*/ - length;
       if(overlimit > 0)
       {
         fb.insertString(offset, text.substring(0, text.length()-overlimit), attrs);

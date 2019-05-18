@@ -43,7 +43,7 @@ public class SerialportShare
    * @param portName - name of the port that we want to access
    * @return SerialPort which is already open. You need to set the configuration params if needed (e.g. baudrate, dtr etc.)
    */
-  SerialPort getPort(String portName)throws Exception
+  public SerialPort getPort(String portName)throws Exception
   {
     // Port already opened by the class
     if(findPort(portName)!=null)
@@ -53,7 +53,7 @@ public class SerialportShare
     
     // We need to open the port. However, let's check if not used by another program
     if( CommUtils.isBusy(portName) )
-      throw new Exception("Commport is used by another application: " + portName);
+      throw new Exception("Commport is unavailable: " + portName);
         
     SerialPortWithRefCount port = new SerialPortWithRefCount(portName);
 
@@ -61,7 +61,7 @@ public class SerialportShare
     return port.getReference();
   }
   
-  void releasePort(SerialPort port) throws Exception
+  public void releasePort(SerialPort port) throws Exception
   {
     SerialPortWithRefCount prt = findPort(port.getPortName());
     

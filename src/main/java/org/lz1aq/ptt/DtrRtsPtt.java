@@ -31,28 +31,11 @@ import jssc.SerialPortException;
 public class DtrRtsPtt implements Ptt
 {
   private static final Logger logger = Logger.getLogger(DtrRtsPtt.class.getName());
-  /** One of the two ways for controlling the PTT - through the DRT or the RTS pin*/
-  public static enum CONTROL_PIN{DTR, RTS};
-  
-  private final String  serialPortName;
+
   private SerialPort    serialPort;
-  private int           delayInMs = 100;
-  private boolean       isSharingCommPort;
-  private CONTROL_PIN   control_pin = CONTROL_PIN.DTR;
-  
-  /** 
-   * Use in case PTT has to open the Commport
-   * @param portName
-   * @param pin
-   * @param delayInMs 
-   */
-  public DtrRtsPtt(String portName, CONTROL_PIN pin, int delayInMs)
-  {
-    this.serialPortName = portName;
-    this.control_pin = pin;
-    this.isSharingCommPort = false;
-    this.delayInMs = delayInMs;
-  }
+  private final int     delayInMs = 100;
+  private PttTypes      control_pin;
+
   
   /**
    * Use in case PTT has to share already open Commport
@@ -60,100 +43,43 @@ public class DtrRtsPtt implements Ptt
    * @param serialPort
    * @param pin
    * @param delayInMs 
+   * @throws java.lang.Exception 
    */
-  public DtrRtsPtt(SerialPort serialPort, CONTROL_PIN pin, int delayInMs) throws Exception
+  public DtrRtsPtt(SerialPort serialPort, PttTypes pin, int delayInMs) throws Exception
   {
-    if(serialPort==null || !serialPort.isOpened())
+    if(!serialPort.isOpened())
     {
-      throw new Exception("PTT trying to share use Commport" + serialPort.getPortName()  + ", but it is still not open.");
+      throw new Exception("Serial port is not open: " + serialPort.getPortName());
     }
     this.serialPort = serialPort;
-    this.serialPortName = serialPort.getPortName();
-    isSharingCommPort= true;
-    control_pin = pin;
+    control_pin     = pin;
   }
    
 
   @Override
-  public void connect() throws Exception 
+  public void init() throws Exception 
   {
-    // Open new com port (not shared with the radio)
-    if(isSharingCommPort == false)
+    try
     {
-      if(isConnected())
-        throw new Exception("PTT already connected to Commport: "+serialPortName); 
- 
-      serialPort = new SerialPort(serialPortName);
-      try
-      {
-        serialPort.openPort();
-      }
-      catch(SerialPortException ex)
-      {
-        serialPort = null;
-        throw new Exception("PTT couldn't open Commport: "+serialPortName);
-      }
-     
-      try
-      {
-        // key up
-        setControlPin(false);
-      }
-      catch(SerialPortException ex)
-      {
-        try
-        {
-          serialPort.closePort();
-        }
-        catch(SerialPortException ex1)
-        {
-          logger.log(Level.SEVERE, null, ex1);
-        }
-        serialPort = null;
-        throw new Exception("PTT couldn't manipulate the DTR for Commport: "+serialPortName);
-      }
+      setControlPin(false);
     }
-    // Shared com port
-    else
+    catch(SerialPortException ex)
     {
-      try
-      {
-        setControlPin(false);
-      }
-      catch(SerialPortException ex)
-      {
-        throw new Exception("PTT couldn't manipulate the DTR for Commport: "+serialPortName);
-      }
-      
+      throw new Exception("PTT couldn't manipulate the Commport: " + serialPort.getPortName());
     }
   }
 
   @Override
-  public void disconnect()
+  public void terminate()
   {
-    // Close the port if not shared
-    if(!isSharingCommPort)
+    try
     {
-      if(!isConnected())
-      {
-        logger.warning("PTT already disconnected!");
-        serialPort = null;
-        return;
-      }
-
-      try
-      {
-        serialPort.closePort();
-      }
-      catch(SerialPortException ex)
-      {
-        logger.log(Level.SEVERE, null, ex);
-      }
-      serialPort = null;
+      setControlPin(false);
     }
-    // Com port is shared - do close com port
-    else    
-      serialPort = null;
+    catch(SerialPortException ex)
+    {
+      logger.log(Level.SEVERE, null, ex);
+    }
   }
              
 
@@ -164,6 +90,7 @@ public class DtrRtsPtt implements Ptt
     {
       Thread.sleep(this.delayInMs);
       setControlPin(true);
+      logger.info("ptt.ON");
     }
     catch(Exception ex)
     {
@@ -177,12 +104,21 @@ public class DtrRtsPtt implements Ptt
     try
     {
       setControlPin(false);
+      logger.info("ptt.OFF");
     }
     catch(Exception ex)
     {
       logger.log(Level.SEVERE, null, ex);
     }
   }
+  
+  
+   @Override
+  public SerialPort getCommport()
+  {
+    return serialPort;
+  }
+  
   
   /**
    * Set the control pin (DTR or RTS)
@@ -191,14 +127,12 @@ public class DtrRtsPtt implements Ptt
    */
   private void setControlPin(boolean state) throws SerialPortException
   {
-    if(control_pin == CONTROL_PIN.DTR)
-    {
+    if(control_pin == PttTypes.DTR)
       serialPort.setDTR(state);
-    }
-    else
-    {
+    else if(control_pin == PttTypes.RTS)
       serialPort.setRTS(state);
-    }
+    else
+      return;
   }
   
   

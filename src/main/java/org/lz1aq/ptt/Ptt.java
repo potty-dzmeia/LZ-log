@@ -19,6 +19,8 @@
 // ***************************************************************************
 package org.lz1aq.ptt;
 
+import jssc.SerialPort;
+
 /**
  *
  * @author levkov_cha_ext
@@ -30,12 +32,12 @@ public interface Ptt
    * @return 
    * @throws java.lang.Exception 
    */
-  public void connect() throws Exception;
+  public void init() throws Exception;
   
   /**
    * Will deinitialize the PTT object (i.e. Close the serial port)
    */
-  public void disconnect();
+  public void terminate();
   
   /**
    * Will engage the PTT. Will introduce the required delay.
@@ -43,7 +45,9 @@ public interface Ptt
   public void on();
   
   /**
-   * Will disengage the PTT. Will introduce the required delay.
+   * Will disengage the PTT. 
    */
   public void off();
+  
+  public SerialPort getCommport();
 }

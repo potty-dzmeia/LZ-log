@@ -109,6 +109,7 @@ public class RadioController
    * - Call loadProtocolParser() before using this function.
    * @param listener
    * @param commport  - should be an already opened commport
+   * @param baudRate
    * @return 
    */
   public boolean connect(RadioControllerListener listener, SerialPort commport, int baudRate)
@@ -167,6 +168,9 @@ public class RadioController
   
   public void disconnect()
   {
+    if(!isConnected)
+      return;
+    
     try
     {
       radio.disconnect();
@@ -630,21 +634,15 @@ public class RadioController
   {
 
     @Override
-    public void connect() throws Exception
+    public void init() throws Exception
     {
       // nothing to do during connect
     }
 
     @Override
-    public void disconnect()
+    public void terminate()
     {
       // nothing to do during disconnect
-    }
-
-    @Override
-    public boolean isConnected()
-    {
-      return true; // assume always connected
     }
 
     @Override
@@ -669,9 +667,15 @@ public class RadioController
     }
 
     @Override
-    public void includePtt(Ptt ptt)
+    public void usePtt(Ptt ptt)
     {
-      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+      throw new UnsupportedOperationException("Not supported yet."); 
+    }
+    
+    @Override
+    public SerialPort getCommport()
+    {
+      throw new UnsupportedOperationException("Not supported yet."); 
     }
   }
   

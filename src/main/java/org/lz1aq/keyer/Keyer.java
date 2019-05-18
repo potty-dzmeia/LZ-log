@@ -29,21 +29,20 @@ import org.lz1aq.ptt.Ptt;
 public interface Keyer
 {
   /**
-   * 
    * @throws Exception 
    */
-  public void connect() throws Exception;
+  public void init() throws Exception;
   
-  public void disconnect();
-  
-  public boolean isConnected();
+  public void terminate();
  
-   
   /**
-   * Ptt object should be initialized and ready to use
+   * Ptt object should be initialized and ready to use.
+   * 
+   * If activated. This will make the keyer set the PTT to on before sending CW and set to OFF
+   * after sending is done.
    * @param ptt 
    */
-  public void includePtt(Ptt ptt);
+  public void usePtt(Ptt ptt);
   
   /**
    * Send the specified text as Morse code
@@ -61,4 +60,6 @@ public interface Keyer
    * @param wpm - speed in words per minute
    */
   public void setCwSpeed(int wpm);
+  
+  public SerialPort getCommport();
 }

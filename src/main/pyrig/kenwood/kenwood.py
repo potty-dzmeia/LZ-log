@@ -25,9 +25,9 @@ class Kenwood(Radio):
     # Get default serial port settings
     serial_settings = SerialSettings() # If different values than the default ones are need - uncomment and set to desired value
     serial_settings.stop_bits_      = SerialSettings.STOPBITS_TWO
-	serial_settings.data_bits_    	= SerialSettings.DATABITS_EIGTH
-	serial_settings.parity_       	= SerialSettings.PARITY_NONE	
-	serial_settings.handshake_    	= SerialSettings.HANDSHAKE_NONE	
+    serial_settings.data_bits_      = SerialSettings.DATABITS_EIGHT
+    serial_settings.parity_       	= SerialSettings.PARITY_NONE	
+    serial_settings.handshake_    	= SerialSettings.HANDSHAKE_NONE	
     #serial_settings.rts_           = SerialSettings.RTS_STATE_OFF   	# not used anymore. It is set from the Settings menu 
     #serial_settings.dtr_           = SerialSettings.DTR_STATE_OFF		# not used anymore. It is set from the Settings menu 
     

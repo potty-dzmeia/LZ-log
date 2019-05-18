@@ -138,7 +138,6 @@ public class Radio
     
     threadPortWriter.interrupt();
     serialPort.removeEventListener();    
-    serialPort = null;
   }
   
   

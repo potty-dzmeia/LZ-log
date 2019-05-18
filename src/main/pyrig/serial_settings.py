@@ -6,7 +6,7 @@ class SerialSettings(I_SerialSettings):
 
     PARITY_NONE, PARITY_EVEN, PARITY_ODD, PARITY_MARK, PARITY_SPACE = 'None', 'Even', 'Odd', 'Mark', 'Space'
     STOPBITS_ONE, STOPBITS_ONE_POINT_FIVE, STOPBITS_TWO = (1, 2, 3)
-    DATABITS_FIVE, DATABITS_SIX, DATABITS_SEVEN, DATABITS_EIGTH = (5, 6, 7, 8)
+    DATABITS_FIVE, DATABITS_SIX, DATABITS_SEVEN, DATABITS_EIGHT = (5, 6, 7, 8)
     HANDSHAKE_NONE, HANDSHAKE_XONXOFF, HANDSHAKE_CTSRTS = 'None', 'XonXoff', 'CtsRts'
     RTS_STATE_NONE, RTS_STATE_ON, RTS_STATE_OFF = 'None', 'On', 'Off'
     DTR_STATE_NONE, DTR_STATE_ON, DTR_STATE_OFF = 'None', 'On', 'Off'
@@ -19,7 +19,7 @@ class SerialSettings(I_SerialSettings):
         # underscore added because of a jython issue
         self.baudrate_min_ = 2400                   # min supported baudrate
         self.baudrate_max_ = 19200                  # max supported baudrate
-        self.data_bits_ = self.DATABITS_EIGTH
+        self.data_bits_ = self.DATABITS_EIGHT
         self.stop_bits_ = self.STOPBITS_ONE
         self.parity_ = self.PARITY_NONE
         self.handshake_ = self.HANDSHAKE_NONE
