@@ -28,7 +28,7 @@ import junit.framework.TestCase;
  */
 public class SerialportShareTest extends TestCase
 {
-  String portName = "Com11"; // Test will fail if this is not connected
+  String portName = "Com10"; // Test will fail if this is not connected
   
   public SerialportShareTest(String testName)
   {
@@ -67,7 +67,7 @@ public class SerialportShareTest extends TestCase
       System.out.println("Trying already open port. Exception: "+ex);
     }
     assertTrue(serialport0.isOpened());
-    assertEquals(serialport0.getPortName(), "Com11"); 
+    assertEquals(serialport0.getPortName(), portName); 
     assertTrue(serialport0.closePort());
     
     
@@ -76,7 +76,7 @@ public class SerialportShareTest extends TestCase
     instance = new SerialportShare();
     SerialPort serialport1 = instance.getPort(portName);
     assertTrue(serialport1.isOpened());
-    assertEquals(serialport1.getPortName(), "Com11");
+    assertEquals(serialport1.getPortName(), portName);
     
     instance.releasePort(serialport1);  
     assertFalse(serialport1.isOpened());
@@ -86,23 +86,18 @@ public class SerialportShareTest extends TestCase
     SerialPort serialport2 = instance.getPort(portName);
     SerialPort serialport3 = instance.getPort(portName);
     assertTrue(serialport2.isOpened());
-    assertEquals(serialport2.getPortName(), "Com11");
+    assertEquals(serialport2.getPortName(), portName);
     assertTrue(serialport3.isOpened());
-    assertEquals(serialport3.getPortName(), "Com11");
+    assertEquals(serialport3.getPortName(), portName);
     
     instance.releasePort(serialport3);  
     assertTrue(serialport3.isOpened());
     instance.releasePort(serialport2);  
     assertFalse(serialport2.isOpened());
     
-    try
-    {
-      instance.releasePort(serialport3);
-      fail("Line should not be executed!");
-    }catch(Exception ex)
-    {
-      System.out.println("Calling release function one extra time. Exception: "+ex);
-    }
+    
+    instance.releasePort(serialport3);
+    
     
     // Make sure we can open the port properly 
     SerialPort tempPort = new SerialPort(portName);
@@ -139,35 +134,28 @@ public class SerialportShareTest extends TestCase
   {
     System.out.println("releasePort");
     SerialportShare instance = new SerialportShare();
-    
+    SerialPort port;
     // Open a port outside the class and make sure that the call fails
     // -----------------------
-    SerialPort port = new SerialPort(portName);
-    port.openPort();
-    try
-    {
-      instance.releasePort(port);
-      fail("Line should not be executed!");
-    }catch(Exception ex)
-    {
-      assertTrue(port.isOpened()); // port should be still open.
-      System.out.println("Trying to release a port that was open by another application. Exception: "+ex);
-    }
-    
-    port.closePort();
+//    SerialPort port = new SerialPort(portName);
+//    port.openPort();
+//    try
+//    {
+//      instance.releasePort(port);
+//      fail("Line should not be executed!");
+//    }catch(Exception ex)
+//    {
+//      assertTrue(port.isOpened()); // port should be still open.
+//      System.out.println("Trying to release a port that was open by another application. Exception: "+ex);
+//    }
+//    
+//    port.closePort();
    
     // Try to release port that is not open
     // -----------------------
     port = new SerialPort(portName);
-    try
-    {
-      instance.releasePort(port);
-      fail("Line should not be executed!");
-    }catch(Exception ex)
-    {
-      assertFalse(port.isOpened()); // port should be still open.
-      System.out.println("Trying to release a port that is not opened. Exception: "+ex);
-    }
+    instance.releasePort(port);
+    
     
   }
   

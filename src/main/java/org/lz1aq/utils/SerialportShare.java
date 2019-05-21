@@ -20,6 +20,8 @@
 package org.lz1aq.utils;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 
@@ -30,6 +32,8 @@ import jssc.SerialPortException;
  */
 public class SerialportShare
 {
+  private static final Logger       logger = Logger.getLogger(SerialportShare.class.getName());
+  
   ArrayList<SerialPortWithRefCount> serialports = new ArrayList<>();
   
   /**
@@ -61,14 +65,24 @@ public class SerialportShare
     return port.getReference();
   }
   
-  public void releasePort(SerialPort port) throws Exception
+  public void releasePort(SerialPort port)
   {
     SerialPortWithRefCount prt = findPort(port.getPortName());
     
     if(prt == null)
-      throw new Exception("Cannot release Commport which was open by another application: " + port.getPortName());
-    
-    prt.releaseReference();
+    {
+      logger.warning("Cannot release Commport which was open by another application: " + port.getPortName());
+      return;
+    }
+             
+    try
+    {
+      prt.releaseReference();
+    }
+    catch(Exception ex)
+    {
+      logger.warning(ex.getMessage());
+    }
   }
   
   private SerialPortWithRefCount findPort(String name)

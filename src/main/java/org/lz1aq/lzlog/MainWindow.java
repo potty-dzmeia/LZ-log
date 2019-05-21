@@ -83,7 +83,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.6.2";
+  static final String PROGRAM_VERSION = "1.7.1";
   static final String PROGRAM_NAME    = "LZ-Log";
   static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
@@ -794,6 +794,13 @@ public class MainWindow extends javax.swing.JFrame
     jPanel3.add(jLabel25, gridBagConstraints);
 
     jComboBoxKeyerType.setModel(KeyerTypes.getComboxModel());
+    jComboBoxKeyerType.addItemListener(new java.awt.event.ItemListener()
+    {
+      public void itemStateChanged(java.awt.event.ItemEvent evt)
+      {
+        jComboBoxKeyerTypeItemStateChanged(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
@@ -1326,7 +1333,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
     jDesktopPane1.add(intframeTimeToNextQso);
-    intframeTimeToNextQso.setBounds(490, 10, 468, 447);
+    intframeTimeToNextQso.setBounds(490, 10, 468, 436);
 
     intframeBandmap.setIconifiable(true);
     intframeBandmap.setResizable(true);
@@ -1531,7 +1538,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
     jDesktopPane1.add(intframeBandmap);
-    intframeBandmap.setBounds(500, 520, 670, 476);
+    intframeBandmap.setBounds(500, 520, 488, 459);
 
     intframeLog.setIconifiable(true);
     intframeLog.setResizable(true);
@@ -2070,7 +2077,7 @@ public class MainWindow extends javax.swing.JFrame
     intframeEntryWindow.getContentPane().add(jPanel2, gridBagConstraints);
 
     jDesktopPane1.add(intframeEntryWindow);
-    intframeEntryWindow.setBounds(280, 20, 453, 271);
+    intframeEntryWindow.setBounds(280, 20, 453, 247);
 
     intframeMisc.setIconifiable(true);
     intframeMisc.setResizable(true);
@@ -2947,29 +2954,33 @@ public class MainWindow extends javax.swing.JFrame
 
   private void jtogglebuttonConnectToKeyerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToKeyerActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
-    boolean isConnected;
     JToggleButton connectButton = (JToggleButton) evt.getSource();
     
     if(connectButton.isSelected())
     {
-      // First connect the PTT as we need to inform Keyer to use it if needed
-      isConnected = connectPtt();
-      if(isConnected)
-        isConnected = connectKeyer();
+      if(connectKeyer() == false)
+      {
+        jtogglebuttonConnectToKeyer.setSelected(false);
+        return;
+      }
+         
+      if(connectPtt() == false)
+      {
+        disconnectKeyer();
+        jtogglebuttonConnectToKeyer.setSelected(false);
+        return;
+      }
+
+      keyer.usePtt(ptt); 
+      jtogglebuttonConnectToKeyer.setSelected(true);
     }
     else
     {
       disconnectKeyer();
       disconnectPtt();
-      isConnected =  false;
+      jtogglebuttonConnectToKeyer.setSelected(false);
     }
     
-    if(isConnected)
-      jtogglebuttonConnectToKeyer.setSelected(true);
-    else
-    {
-     jtogglebuttonConnectToKeyer.setSelected(false);
-    }  
   }//GEN-LAST:event_jtogglebuttonConnectToKeyerActionPerformed
 
   private void jDialogSettingsComponentShown(java.awt.event.ComponentEvent evt)//GEN-FIRST:event_jDialogSettingsComponentShown
@@ -3104,6 +3115,20 @@ public class MainWindow extends javax.swing.JFrame
     
     JOptionPane.showMessageDialog(null, "Adif file created successfully.", "Success...", JOptionPane.INFORMATION_MESSAGE);
   }//GEN-LAST:event_jMenuItem7ActionPerformed
+
+  private void jComboBoxKeyerTypeItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jComboBoxKeyerTypeItemStateChanged
+  {//GEN-HEADEREND:event_jComboBoxKeyerTypeItemStateChanged
+    String selected = jComboBoxKeyerType.getSelectedItem().toString();
+    if(selected.compareTo(KeyerTypes.WINKEYER.toString()) == 0)
+    {
+      jComboBoxPttType.setSelectedItem(PttTypes.NONE.toString());
+      jComboBoxPttType.setEnabled(false);
+    }
+    else
+    {
+      jComboBoxPttType.setEnabled(true);
+    }
+  }//GEN-LAST:event_jComboBoxKeyerTypeItemStateChanged
   
   
   private void increaseKeyerSpeed()
@@ -3183,10 +3208,10 @@ public class MainWindow extends javax.swing.JFrame
     catch(Exception ex)
     {
       JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      serialportShare.releasePort(keyer.getCommport());
       return false;
     }
     
-    keyer.usePtt(ptt);
     keyer.setCwSpeed(keyerSpeed);
     return true;
   }
@@ -3195,15 +3220,8 @@ public class MainWindow extends javax.swing.JFrame
   private void disconnectKeyer()
   {
     keyer.terminate();
-    try
-    {
-      serialportShare.releasePort(keyer.getCommport());
-    }
-    catch(Exception ex)
-    {
-      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
-    
+    serialportShare.releasePort(keyer.getCommport());
+
     // When disconnected keying will be redirected to the radio (hopefully it will be supported)
     keyer = radioController.getKeyer(); 
     keyer.setCwSpeed(keyerSpeed);
@@ -3212,6 +3230,13 @@ public class MainWindow extends javax.swing.JFrame
   
   private boolean connectPtt()
   {
+    if(settings.getKeyerType() == KeyerTypes.WINKEYER)
+    {
+      JOptionPane.showMessageDialog(null, "PTT is not supported when using WinKeyer.", "Error", JOptionPane.ERROR_MESSAGE);
+      return false;
+    }
+    
+    
     try
     {
       ptt = new DtrRtsPtt(serialportShare.getPort(settings.getPttCommportName()),
@@ -3232,15 +3257,7 @@ public class MainWindow extends javax.swing.JFrame
   private void disconnectPtt()
   {
     ptt.terminate();
-    
-    try
-    {
-      serialportShare.releasePort(ptt.getCommport());
-    }
-    catch(Exception ex)
-    {
-      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
+    serialportShare.releasePort(ptt.getCommport());
   }
       
   
@@ -3271,15 +3288,7 @@ public class MainWindow extends javax.swing.JFrame
   private void disconnectRadio()
   {
     radioController.disconnect();
-    
-    try
-    {
-      serialportShare.releasePort(radioController.getSerialPort());
-    }
-    catch(Exception ex)
-    {
-      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
+    serialportShare.releasePort(radioController.getSerialPort());
   }
   
   
@@ -4579,12 +4588,12 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   class PttDelayDocumentFilter extends DocumentFilter
-  {
+  { 
     @Override
     public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
     {
       int currentLength = fb.getDocument().getLength();
-      int overlimit =  (currentLength+text.length()) - 3/*max length*/ - length;
+      int overlimit =  (currentLength+text.length()) - 3/*max length*/;
       if(overlimit > 0)
       {
         fb.insertString(offset, text.substring(0, text.length()-overlimit), attrs);

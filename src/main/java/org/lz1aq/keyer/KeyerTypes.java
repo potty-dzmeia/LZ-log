@@ -26,7 +26,7 @@ public enum KeyerTypes
   {
     return new DefaultComboBoxModel(new String[]
     {
-      NONE.toString(), WINKEYER.toString(), DTR.toString(), RTS.toString()
+      WINKEYER.toString(), DTR.toString(), RTS.toString()
     });
   }
 

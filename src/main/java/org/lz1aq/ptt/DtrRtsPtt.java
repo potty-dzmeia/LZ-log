@@ -33,7 +33,7 @@ public class DtrRtsPtt implements Ptt
   private static final Logger logger = Logger.getLogger(DtrRtsPtt.class.getName());
 
   private SerialPort    serialPort;
-  private final int     delayInMs = 100;
+  private final int     delayInMs;
   private PttTypes      control_pin;
 
   
@@ -53,6 +53,7 @@ public class DtrRtsPtt implements Ptt
     }
     this.serialPort = serialPort;
     control_pin     = pin;
+    this.delayInMs  = delayInMs;
   }
    
 
@@ -88,8 +89,8 @@ public class DtrRtsPtt implements Ptt
   {
     try
     {
-      Thread.sleep(this.delayInMs);
       setControlPin(true);
+      Thread.sleep(this.delayInMs);
       logger.info("ptt.ON");
     }
     catch(Exception ex)
@@ -131,8 +132,7 @@ public class DtrRtsPtt implements Ptt
       serialPort.setDTR(state);
     else if(control_pin == PttTypes.RTS)
       serialPort.setRTS(state);
-    else
-      return;
+    
   }
   
   

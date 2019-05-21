@@ -299,8 +299,6 @@ public class DtrRtsKeyer implements Keyer
     @Override
     public void run() 
     {  
-      if(ptt!=null)
-        ptt.on();
       this.setPriority(Thread.MAX_PRIORITY -1); // highest prio needed so that the CW is not choppy
       
       while(true)
@@ -329,9 +327,9 @@ public class DtrRtsKeyer implements Keyer
           logger.log(Level.SEVERE, "Error while trying to manipulate the com port");
         }
       }
-       
+      
       if(ptt!=null)
-        ptt.off();
+        ptt.off(); 
     }
   
     
@@ -343,6 +341,9 @@ public class DtrRtsKeyer implements Keyer
      */
     private void transmitText(String text) throws InterruptedException, SerialPortException
     {
+      if(ptt!=null)
+        ptt.on();
+      
       // 'all but the last' logic preserves the ratios between the different spaces by avoiding playing two spaces in a row.
       for(int i = 0; i < text.length(); i++)
       {
@@ -354,7 +355,13 @@ public class DtrRtsKeyer implements Keyer
         else
         {
           String dotsndashes = MorseCode.getCode(c); // c must be an Object to be a hashkey
-          if(dotsndashes == null) return; // not a valid character - stop transmitting
+          if(dotsndashes == null) 
+          {
+            if(ptt!=null)
+              ptt.off();
+            return; // not a valid character - stop transmitting
+          } 
+          
           for(int j = 0; j < dotsndashes.length(); j++)
           {
             char ch = dotsndashes.charAt(j);
@@ -377,6 +384,9 @@ public class DtrRtsKeyer implements Keyer
           }
         }
       }
+      
+      if(ptt!=null)
+        ptt.off();
     }
     
     
