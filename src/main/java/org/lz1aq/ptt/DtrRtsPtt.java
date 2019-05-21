@@ -34,6 +34,7 @@ public class DtrRtsPtt implements Ptt
 
   private SerialPort    serialPort;
   private final int     delayInMs;
+  private final int     tailInMs;
   private PttTypes      control_pin;
 
   
@@ -45,7 +46,7 @@ public class DtrRtsPtt implements Ptt
    * @param delayInMs 
    * @throws java.lang.Exception 
    */
-  public DtrRtsPtt(SerialPort serialPort, PttTypes pin, int delayInMs) throws Exception
+  public DtrRtsPtt(SerialPort serialPort, PttTypes pin, int delayInMs, int tailInMs) throws Exception
   {
     if(!serialPort.isOpened())
     {
@@ -54,6 +55,7 @@ public class DtrRtsPtt implements Ptt
     this.serialPort = serialPort;
     control_pin     = pin;
     this.delayInMs  = delayInMs;
+    this.tailInMs   = tailInMs;
   }
    
 
@@ -104,6 +106,7 @@ public class DtrRtsPtt implements Ptt
   {
     try
     {
+      Thread.sleep(tailInMs);
       setControlPin(false);
       logger.info("ptt.OFF");
     }

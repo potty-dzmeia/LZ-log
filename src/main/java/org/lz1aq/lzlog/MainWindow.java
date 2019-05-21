@@ -83,7 +83,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.7.1";
+  static final String PROGRAM_VERSION = "1.7.2";
   static final String PROGRAM_NAME    = "LZ-Log";
   static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
@@ -228,6 +228,7 @@ public class MainWindow extends javax.swing.JFrame
     ((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
     ((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
     ((AbstractDocument) jTextFieldPttDelay.getDocument()).setDocumentFilter(pttDelayFilter);
+     ((AbstractDocument) jTextFieldPttTailDelay.getDocument()).setDocumentFilter(pttDelayFilter);
     ((AbstractDocument) jtextfieldQsoRepeatPeriod.getDocument()).setDocumentFilter(qsoRepeatPeriodFilter);
     ((AbstractDocument) jTextFieldTimeToNextQso.getDocument()).setDocumentFilter(dontShowAfterFilter);
     
@@ -394,6 +395,8 @@ public class MainWindow extends javax.swing.JFrame
     jComboBoxPttCommport = new javax.swing.JComboBox<>();
     jComboBoxPttType = new javax.swing.JComboBox<>();
     jTextFieldPttDelay = new javax.swing.JTextField();
+    jLabel35 = new javax.swing.JLabel();
+    jTextFieldPttTailDelay = new javax.swing.JTextField();
     jPanelFunctionKeys = new javax.swing.JPanel();
     jLabel3 = new javax.swing.JLabel();
     jtextfieldfF1 = new javax.swing.JTextField();
@@ -835,7 +838,7 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
     jPanel4.add(jLabel30, gridBagConstraints);
 
-    jLabel33.setText("Delay in [msec]");
+    jLabel33.setText("Front delay [msec]");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -870,6 +873,22 @@ public class MainWindow extends javax.swing.JFrame
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanel4.add(jTextFieldPttDelay, gridBagConstraints);
+
+    jLabel35.setText("Tail delay [msec]");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel4.add(jLabel35, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel4.add(jTextFieldPttTailDelay, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -2964,14 +2983,16 @@ public class MainWindow extends javax.swing.JFrame
         return;
       }
          
-      if(connectPtt() == false)
+      if(settings.getPttType() != PttTypes.NONE)
       {
-        disconnectKeyer();
-        jtogglebuttonConnectToKeyer.setSelected(false);
-        return;
+        if(connectPtt() == false)
+        {
+          disconnectKeyer();
+          jtogglebuttonConnectToKeyer.setSelected(false);
+          return;
+        }
       }
-
-      keyer.usePtt(ptt); 
+  
       jtogglebuttonConnectToKeyer.setSelected(true);
     }
     else
@@ -3241,8 +3262,11 @@ public class MainWindow extends javax.swing.JFrame
     {
       ptt = new DtrRtsPtt(serialportShare.getPort(settings.getPttCommportName()),
                           settings.getPttType(),
-                          settings.getPttDelayInMilliseconds());
+                          settings.getPttDelayInMilliseconds(),
+                          settings.getPttTailInMilliseconds());
       ptt.init();
+      
+      keyer.usePtt(ptt); 
     }
     catch(Exception ex)
     {
@@ -3256,8 +3280,12 @@ public class MainWindow extends javax.swing.JFrame
 
   private void disconnectPtt()
   {
-    ptt.terminate();
-    serialportShare.releasePort(ptt.getCommport());
+    if(ptt!=null)
+    {
+      ptt.terminate();
+      serialportShare.releasePort(ptt.getCommport());
+    }
+    ptt = null;
   }
       
   
@@ -3422,21 +3450,11 @@ public class MainWindow extends javax.swing.JFrame
     return KeyerTypes.valueOf(jComboBoxKeyerType.getSelectedItem().toString());
   }
   
-  private void setSelectedKeyerType(KeyerTypes keyerType)
-  {
-    jComboBoxKeyerType.setSelectedItem(keyerType.toString());
-  }
-  
   private PttTypes getSelectedPttType()
   {
     return PttTypes.valueOf(jComboBoxPttType.getSelectedItem().toString());
   }
-  
-  private void setSelectedPttType(PttTypes pttType)
-  {
-    jComboBoxPttType.setSelectedItem(pttType.toString());
-  }
-  
+
   /**
    * Determines the current working mode. Takes into account if the connected
    * to the radio or not.
@@ -3690,7 +3708,7 @@ public class MainWindow extends javax.swing.JFrame
     // Keyer
     //--------------------------------
     // Type
-     setSelectedKeyerType(settings.getKeyerType());
+    jComboBoxKeyerType.setSelectedItem(settings.getKeyerType().toString());
     // Commport
     if(((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).getIndexOf(settings.getKeyerCommportName()) < 0)
     {
@@ -3703,7 +3721,10 @@ public class MainWindow extends javax.swing.JFrame
     // PTT
     //--------------------------------
     // Type
-    setSelectedPttType(settings.getPttType());
+    jComboBoxPttType.setSelectedItem(settings.getPttType().toString());
+    // Disable editing if Winkey is selected
+    if(settings.getKeyerType() == KeyerTypes.WINKEYER)
+      jComboBoxPttType.setEnabled(false);
      // Commport
     if(((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).getIndexOf(settings.getPttCommportName()) < 0)
     {
@@ -3712,7 +3733,7 @@ public class MainWindow extends javax.swing.JFrame
     jComboBoxPttCommport.setSelectedItem(settings.getPttCommportName());
     // Delay
     jTextFieldPttDelay.setText(Integer.toString(settings.getPttDelayInMilliseconds()));
-    
+    jTextFieldPttTailDelay.setText(Integer.toString(settings.getPttTailInMilliseconds()));
     //--------------------------------
     // Callsign
     //--------------------------------
@@ -3798,6 +3819,7 @@ public class MainWindow extends javax.swing.JFrame
       settings.setPttCommportName(jComboBoxPttCommport.getSelectedItem().toString());
     // Delay
     settings.setPttDelayInMilliseconds(Integer.parseInt(jTextFieldPttDelay.getText()));
+    settings.setPttTailInMilliseconds(Integer.parseInt(jTextFieldPttTailDelay.getText()));
     
     //--------------------------------
     // Callsign
@@ -4751,6 +4773,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JLabel jLabel32;
   private javax.swing.JLabel jLabel33;
   private javax.swing.JLabel jLabel34;
+  private javax.swing.JLabel jLabel35;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabel6;
@@ -4801,6 +4824,7 @@ public class MainWindow extends javax.swing.JFrame
   private javax.swing.JTextField jTextFieldContestExchange;
   private javax.swing.JTextField jTextFieldF2;
   private javax.swing.JTextField jTextFieldPttDelay;
+  private javax.swing.JTextField jTextFieldPttTailDelay;
   private javax.swing.JTextField jTextFieldTimeToNextQso;
   private javax.swing.JButton jbuttonCreateNewLog;
   private javax.swing.JButton jbuttonDeleteEntry;

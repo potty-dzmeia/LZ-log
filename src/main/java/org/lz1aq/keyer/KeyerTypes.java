@@ -9,7 +9,7 @@ import javax.swing.DefaultComboBoxModel;
  */
 public enum KeyerTypes
 {
-  NONE(0), WINKEYER(1), DTR(2), RTS(3), ;
+  WINKEYER(1), DTR(2), RTS(3), ;
   private final int code;
 
   KeyerTypes(int code)

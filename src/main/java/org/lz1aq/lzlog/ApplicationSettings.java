@@ -47,7 +47,8 @@ public final class ApplicationSettings
   static final String PROPERTY_KEYER_TYPE = "keyer_type";
   static final String PROPERTY_PTT_TYPE = "ptt_type";
   static final String PROPERTY_PTT_COMMPORT_NAME = "ptt_com_port_name";
-  static final String PROPERTY_PTT_DELAY = "ptt_delay";
+  static final String PROPERTY_PTT_DELAY = "ptt_delay_in_msec";
+  static final String PROPERTY_PTT_TAIL = "ptt_tail_in_msec";
         
   static final String PROPERTY_MY_CALL_SIGN = "my_callsign";
   static final String PROPERTY_QUICK_CALLSIGN_MODE = "quick_callsign_mode";
@@ -109,6 +110,7 @@ public final class ApplicationSettings
   private PttTypes pttType;
   private String   pttCommportName;
   private int      pttDelayInMilliseconds;
+  private int      pttTailInMilliseconds;
 
   private KeyerTypes keyerType;
   private String myCallsign;
@@ -174,6 +176,16 @@ public final class ApplicationSettings
     return pttCommportName;
   }
 
+  public void setPttTailInMilliseconds(int delayInMs)
+  {
+    this.pttTailInMilliseconds = delayInMs;
+  }  
+  
+  public int getPttTailInMilliseconds()
+  {
+    return pttTailInMilliseconds;
+  }
+   
   public int getPttDelayInMilliseconds()
   {
     return pttDelayInMilliseconds;
@@ -582,6 +594,7 @@ public final class ApplicationSettings
     prop.setProperty(PROPERTY_PTT_TYPE, Integer.toString(pttType.getValue()));
     prop.setProperty(PROPERTY_PTT_COMMPORT_NAME, pttCommportName);
     prop.setProperty(PROPERTY_PTT_DELAY, Integer.toString(pttDelayInMilliseconds));
+    prop.setProperty(PROPERTY_PTT_TAIL, Integer.toString(pttTailInMilliseconds));
     
     prop.setProperty(PROPERTY_MY_CALL_SIGN, myCallsign);
     prop.setProperty(PROPERTY_CONTEST_EXCHANGE, contestExchange);
@@ -686,6 +699,12 @@ public final class ApplicationSettings
         SetSettingToDefault(PROPERTY_PTT_DELAY);
       else
         pttDelayInMilliseconds = Integer.parseInt(temp);
+      
+      temp = prop.getProperty(PROPERTY_PTT_TAIL);
+      if(temp == null)
+        SetSettingToDefault(PROPERTY_PTT_TAIL);
+      else
+        pttTailInMilliseconds = Integer.parseInt(temp);
       
       
       // Keyer type
@@ -827,6 +846,7 @@ public final class ApplicationSettings
     SetSettingToDefault(PROPERTY_PTT_TYPE);
     SetSettingToDefault(PROPERTY_PTT_COMMPORT_NAME);
     SetSettingToDefault(PROPERTY_PTT_DELAY);
+    SetSettingToDefault(PROPERTY_PTT_TAIL);
     SetSettingToDefault(PROPERTY_MY_CALL_SIGN);
     SetSettingToDefault(PROPERTY_QUICK_CALLSIGN_MODE);
     SetSettingToDefault(PROPERTY_DEFAULT_PREFIX);
@@ -876,7 +896,7 @@ public final class ApplicationSettings
         break;
         
       case PROPERTY_KEYER_TYPE:
-        keyerType = KeyerTypes.NONE;
+        keyerType = KeyerTypes.WINKEYER;
         break;
         
       case PROPERTY_PTT_TYPE:
@@ -889,6 +909,10 @@ public final class ApplicationSettings
 
       case PROPERTY_PTT_DELAY:
         pttDelayInMilliseconds = 30;
+        break;
+        
+      case PROPERTY_PTT_TAIL:
+        pttTailInMilliseconds = 10;
         break;
 
       case PROPERTY_MY_CALL_SIGN:
