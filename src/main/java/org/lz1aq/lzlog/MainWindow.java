@@ -3992,7 +3992,7 @@ public class MainWindow extends javax.swing.JFrame
       String exchange;
       
       // If jtextfieldCallsign is empty we should get exchange from last QSO
-      if(jtextfieldCallsign.getText().isEmpty() && log.getSize() > 0)
+      if(isCallsignFieldEmpty() && log.getSize() > 0)
       {
         exchange = log.getLastQso().getSnt();
       }
@@ -4064,6 +4064,14 @@ public class MainWindow extends javax.swing.JFrame
     if(Qso.isValidCallsign(getCallsignFromTextField()))
       jtablemodelBandmap.addSpot(getCallsignFromTextField(), getFreq(), getMode());
     initEntryFields();
+  }
+  
+  boolean isCallsignFieldEmpty()
+  {
+    if(settings.isQuickCallsignModeEnabled())
+      return settings.getDefaultPrefix().compareTo(jtextfieldCallsign.getText()) == 0;
+   
+    return jtextfieldCallsign.getText().isEmpty();
   }
   
   private void pressedEsc()
