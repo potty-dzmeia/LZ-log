@@ -1793,13 +1793,6 @@ public class MainWindow extends javax.swing.JFrame
     jtextfieldRcv.setHorizontalAlignment(javax.swing.JTextField.CENTER);
     jtextfieldRcv.setBorder(javax.swing.BorderFactory.createTitledBorder("Rcv"));
     jtextfieldRcv.setMinimumSize(new java.awt.Dimension(0, 80));
-    jtextfieldRcv.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        jtextfieldRcvActionPerformed(evt);
-      }
-    });
     jtextfieldRcv.addKeyListener(new java.awt.event.KeyAdapter()
     {
       public void keyTyped(java.awt.event.KeyEvent evt)
@@ -2445,21 +2438,6 @@ public class MainWindow extends javax.swing.JFrame
     pressedF11();
   }//GEN-LAST:event_jButton11ActionPerformed
 
-  private void jtextfieldRcvActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtextfieldRcvActionPerformed
-  {//GEN-HEADEREND:event_jtextfieldRcvActionPerformed
-    // Log Qso
-    if(addEntryToLog())
-    {
-      if(settings.isEmsEnabled() && jradiobuttonCQ.isSelected())
-        pressedF3(); 
-      else if(settings.isEmsEnabled() && jradiobuttonSP.isSelected())
-        pressedF2();
-      
-      initEntryFields();
-      
-    }
-  }//GEN-LAST:event_jtextfieldRcvActionPerformed
-
   private void jtextfieldCallsignKeyReleased(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jtextfieldCallsignKeyReleased
   {//GEN-HEADEREND:event_jtextfieldCallsignKeyReleased
     // On every key press update the callsign status
@@ -2723,6 +2701,19 @@ public class MainWindow extends javax.swing.JFrame
     {
       case KeyEvent.VK_SPACE: // Move to Rcv field    
         jtextfieldCallsign.requestFocusInWindow();
+        evt.consume();
+        break;
+      case KeyEvent.VK_ENTER: // Move to Rcv field    
+         // Log Qso
+        if(addEntryToLog())
+        {
+          if(settings.isEmsEnabled() && jradiobuttonCQ.isSelected())
+            pressedF3();
+          else if(settings.isEmsEnabled() && jradiobuttonSP.isSelected())
+            pressedF2();
+
+          initEntryFields();
+        }
         evt.consume();
         break;
     }
@@ -4003,7 +3994,7 @@ public class MainWindow extends javax.swing.JFrame
       
       if(settings.isSendLeadingZeroAsT())
       {
-        exchange = RcvFormatter.leadingZerosToT(exchange);
+        exchange = RcvFormatter.leadingZerosToT(exchange);  
       }
 
       if(settings.isSendZeroAsT())
