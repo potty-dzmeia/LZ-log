@@ -3173,7 +3173,7 @@ public class MainWindow extends javax.swing.JFrame
     // CQ mode
     if(getTypeOfWork().equalsIgnoreCase(Qso.TYPE_OF_WORK_CQ))
     {
-      if(jtextfieldCallsign.getText().isEmpty())
+      if(isCallsignFieldEmpty())
       {
         pressedF1(); // If callsign field is empty - send CQ
         return false; // do not move focus to Snt field
@@ -3190,7 +3190,7 @@ public class MainWindow extends javax.swing.JFrame
     else
     {
       pressedF4(); // Send my callsign
-      return true; // do not move focus to Snt field
+      return false; // do not move focus to Snt field
     }
     
   }
@@ -3362,7 +3362,7 @@ public class MainWindow extends javax.swing.JFrame
   
   
   /**
-   * Reads the info from the entry windwo and if all data is valid it saves it into the Log
+   * Reads the info from the entry window and if all data is valid it saves it into the Log
    *
    * @return true - if the QSO was successfully logged
    *         false - 
@@ -3371,7 +3371,7 @@ public class MainWindow extends javax.swing.JFrame
   {   
     // Do some validation of the data
     // ------------------------------
-    if(jtextfieldCallsign.getText().isEmpty() || !Qso.isValidCallsign(getCallsignFromTextField()))
+    if(isCallsignFieldEmpty() || !Qso.isValidCallsign(getCallsignFromTextField()))
     {
       JOptionPane.showMessageDialog(null, "Invalid callsign!");
       jtextfieldCallsign.requestFocusInWindow();
