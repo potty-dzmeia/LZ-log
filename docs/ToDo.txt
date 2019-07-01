@@ -1,4 +1,6 @@
 High priority:
+- freq columns in bandmap are not resized when we remove the frequency option
+- ESM should be exactly like in N1mm
 - Check the install directory and open warning pop-up informing the user what directories are allowed.
 - send CW morse code character by character ( this will allow to edit the callsign while sending is in progress)
 - Add all the SerialPort settings inside the Java app
