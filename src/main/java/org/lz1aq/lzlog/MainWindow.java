@@ -2111,7 +2111,7 @@ public class MainWindow extends javax.swing.JFrame
         jpanelKeyerSettings.setMinimumSize(new java.awt.Dimension(188, 70));
         jpanelKeyerSettings.setLayout(new java.awt.GridLayout(1, 0));
 
-        jbuttonKeyerUP.setText("UP (PgUp)");
+        jbuttonKeyerUP.setText("UP");
         jbuttonKeyerUP.setToolTipText("Also the PAGE_UP key");
         jbuttonKeyerUP.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2120,7 +2120,7 @@ public class MainWindow extends javax.swing.JFrame
         });
         jpanelKeyerSettings.add(jbuttonKeyerUP);
 
-        jbuttonKeyerDown.setText("DOWN (PgDn)");
+        jbuttonKeyerDown.setText("DOWN");
         jbuttonKeyerDown.setToolTipText("Also the PAGE_DOWN key");
         jbuttonKeyerDown.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
