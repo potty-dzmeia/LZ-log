@@ -2150,7 +2150,7 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="jbuttonSetCqFreq">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Set CQ freq"/>
+                            <Property name="text" type="java.lang.String" value="Set CQ freq (Ctrl+F1)"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
                           <Events>
@@ -2218,7 +2218,7 @@
                       <SubComponents>
                         <Component class="javax.swing.JButton" name="jbuttonKeyerUP">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="UP"/>
+                            <Property name="text" type="java.lang.String" value="UP (PgUp)"/>
                             <Property name="toolTipText" type="java.lang.String" value="Also the PAGE_UP key"/>
                           </Properties>
                           <Events>
@@ -2227,7 +2227,7 @@
                         </Component>
                         <Component class="javax.swing.JButton" name="jbuttonKeyerDown">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="DOWN"/>
+                            <Property name="text" type="java.lang.String" value="DOWN (PgDn)"/>
                             <Property name="toolTipText" type="java.lang.String" value="Also the PAGE_DOWN key"/>
                           </Properties>
                           <Events>
