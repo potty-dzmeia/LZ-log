@@ -39,16 +39,16 @@ class Radio(I_Radio):
         raise NotImplementedError("getAvailableModes")
 
 
-    @classmethod
-    def getAvailableBands(cls):
-        """
-        The function returns a string with all the bands that it supports.
-        Example: "3.5 7 14"
-
-        :return: A string with the supported bands. Each band is separated from the next with space.
-        :rtype: str
-        """
-        raise NotImplementedError("getAvailableBands")
+    # @classmethod
+    # def getAvailableBands(cls):
+    #     """
+    #     The function returns a string with all the bands that it supports.
+    #     Example: "3.5 7 14"
+    #
+    #     :return: A string with the supported bands. Each band is separated from the next with space.
+    #     :rtype: str
+    #     """
+    #     raise NotImplementedError("getAvailableBands")
 
 
     @classmethod

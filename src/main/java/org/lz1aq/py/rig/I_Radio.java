@@ -56,7 +56,7 @@ public interface I_Radio extends I_Rig
    * @return A string with the supported bands in MHz. Each band is separated from the
    *  next with space.
    */
-  public String getAvailableBands();
+  //public String getAvailableBands();
   
   
   /**

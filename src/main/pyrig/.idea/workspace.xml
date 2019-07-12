@@ -18,9 +18,33 @@
     <session id="16057939">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
+          <entry key="project.open.time.0" value="1" />
+          <entry key="project.open.time.11" value="1" />
           <entry key="project.open.time.6" value="1" />
-          <entry key="project.opened" value="1" />
+          <entry key="project.opened" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="py" value="36" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="Python" value="36" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="dummy" value="2" />
+          <entry key="py" value="2536" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="PLAIN_TEXT" value="2" />
+          <entry key="Python" value="2536" />
         </counts>
       </usages-collector>
     </session>
@@ -29,7 +53,49 @@
     <favorites_list name="pyrig" />
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/yaesu/ft857.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="459">
+              <caret line="209" column="72" selection-start-line="209" selection-start-column="72" selection-end-line="209" selection-end-column="72" />
+              <folding>
+                <element signature="e#0#19#0" expanded="true" />
+                <marker date="1562889552171" expanded="true" signature="4794:4803" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/icom/icom.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="340">
+              <caret line="169" column="12" selection-start-line="169" selection-start-column="8" selection-end-line="169" selection-end-column="12" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>(not used/supported by ft857)</find>
+      <find>toBcd</find>
+      <find>setfre</find>
+      <find>__mode_from_byte_to_string</find>
+      <find>misc_utils</find>
+      <find>kenwo</find>
+      <find>getAvailableBands</find>
+      <find>encodeGetFreq</find>
+    </findStrings>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -57,18 +123,20 @@
         <option value="$PROJECT_DIR$/elecraft/tests/elecraft_test.py" />
         <option value="$PROJECT_DIR$/logging.conf" />
         <option value="$PROJECT_DIR$/encoded_transaction.py" />
-        <option value="$PROJECT_DIR$/misc_utils.py" />
-        <option value="$PROJECT_DIR$/yaesu/__init__.py" />
         <option value="$PROJECT_DIR$/elecraft/elecraft.py" />
         <option value="$PROJECT_DIR$/decoded_transaction.py" />
-        <option value="$PROJECT_DIR$/icom/icom.py" />
-        <option value="$PROJECT_DIR$/yaesu/yaesu.py" />
-        <option value="$PROJECT_DIR$/radio.py" />
         <option value="$PROJECT_DIR$/kenwood/kenwood.py" />
         <option value="$PROJECT_DIR$/kenwood/ts-850.py" />
         <option value="$PROJECT_DIR$/serial_settings.py" />
-        <option value="$PROJECT_DIR$/__init__.py" />
         <option value="$PROJECT_DIR$/kenwood/__init__.py" />
+        <option value="$PROJECT_DIR$/misc_utils.py" />
+        <option value="$PROJECT_DIR$/radio.py" />
+        <option value="$PROJECT_DIR$/icom/icom.py" />
+        <option value="$PROJECT_DIR$/teest.py" />
+        <option value="$PROJECT_DIR$/__init__.py" />
+        <option value="$PROJECT_DIR$/yaesu/yaesu.py" />
+        <option value="$PROJECT_DIR$/yaesu/__init__.py" />
+        <option value="$PROJECT_DIR$/yaesu/ft857.py" />
       </list>
     </option>
   </component>
@@ -76,9 +144,10 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="49" />
-    <option name="width" value="1871" />
-    <option name="height" value="1037" />
+    <option name="x" value="-702" />
+    <option name="y" value="166" />
+    <option name="width" value="2904" />
+    <option name="height" value="1226" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -101,8 +170,28 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="pyrig" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pyrig" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pyrig" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pyrig" type="462c0819:PsiDirectoryNode" />
+              <item name="icom" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pyrig" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pyrig" type="462c0819:PsiDirectoryNode" />
+              <item name="yaesu" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -110,13 +199,12 @@
     <property name="LayoutCode.rearrangeEntriesPython" value="true" />
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///home/potty/development/projects/jatu/src/main/pyrig/decoded_transaction.py" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../LogChecker" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="options.lastSelected" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="recentsLimit" value="5" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
-    <property name="settings.editor.splitter.proportion" value="0.2" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -141,7 +229,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.misc_utils">
+  <component name="RunManager" selected="Python.teest">
     <configuration default="true" type="tests" factoryName="Attests">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -208,6 +296,28 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method v="2" />
     </configuration>
+    <configuration name="ft857" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pyrig" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/yaesu" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/yaesu/ft857.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="icom" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pyrig" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -254,7 +364,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="radio" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="teest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pyrig" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -267,39 +377,13 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/radio.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/teest.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method v="2" />
-    </configuration>
-    <configuration name="serial_settings" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="pyrig" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/serial_settings.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
       <method v="2" />
     </configuration>
     <configuration name="test (1)" type="PythonConfigurationType" factoryName="Python">
@@ -380,7 +464,24 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests in icom_test" type="tests" factoryName="Unittests" nameIsGenerated="true">
+    <configuration name="Unittests in bin" type="tests" factoryName="Unittests" nameIsGenerated="true">
+      <module name="pyrig" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests in icom_test.py" type="tests" factoryName="Unittests" nameIsGenerated="true">
       <module name="pyrig" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -413,23 +514,6 @@
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_legacyInformationCopiedToNew" value="true" />
       <option name="_new_target" value="&quot;$PROJECT_DIR$/icom/tests/icom_test.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests in pyrig" type="tests" factoryName="Unittests" nameIsGenerated="true">
-      <module name="pyrig" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <RunnerSettings RunnerId="PythonRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
@@ -504,22 +588,22 @@
     <list>
       <item itemvalue="Python.training" />
       <item itemvalue="Python.test" />
-      <item itemvalue="Python tests.Unittests in pyrig" />
+      <item itemvalue="Python tests.Unittests in bin" />
       <item itemvalue="Python.test (1)" />
-      <item itemvalue="Python tests.Unittests in icom_test" />
+      <item itemvalue="Python tests.Unittests in icom_test.py" />
       <item itemvalue="Python.icom" />
-      <item itemvalue="Python.serial_settings" />
-      <item itemvalue="Python.radio" />
       <item itemvalue="Python.elecraft_test" />
       <item itemvalue="Python.misc_utils" />
+      <item itemvalue="Python.teest" />
+      <item itemvalue="Python.ft857" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.teest" />
+        <item itemvalue="Python.ft857" />
         <item itemvalue="Python.misc_utils" />
         <item itemvalue="Python.elecraft_test" />
         <item itemvalue="Python.icom" />
-        <item itemvalue="Python.serial_settings" />
-        <item itemvalue="Python.radio" />
       </list>
     </recent_temporary>
   </component>
@@ -540,13 +624,13 @@
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20190778" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20031796" />
       <window_info id="Structure" order="1" weight="0.24973261" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49959382" weight="0.32839224" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.58895206" weight="0.32340425" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39893618" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.58895206" weight="0.3676732" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39786857" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -649,13 +733,6 @@
     <entry file="file://$PROJECT_DIR$/kenwood/tests/kenwood_test.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/icom/tests/icom_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="63" column="8" selection-start-line="63" selection-start-column="8" selection-end-line="63" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/elecraft/tests/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -680,78 +757,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/misc_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="4" selection-start-line="4" selection-end-line="17" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/decoded_transaction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="16" column="117" selection-start-line="16" selection-start-column="117" selection-end-line="16" selection-end-column="117" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/elecraft/elecraft.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="365" column="48" selection-start-line="365" selection-start-column="48" selection-end-line="365" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/yaesu/yaesu.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="46" column="23" selection-start-line="46" selection-start-column="8" selection-end-line="46" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/icom/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="6" column="26" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/serial_settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret line="1" column="45" selection-start-line="1" selection-start-column="45" selection-end-line="1" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/yaesu/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="9" column="16" selection-start-line="9" selection-start-column="16" selection-end-line="9" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/radio.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#36#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/icom/icom.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="171" column="28" selection-start-line="171" selection-start-column="28" selection-end-line="171" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/encoded_transaction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="5" column="77" selection-start-line="5" selection-start-column="77" selection-end-line="5" selection-end-column="77" />
         </state>
       </provider>
     </entry>
@@ -762,10 +771,116 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/kenwood/kenwood.py">
+    <entry file="file://$PROJECT_DIR$/decoded_transaction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="56">
+          <caret line="167" column="8" selection-start-line="167" selection-start-column="8" selection-end-line="167" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/teest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="101">
+          <caret line="81" column="20" lean-forward="true" selection-start-line="81" selection-start-column="19" selection-end-line="81" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/misc_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="101">
+          <caret line="67" selection-start-line="67" selection-end-line="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/icom/tests/icom_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="63" column="8" selection-start-line="63" selection-start-column="8" selection-end-line="63" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/icom/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
-          <caret line="98" column="5" selection-start-line="98" selection-start-column="5" selection-end-line="98" selection-end-column="5" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/elecraft/elecraft.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="94" column="27" selection-start-line="94" selection-start-column="10" selection-end-line="94" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kenwood/kenwood.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="96" column="27" selection-start-line="96" selection-start-column="10" selection-end-line="96" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/radio.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-119">
+          <caret line="50" column="54" selection-start-line="50" selection-start-column="37" selection-end-line="50" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#36#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/yaesu/yaesu.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="19" lean-forward="true" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/yaesu/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="23" selection-start-line="1" selection-start-column="23" selection-end-line="1" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/encoded_transaction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="9" column="8" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/-1361349238/__builtin__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="201">
+          <caret line="1687" column="8" selection-start-line="1687" selection-start-column="8" selection-end-line="1687" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/icom/icom.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="169" column="12" selection-start-line="169" selection-start-column="8" selection-end-line="169" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/yaesu/ft857.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="209" column="72" selection-start-line="209" selection-start-column="72" selection-end-line="209" selection-end-column="72" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+            <marker date="1562889552171" expanded="true" signature="4794:4803" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>

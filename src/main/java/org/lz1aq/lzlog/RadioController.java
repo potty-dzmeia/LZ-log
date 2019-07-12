@@ -79,17 +79,17 @@ public class RadioController
   
   /**
    *  
+   * @param moduleName
    * @param filenameOfPythonFile
    * @return 
    */
-  public boolean loadProtocolParser(String filenameOfPythonFile)
+  public boolean loadProtocolParser(String moduleName, String filenameOfPythonFile)
   {
     try
     {
       // Create radioParser object from the python Class
-      String moduleName = StringUtils.removeEnd(filenameOfPythonFile, ".py");
-
-      String className = StringUtils.capitalize(moduleName); // The name of the Class withing the module(file) should be with the same name but with capital letter
+      String className = StringUtils.removeEnd(filenameOfPythonFile, ".py");
+      className = StringUtils.capitalize(className); 
 
       // Create radioParser object from the python Class
       JythonObjectFactory f2 = new JythonObjectFactory(I_Radio.class, moduleName, className);

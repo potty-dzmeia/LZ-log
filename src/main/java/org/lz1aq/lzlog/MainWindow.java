@@ -3221,7 +3221,8 @@ public class MainWindow extends javax.swing.JFrame
         return false;
     }
    
-    boolean result = radioController.loadProtocolParser(chooser.getSelectedFile().getName());
+    boolean result = radioController.loadProtocolParser(chooser.getCurrentDirectory().getName(),  // Module name
+                                                        chooser.getSelectedFile().getName());     // Class name
     if (result == false)
     {
       JOptionPane.showMessageDialog(null, "Error when trying to load the radio protocol parser file!", "Error", JOptionPane.ERROR_MESSAGE);

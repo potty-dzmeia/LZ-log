@@ -4,6 +4,7 @@
 /dist/
 /target/
 /logs/
+/src/main/pyrig/venv/
 *.pyc
 *.class
 *.db4o

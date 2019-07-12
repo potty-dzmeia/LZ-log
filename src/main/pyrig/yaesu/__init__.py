@@ -1,4 +1,5 @@
 from yaesu import Yaesu
+from ft857 import Ft857
 
 #Set default logging handler to avoid "No handler found" warnings.
 import logging

@@ -18,7 +18,7 @@ def get_logging_config():
     return os.path.join(path, "logging.conf")
 
 
-def fromBcd(byte_array):
+def fromBcd(byte_array, endian="little"):
     """
     Converts a number in little endian 4bits per digit bcd format to binary
 
@@ -27,9 +27,14 @@ def fromBcd(byte_array):
 
     :param byteArray: digits in 4bit bcd format (little endian)
     :type byteArray: bytearray
+    :param endian: "little" or "big"
+    :type endian: str
     :return: number
     :rtype: int
     """
+    if endian == "big":
+        byte_array.reverse()
+
     result = 0;
     multi = 1;
     for b in byte_array:
@@ -41,15 +46,18 @@ def fromBcd(byte_array):
     return result
 
 
-def toBcd(number, bcd_len):
+def toBcd(number, bcd_len, endian="little"):
     """
-    Converts number to 4bit BCD values (little endian).
-    Example: toBcd(1234, 10) --> [0x34, 0x12, 0x00, 0x00, 0x00]
+    Converts number to 4bit BCD values (big endian).
+    Example: 439,700.00MHz toBcd(43970000, 8, "big") --> [0x43, 0x97, 0x00, 0x00]
+    Example: 439,700.00MHz toBcd(43970000, 8)        --> [0x00, 0x00, 0x97, 0x43]
 
     :param number: number to be converted to BCD format
     :type number: int
     :param bcd_len: how many BCD character should the output contain (must be an even value)
     :type bcd_len: int
+    :param endian: "little" or "big"
+    :type endian: str
     :return: list of integers containing the BCD values
     :rtype: list
     """
@@ -68,6 +76,8 @@ def toBcd(number, bcd_len):
         number /= 10
         result.append(byte)
 
+    if endian == "big":
+        result.reverse()
     return result
 
 
