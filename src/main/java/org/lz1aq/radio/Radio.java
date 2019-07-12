@@ -39,6 +39,7 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.lz1aq.radio.event.EmptyRadioListener;
+import org.lz1aq.utils.Misc;
 
 
 
@@ -312,7 +313,7 @@ public class Radio
         if(b==null)
           return;
         
-        //logger.log(Level.INFO, "Incoming bytes ("+b.length+") <------ " + Misc.toHexString(b) );
+        logger.log(Level.INFO, "Incoming bytes ("+b.length+") <------ " + Misc.toHexString(b) );
         
         // Read all there is and add it to our receive buffer
         receiveBuffer.write(b);
@@ -337,6 +338,8 @@ public class Radio
         }
         else
         {
+          if(receiveBuffer.size()>1000) // Lots of incoming garabge - clean the buffer
+            receiveBuffer.reset();
           break;
         }
       }

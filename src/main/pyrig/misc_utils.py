@@ -93,6 +93,8 @@ def get_as_hex_string(data):
         return ' '.join('0x%02x' % ord(b) for b in data)
     elif type(data) == list:
         return ' '.join('0x%02x' % b for b in data)
+    elif type(data) == bytearray:
+        return ' '.join('{:02x}'.format(x) for x in data)
 
 
 #----------------------------------------------------------------

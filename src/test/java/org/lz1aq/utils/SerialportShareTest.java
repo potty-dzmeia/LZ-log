@@ -28,7 +28,7 @@ import junit.framework.TestCase;
  */
 public class SerialportShareTest extends TestCase
 {
-  String portName = "Com5"; // Test will fail if this is not connected
+  String portName = "Com20"; // Test will fail if this comport does not exist
   
   public SerialportShareTest(String testName)
   {

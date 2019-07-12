@@ -79,11 +79,13 @@ from misc_utils import  *
 
 freq = 3700000
 freq /= 10
-freq = toBcd(freq, 4, "big")
+freq = toBcd(freq, 8, "big")
 
 freq.append(02)
 
+
 print(printListInHex(freq))
+print(freq.__str__())
 
 if freq.__len__() != 5:
     print "error"

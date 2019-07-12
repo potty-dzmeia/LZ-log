@@ -298,7 +298,10 @@ class Yaesu(Radio):
 
         # The incoming data does not contain one complete transaction...
         if end == -1:
-            return DecodedTransaction(None, 0)
+            result_dic = dict()
+            DecodedTransaction.insertNotSupported(result_dic, data)
+            result_json = DecodedTransaction.toJson(result_dic)
+            return DecodedTransaction(result_json, 0)
 
         json_result = cls.__parse(data[:end+1])
 

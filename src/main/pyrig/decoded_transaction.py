@@ -66,11 +66,11 @@ class DecodedTransaction(I_DecodedTransaction):
     def insertNotSupported(cls, dest, data=""):
         """
         Inserts a decoded command coming from the radio into the supplied dictionary
-        :param data: The transaction that couldn't be decoded in hex format
-        :type data: str
         :param dest: The dict to which the following item will be added:
                      "not-supported":"the data that couldn't be decoded in hex format"
         :type dest: dict
+        :param data: The transaction that couldn't be decoded in hex format
+        :type data: str
         """
         dest[cls.NOT_SUPPORTED_CMD] = data
 

@@ -143,8 +143,8 @@ class Ft857(Radio):
         command = misc_utils.toBcd(freq, 8)
         command.append(0x01)  # command 01
 
-        tr1 = EncodedTransaction(command.__str__(), post_write_delay=50)
-        logger.debug("returns: {0}".format(tr1))
+        tr1 = EncodedTransaction(bytearray(command).__str__(), post_write_delay=50)
+        #logger.debug("returns: {0}".format(tr1))
         return [tr1]
 
 
@@ -162,7 +162,7 @@ class Ft857(Radio):
         # To get Freq and Mode we have to send to the radio the following bytes: [xx, xx, xx, xx, 01]
         # E.g. [xx, xx, xx, xx, 03] - bytes marked with "xx" are not relevant
         command = [0xFF, 0xFF, 0xFF, 0xFF, 0x03]
-        tr1 = EncodedTransaction(command.__str__(), post_write_delay=50)
+        tr1 = EncodedTransaction(bytearray(command).__str__(), post_write_delay=50)
         return [tr1]
 
 
@@ -180,7 +180,7 @@ class Ft857(Radio):
         # E.g. [xx, xx, xx, xx, 03] - bytes marked with "xx" are not relevant
 
         command = [0xFF, 0xFF, 0xFF, 0xFF, 0x03]
-        tr1 = EncodedTransaction(command.__str__(), post_write_delay=50)
+        tr1 = EncodedTransaction(bytearray(command).__str__(), post_write_delay=50)
         return [tr1]
 
 
@@ -207,7 +207,7 @@ class Ft857(Radio):
 
         p1 = cls.mode_codes[new_mode]
         command = [p1, 0xFF, 0xFF, 0xFF, 0x07]
-        tr1 = EncodedTransaction(command.__str__(), post_write_delay=50)
+        tr1 = EncodedTransaction(bytearray(command).__str__(), post_write_delay=50)
         return [tr1]
 
 
@@ -308,16 +308,25 @@ class Ft857(Radio):
 
         #  Discard all bytes if we don't get exactly 5
         if trans.__len__() != 5:
-            return DecodedTransaction(None, trans.__len__)
+            logger.info("Received different than 5 bytes.")
+            logger.info("Len = "+str(trans.__len__()))
+            logger.info("Content = " + str(bytearray(trans)))
+
+            result_dic = dict()
+            DecodedTransaction.insertNotSupported(result_dic, "Unknown character found in the data coming from the radio.")
+            result_json = DecodedTransaction.toJson(result_dic)
+            return DecodedTransaction(result_json, trans.__len__())
 
         result_dic = dict()
 
         # Mode
         mode = cls.__mode_from_byte_to_string(trans[4])
+        logger.info("mode: "+mode)
         DecodedTransaction.insertMode(result_dic, mode)
         # Frequency
         freq = misc_utils.fromBcd(trans[0:4],"big")
         freq *= 10  # ft857 does not send the least significant digit for the HZ (e.g. 7,150,45)
+        logger.info("freq: " + str(freq))
         DecodedTransaction.insertFreq(result_dic, str(freq))
 
         try:
@@ -326,6 +335,7 @@ class Ft857(Radio):
             # something went wrong during parsing. Return not supported...
             result_dic = dict()
             DecodedTransaction.insertNotSupported(result_dic, "Unknown character found in the data coming from the radio.")
+            result_json = DecodedTransaction.toJson(result_dic)
             return DecodedTransaction(result_json, trans.__len__())
 
         # return the object with the decoded transaction and the amount of bytes that we have read from the supplied buffer(string)
@@ -349,7 +359,6 @@ class Ft857(Radio):
         # Convert the "mode" to valid string
         for key, value in cls.mode_codes.items():
             if mode == value:
-                logger.info("returns = " + key)
                 return key
 
         # In case of unknown mode integer

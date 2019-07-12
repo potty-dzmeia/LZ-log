@@ -302,12 +302,12 @@ class Icom(radio.Radio):
         # Find the beginning of the transaction (0xfe 0xfe)
         trans_start_index = trans.find(cls.TRANS_START)
         if trans_start_index == -1:
-            return DecodedTransaction(None, 0)
+            return DecodedTransaction(None, 0)  # it is OK to return "None" if 0 bytes are read
 
         # Find the end of the transaction (must be after trans_start_index)
         trans_end_index = trans.find(cls.TRANS_END, trans_start_index)
         if trans_end_index == -1:
-            return DecodedTransaction(None, 0)
+            return DecodedTransaction(None, 0)  # it is OK to return "None" if 0 bytes are read
 
         result_dic = dict()
 
