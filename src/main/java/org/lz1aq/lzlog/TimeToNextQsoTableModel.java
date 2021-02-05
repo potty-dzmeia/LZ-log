@@ -236,6 +236,13 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
             // For each logged QSO check if it is the latest per callsign/mode
             for (int i = 0; i < log.getSize(); i++)
             {
+                
+                if( log.getSecondsLeft(log.get(i), appSettings.getQsoRepeatPeriod()) < appSettings.getIncomingQsoHiderAfter()*(-1) )
+                {
+                    // Do not insert QSOs older than "appSettings.getIncomingQsoHiderAfter"
+                    continue;
+                }
+                  
                 String call = log.get(i).getHisCallsign();
                 RadioModes mode = log.get(i).getMode();
                 int local_index = find(call, mode);   

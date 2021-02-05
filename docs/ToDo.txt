@@ -1,7 +1,7 @@
 High priority:
 - remove all uneeded functions from Log class
+- Make sure that editing the log wont break TimeToNextQso functionality
 - 
-
 - freq columns in bandmap are not resized when we remove the frequency option
 
 - Check the install directory and open warning pop-up informing the user what directories are allowed.
@@ -25,7 +25,6 @@ High priority:
 
 
 Low priority:
-- Allow change of the CW speed in function messages
 - delete callsign when moving away from freq and enter into bandmap
 - enter frequency in callsign
 - note za wsqka vruzka 
@@ -34,12 +33,7 @@ Low priority:
 - first part of sent serial number is not updated (e.g. when changing the serial number from the table)
 - the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
 
-Last Solved:
-- ESM when in Callsign field (and default prefix is set) will not sent MyCallsign in case the field was empty.
-- ESM should be exactly like in N1mm
-- Try to catch all keyboard presses (f4 should not close HDSDR)  -- Done by external native Win32 application
-- Serial number like in N1mm
-- If default prefix is used it should always stay in the entry window
-- The default is now visible in the entry window
-- send all zeros as T
-- Adif export supported
+Solved:
+- Mix mode (SSB and CW) is now supported. The 30min rule is now applied per callsign and mode (not like before only for callsign regardless of the mode).
+- In settings the repeat period of the contest is now in Minutes and not in Seconds.
+- 

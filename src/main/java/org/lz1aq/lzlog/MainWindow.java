@@ -82,277 +82,274 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.9";
-  static final String PROGRAM_NAME    = "LZ-Log";
-  static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
-          
-  static final int    SERIAL_NUMBER_MAX_LENGTH = 15;
-  
-  private Log                           log;
-  private LogTableModel                 jtablemodelLog;
-  private TimeToNextQsoTableModel       jtablemodelIncomingQso;
-  private BandmapTableModel             jtablemodelBandmap;
-  private final ApplicationSettings     settings;
-  private final RadioController         radioController;
-  private Keyer                         keyer; 
-  private VoiceKeyer                    voiceKeyer;
-  private Ptt                           ptt;
-  private int                           cqFrequency =3500000;
-  private int                           keyerSpeed = 28;
-  private final Timer                   timer1sec;
-  private final Timer                   timer500ms;
-  private Timer                         timerContinuousCq;
-  private Timer                         timerRadioPolling;
-  private FontChooser                   fontchooser = new FontChooser();
-  private String                        logDbFile;
-  private String                        pathToWorkingDir; // where the jar file is located
-  private SerialportShare               serialportShare = new SerialportShare();
-  
-  private DocumentFilter                callsignFilter = new CallsignDocumentFilter();
-  private DocumentFilter                serialNumberFilter = new SerialNumberDocumentFilter();
-  private DocumentFilter                pttDelayFilter = new PttDelayDocumentFilter();
-  private DocumentFilter                qsoRepeatPeriodFilter = new DigitsOnlyFilter();
-  private DocumentFilter                dontShowAfterFilter = new DigitsOnlyFilter();
 
-  
-  private static final Logger logger = Logger.getLogger(Radio.class.getName());
-  
-  
-  private final ActionListener timer1secListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
+    static final String PROGRAM_VERSION = "1.9";
+    static final String PROGRAM_NAME = "LZ-Log";
+    static final String PROGRAM_ABOUT = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
+
+    static final int SERIAL_NUMBER_MAX_LENGTH = 15;
+
+    private Log log;
+    private LogTableModel jtablemodelLog;
+    private TimeToNextQsoTableModel jtablemodelIncomingQso;
+    private BandmapTableModel jtablemodelBandmap;
+    private final ApplicationSettings settings;
+    private final RadioController radioController;
+    private Keyer keyer;
+    private VoiceKeyer voiceKeyer;
+    private Ptt ptt;
+    private int cqFrequency = 3500000;
+    private int keyerSpeed = 28;
+    private final Timer timer1sec;
+    private final Timer timer500ms;
+    private Timer timerContinuousCq;
+    private Timer timerRadioPolling;
+    private FontChooser fontchooser = new FontChooser();
+    private String logDbFile;
+    private String pathToWorkingDir; // where the jar file is located
+    private SerialportShare serialportShare = new SerialportShare();
+
+    private DocumentFilter callsignFilter = new CallsignDocumentFilter();
+    private DocumentFilter serialNumberFilter = new SerialNumberDocumentFilter();
+    private DocumentFilter pttDelayFilter = new PttDelayDocumentFilter();
+    private DocumentFilter qsoRepeatPeriodFilter = new DigitsOnlyFilter();
+    private DocumentFilter dontShowAfterFilter = new DigitsOnlyFilter();
+
+    private static final Logger logger = Logger.getLogger(Radio.class.getName());
+
+    private final ActionListener timer1secListener = new ActionListener()
     {
-      jtablemodelIncomingQso.refresh();
-      jtablemodelBandmap.refresh(getBandmapStartFreq());
-    }
-  };
+        @Override
+        public void actionPerformed(ActionEvent evt)
+        {
+            jtablemodelIncomingQso.refresh();
+            jtablemodelBandmap.refresh(getBandmapStartFreq());
+        }
+    };
 
-  private final ActionListener timer500msListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
+    private final ActionListener timer500msListener = new ActionListener()
     {
-      // On every second update the callsign status
-      String status = getCallsignStatusText(getCallsignFromTextField());
-      jlabelCallsignStatus.setText(status);
-    }
-  };
-  
-  private final ActionListener timerContinuousCqListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
+        @Override
+        public void actionPerformed(ActionEvent evt)
+        {
+            // On every second update the callsign status
+            String status = getCallsignStatusText(getCallsignFromTextField());
+            jlabelCallsignStatus.setText(status);
+        }
+    };
+
+    private final ActionListener timerContinuousCqListener = new ActionListener()
     {
-      pressedF1();
-    }
-  };
-  
-  
-  private final ActionListener timerRadioPollingListener = new ActionListener()
-  {
-    @Override
-    public void actionPerformed(ActionEvent evt)
+        @Override
+        public void actionPerformed(ActionEvent evt)
+        {
+            pressedF1();
+        }
+    };
+
+    private final ActionListener timerRadioPollingListener = new ActionListener()
     {
-      radioController.poll();
-    }
-  };
-  
+        @Override
+        public void actionPerformed(ActionEvent evt)
+        {
+            radioController.poll();
+        }
+    };
 
-
-  public MainWindow()
-  { 
-    determineWorkingDir();
-    
-    // Create directory for logs if not existing
-    File directory = new File(Paths.get(pathToWorkingDir, "/logs").toString());
-    if (! directory.exists())
+    public MainWindow()
     {
-        directory.mkdir();
-    }
-    
-    // Load user settings from the properties file
-    this.settings = new ApplicationSettings();
-    
-    // Init GUI
-    initComponents();
-    
-    // Show dialog for opening New/Existing log - result will be kept in logDbFile
-    if(((LogSelectionDialog)jdialogLogSelection).showDialog())
-    {
-      System.exit(0); // Close program if Showdialog tells us to do so
-    }
-    
-    // Open log database
-    try
-    {
-      Qso example = new Qso(14190000, RadioModes.CW, "lz1abc", "lz0fs", "200091", "200091", "cq"); // We need to supply an example QSO whwn creating/opening new
-      log = new Log(new LogDatabase(logDbFile), example);
-    }
-    catch (Exception ex)
-    {
-      logger.log(Level.SEVERE, "Couldn't open the log database!", ex);
-    }
-    
-    // Init TableModels
-    jtablemodelLog = new LogTableModel(log);
-    jtablemodelLog.setInvisible(4); // Hide myCall
-    jtableLog.setModel(jtablemodelLog);
-    
-    jtablemodelIncomingQso = new TimeToNextQsoTableModel(log, settings);
-    jtableIncomingQso.setModel(jtablemodelIncomingQso);
-    
-    jtablemodelBandmap = new BandmapTableModel(log, getBandmapStartFreq(), settings);
-    jtableBandmap.setModel(jtablemodelBandmap);
-    
-    
-    // Renderer for the bandmap
-    jtableBandmap.setDefaultRenderer(Object.class, new BandmapTableCellRender());
-    jtableIncomingQso.setDefaultRenderer(Object.class, new IncomingQsoTableCellRender());
-    jtableLog.setDefaultRenderer(Object.class, new LogTableCellRender());
-    
-    // Communicating with the radio
-    radioController = new RadioController();
-    keyer = radioController.getKeyer(); // Radio will be the default keyer
-    
-    // This is used for catching global key presses (i.e. needed for F1-F12 presses)
-    KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-    manager.addKeyEventDispatcher(new MyDispatcher());
-    
-    // Prepare the entry fields to have the necessary data
-    initEntryFields();
+        determineWorkingDir();
 
-    // Callsign text field should show capital letters only
-    ((AbstractDocument) jtextfieldCallsign.getDocument()).setDocumentFilter(callsignFilter);
-    // Serial number should be 6 digits long
-    ((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
-    ((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
-    ((AbstractDocument) jTextFieldPttDelay.getDocument()).setDocumentFilter(pttDelayFilter);
-     ((AbstractDocument) jTextFieldPttTailDelay.getDocument()).setDocumentFilter(pttDelayFilter);
-    ((AbstractDocument) jtextfieldQsoRepeatPeriod.getDocument()).setDocumentFilter(qsoRepeatPeriodFilter);
-    ((AbstractDocument) jTextFieldTimeToNextQso.getDocument()).setDocumentFilter(dontShowAfterFilter);
-    
+        // Create directory for logs if not existing
+        File directory = new File(Paths.get(pathToWorkingDir, "/logs").toString());
+        if(!directory.exists())
+        {
+            directory.mkdir();
+        }
 
-    // Needed so that jTable to scroll automatically upon entering a new Qso
-    jtableLog.addComponentListener(new ComponentAdapter()
-    {
-      @Override
-      public void componentResized(ComponentEvent e)
-      {
-        jtableLog.scrollRectToVisible(jtableLog.getCellRect(jtableLog.getRowCount() - 1, 0, true));
-      }
-    });
-    
-    
-    jtableBandmap.setShowGrid(true);
-    // Hihglighting for active text fields 
-    jtextfieldCallsign.addFocusListener(highlighter);
-    jtextfieldSnt.addFocusListener(highlighter);
-    jtextfieldRcv.addFocusListener(highlighter);
+        // Load user settings from the properties file
+        this.settings = new ApplicationSettings();
 
-    // Timer for refreshing Bandmap and TimeToNextQso windows
-    timer1sec = new Timer(1000, timer1secListener);
-    timer1sec.setRepeats(true);
-    timer1sec.start();
-    
-    // Timer for updating the status of the callsign (Dupe, new etc..)
-    timer500ms = new Timer(300, timer500msListener);
-    timer500ms.setRepeats(true);
-    timer500ms.start();
-    
-    //
-    timerContinuousCq = new Timer(6000, timerContinuousCqListener);
-    timerContinuousCq.setRepeats(false);
-    
-    voiceKeyer = new VoiceKeyer();
-  }
+        // Init GUI
+        initComponents();
 
-  
-  public void resizeFreqColumnWidth(JTable table, int size)
-  {
-    final TableColumnModel columnModel = table.getColumnModel();
+        // Show dialog for opening New/Existing log - result will be kept in logDbFile
+        if(((LogSelectionDialog) jdialogLogSelection).showDialog())
+        {
+            System.exit(0); // Close program if Showdialog tells us to do so
+        }
 
-    for (int column = 0; column < table.getColumnCount(); column++)
-    {    
-      // If frequency column
-      if( settings.isShowBandmapFreqColumns() && (column%2==0) )
-      {
-        columnModel.getColumn(column).setPreferredWidth(size);
-      }
-    }
-  }
-  
-  private DefaultComboBoxModel getBaudRates()
-  {
-    return CommUtils.BaudRate.getComboxModel();
-  } 
-  
-  private DefaultComboBoxModel getBandsComboboxModel()
-  {
-    return new DefaultComboBoxModel(new String[] { "1.8", "3.5", "7", "14", "21", "28" });
-  }
-  
-  
-  private DefaultComboBoxModel getModeComboboxModel()
-  {
-    return RadioModes.getComboxModel();
-  }
-  
-  private DefaultComboBoxModel getBandmapStepInHzComboboxModel()
-  {
-    return new DefaultComboBoxModel(new String[] { "100", "200", "500"});
-  }
-  
-  
-  private DefaultComboBoxModel getBandmapColumnCountComboboxModel()
-  {
-    return new DefaultComboBoxModel(new String[] {"8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66", "68", "70", "72", "74", "76", "78", "80", "82", "84", "86", "88"});
-  }
-  
-  private DefaultComboBoxModel getBandmapRowCountComboboxModel()
-  {
-    return new DefaultComboBoxModel(new String[] {"8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66", "68", "70", "72", "74", "76", "78", "80", "82", "84", "86", "88"});
-  }
-  
-  private class LogSelectionDialog extends JDialog
-  {
-    public boolean isProgramTerminated = false;
+        // Open log database
+        try
+        {
+            Qso example = new Qso(14190000, RadioModes.CW, "lz1abc", "lz0fs", "200091", "200091", "cq"); // We need to supply an example QSO whwn creating/opening new
+            log = new Log(new LogDatabase(logDbFile), example);
+        } catch(Exception ex)
+        {
+            logger.log(Level.SEVERE, "Couldn't open the log database!", ex);
+        }
 
-    public boolean showDialog()
-    {
-      this.setVisible(true);
-      return isProgramTerminated;
-    }
-  }
-  
-  
-  
+        // Init TableModels
+        jtablemodelLog = new LogTableModel(log);
+        jtablemodelLog.setInvisible(4); // Hide myCall
+        jtableLog.setModel(jtablemodelLog);
 
-    
-  FocusListener highlighter = new FocusListener()
-  {
+        jtablemodelIncomingQso = new TimeToNextQsoTableModel(log, settings);
+        jtableIncomingQso.setModel(jtablemodelIncomingQso);
 
-    @Override
-    public void focusGained(FocusEvent e)
-    {
-      e.getComponent().setBackground(Color.white);
+        jtablemodelBandmap = new BandmapTableModel(log, getBandmapStartFreq(), settings);
+        jtableBandmap.setModel(jtablemodelBandmap);
+
+        // Renderer for the bandmap
+        jtableBandmap.setDefaultRenderer(Object.class, new BandmapTableCellRender());
+        jtableIncomingQso.setDefaultRenderer(Object.class, new IncomingQsoTableCellRender());
+        jtableLog.setDefaultRenderer(Object.class, new LogTableCellRender());
+
+        // Communicating with the radio
+        radioController = new RadioController();
+        keyer = radioController.getKeyer(); // Radio will be the default keyer
+
+        // This is used for catching global key presses (i.e. needed for F1-F12 presses)
+        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        manager.addKeyEventDispatcher(new MyDispatcher());
+
+        // Prepare the entry fields to have the necessary data
+        initEntryFields();
+
+        // Callsign text field should show capital letters only
+        ((AbstractDocument) jtextfieldCallsign.getDocument()).setDocumentFilter(callsignFilter);
+        // Serial number should be 6 digits long
+        ((AbstractDocument) jtextfieldSnt.getDocument()).setDocumentFilter(serialNumberFilter);
+        ((AbstractDocument) jtextfieldRcv.getDocument()).setDocumentFilter(serialNumberFilter);
+        ((AbstractDocument) jTextFieldPttDelay.getDocument()).setDocumentFilter(pttDelayFilter);
+        ((AbstractDocument) jTextFieldPttTailDelay.getDocument()).setDocumentFilter(pttDelayFilter);
+        ((AbstractDocument) jtextfieldQsoRepeatPeriod.getDocument()).setDocumentFilter(qsoRepeatPeriodFilter);
+        ((AbstractDocument) jTextFieldTimeToNextQso.getDocument()).setDocumentFilter(dontShowAfterFilter);
+
+        // Needed so that jTable to scroll automatically upon entering a new Qso
+        jtableLog.addComponentListener(new ComponentAdapter()
+        {
+            @Override
+            public void componentResized(ComponentEvent e)
+            {
+                jtableLog.scrollRectToVisible(jtableLog.getCellRect(jtableLog.getRowCount() - 1, 0, true));
+            }
+        });
+
+        jtableBandmap.setShowGrid(true);
+        // Hihglighting for active text fields 
+        jtextfieldCallsign.addFocusListener(highlighter);
+        jtextfieldSnt.addFocusListener(highlighter);
+        jtextfieldRcv.addFocusListener(highlighter);
+
+        // Timer for refreshing Bandmap and TimeToNextQso windows
+        timer1sec = new Timer(1000, timer1secListener);
+        timer1sec.setRepeats(true);
+        timer1sec.start();
+
+        // Timer for updating the status of the callsign (Dupe, new etc..)
+        timer500ms = new Timer(300, timer500msListener);
+        timer500ms.setRepeats(true);
+        timer500ms.start();
+
+        //
+        timerContinuousCq = new Timer(6000, timerContinuousCqListener);
+        timerContinuousCq.setRepeats(false);
+
+        voiceKeyer = new VoiceKeyer();
     }
 
-    @Override
-    public void focusLost(FocusEvent e)
+    public void resizeFreqColumnWidth(JTable table, int size)
     {
-      e.getComponent().setBackground(Color.lightGray);
+        final TableColumnModel columnModel = table.getColumnModel();
+
+        for(int column = 0; column < table.getColumnCount(); column++)
+        {
+            // If frequency column
+            if(settings.isShowBandmapFreqColumns() && (column % 2 == 0))
+            {
+                columnModel.getColumn(column).setPreferredWidth(size);
+            }
+        }
     }
 
-  
-  };
-    
-    
-  /**
-   * This method is called from within the constructor to initialize the form. WARNING: Do NOT
-   * modify this code. The content of this method is always regenerated by the Form Editor.
-   */
-  @SuppressWarnings("unchecked")
+    private DefaultComboBoxModel getBaudRates()
+    {
+        return CommUtils.BaudRate.getComboxModel();
+    }
+
+    private DefaultComboBoxModel getBandsComboboxModel()
+    {
+        return new DefaultComboBoxModel(new String[]
+        {
+            "1.8", "3.5", "7", "14", "21", "28"
+        });
+    }
+
+    private DefaultComboBoxModel getModeComboboxModel()
+    {
+        return RadioModes.getComboxModel();
+    }
+
+    private DefaultComboBoxModel getBandmapStepInHzComboboxModel()
+    {
+        return new DefaultComboBoxModel(new String[]
+        {
+            "100", "200", "500"
+        });
+    }
+
+    private DefaultComboBoxModel getBandmapColumnCountComboboxModel()
+    {
+        return new DefaultComboBoxModel(new String[]
+        {
+            "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66", "68", "70", "72", "74", "76", "78", "80", "82", "84", "86", "88"
+        });
+    }
+
+    private DefaultComboBoxModel getBandmapRowCountComboboxModel()
+    {
+        return new DefaultComboBoxModel(new String[]
+        {
+            "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "48", "50", "52", "54", "56", "58", "60", "62", "64", "66", "68", "70", "72", "74", "76", "78", "80", "82", "84", "86", "88"
+        });
+    }
+
+    private class LogSelectionDialog extends JDialog
+    {
+
+        public boolean isProgramTerminated = false;
+
+        public boolean showDialog()
+        {
+            this.setVisible(true);
+            return isProgramTerminated;
+        }
+    }
+
+    FocusListener highlighter = new FocusListener()
+    {
+
+        @Override
+        public void focusGained(FocusEvent e)
+        {
+            e.getComponent().setBackground(Color.white);
+        }
+
+        @Override
+        public void focusLost(FocusEvent e)
+        {
+            e.getComponent().setBackground(Color.lightGray);
+        }
+
+    };
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()
     {
@@ -2405,195 +2402,191 @@ public class MainWindow extends javax.swing.JFrame
 
   private void formWindowOpened(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowOpened
   {//GEN-HEADEREND:event_formWindowOpened
-    initMainWindow(true);
+      initMainWindow(true);
   }//GEN-LAST:event_formWindowOpened
 
   private void formWindowClosing(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowClosing
   {//GEN-HEADEREND:event_formWindowClosing
-    // Read the dimensions of the different frames
-    settings.setFrameDimensions(ApplicationSettings.FrameIndex.ENTRY, intframeEntryWindow.getBounds());
-    settings.setFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP, intframeBandmap.getBounds());
-    settings.setFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO, intframeTimeToNextQso.getBounds());
-    settings.setFrameDimensions(ApplicationSettings.FrameIndex.JFRAME, this.getBounds());
-    settings.setFrameDimensions(ApplicationSettings.FrameIndex.LOG, intframeLog.getBounds());
-    settings.setFrameDimensions(ApplicationSettings.FrameIndex.RADIO, intframeRadioConnection.getBounds());
-    settings.setFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS, intframeMisc.getBounds());
-            
-    storeFonts();
-    
-    settings.SaveSettingsToDisk(); // Save all settings to disk
+      // Read the dimensions of the different frames
+      settings.setFrameDimensions(ApplicationSettings.FrameIndex.ENTRY, intframeEntryWindow.getBounds());
+      settings.setFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP, intframeBandmap.getBounds());
+      settings.setFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO, intframeTimeToNextQso.getBounds());
+      settings.setFrameDimensions(ApplicationSettings.FrameIndex.JFRAME, this.getBounds());
+      settings.setFrameDimensions(ApplicationSettings.FrameIndex.LOG, intframeLog.getBounds());
+      settings.setFrameDimensions(ApplicationSettings.FrameIndex.RADIO, intframeRadioConnection.getBounds());
+      settings.setFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS, intframeMisc.getBounds());
+
+      storeFonts();
+
+      settings.SaveSettingsToDisk(); // Save all settings to disk
   }//GEN-LAST:event_formWindowClosing
 
   private void jmenuSettingsActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jmenuSettingsActionPerformed
   {//GEN-HEADEREND:event_jmenuSettingsActionPerformed
-    jDialogSettings.pack();
-    jDialogSettings.setVisible(true);
+      jDialogSettings.pack();
+      jDialogSettings.setVisible(true);
   }//GEN-LAST:event_jmenuSettingsActionPerformed
 
   private void jButton12ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton12ActionPerformed
   {//GEN-HEADEREND:event_jButton12ActionPerformed
-    pressedF12();
+      pressedF12();
   }//GEN-LAST:event_jButton12ActionPerformed
 
   private void jButton11ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton11ActionPerformed
   {//GEN-HEADEREND:event_jButton11ActionPerformed
-    pressedF11();
+      pressedF11();
   }//GEN-LAST:event_jButton11ActionPerformed
 
   private void jtextfieldCallsignKeyReleased(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jtextfieldCallsignKeyReleased
   {//GEN-HEADEREND:event_jtextfieldCallsignKeyReleased
-    // On every key press update the callsign status
-    String status = getCallsignStatusText(getCallsignFromTextField());
-    jlabelCallsignStatus.setText(status);
+      // On every key press update the callsign status
+      String status = getCallsignStatusText(getCallsignFromTextField());
+      jlabelCallsignStatus.setText(status);
   }//GEN-LAST:event_jtextfieldCallsignKeyReleased
 
   private void jtextfieldCallsignKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jtextfieldCallsignKeyTyped
   {//GEN-HEADEREND:event_jtextfieldCallsignKeyTyped
-    if(timerContinuousCq.isRunning()) // Any key press stops the automatic CQ
-    {
-      timerContinuousCq.stop();
-      keyer.stopSendingCw();
-    }
-    
-    switch(evt.getKeyChar())
-    {
-      case KeyEvent.VK_SPACE: // Move to Rcv field    
-        jtextfieldRcv.requestFocusInWindow();
-        evt.consume();
-        break;
+      if(timerContinuousCq.isRunning()) // Any key press stops the automatic CQ
+      {
+          timerContinuousCq.stop();
+          keyer.stopSendingCw();
+      }
 
-      case KeyEvent.VK_ENTER: // Move to Rcv field      
-        if(settings.isEmsEnabled())
-        {
-          if(sendEnterSendsMessage())
-          {
-             jtextfieldRcv.requestFocusInWindow();
-          }
-        }
-        else
-        {
-          jtextfieldRcv.requestFocusInWindow();
-        }
-        evt.consume();     
-        break;
-    }
+      switch(evt.getKeyChar())
+      {
+          case KeyEvent.VK_SPACE: // Move to Rcv field    
+              jtextfieldRcv.requestFocusInWindow();
+              evt.consume();
+              break;
+
+          case KeyEvent.VK_ENTER: // Move to Rcv field      
+              if(settings.isEmsEnabled())
+              {
+                  if(sendEnterSendsMessage())
+                  {
+                      jtextfieldRcv.requestFocusInWindow();
+                  }
+              } else
+              {
+                  jtextfieldRcv.requestFocusInWindow();
+              }
+              evt.consume();
+              break;
+      }
   }//GEN-LAST:event_jtextfieldCallsignKeyTyped
 
   private void jbuttonDeleteEntryActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jbuttonDeleteEntryActionPerformed
   {//GEN-HEADEREND:event_jbuttonDeleteEntryActionPerformed
-    // Ask for confirmation
-    int response = JOptionPane.showConfirmDialog(null, "Delete the selected Qso entry?", "Confirm",
-                                                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (response == JOptionPane.NO_OPTION || response == JOptionPane.CLOSED_OPTION)
-    {
-      return; // do nothing
-    }
+      // Ask for confirmation
+      int response = JOptionPane.showConfirmDialog(null, "Delete the selected Qso entry?", "Confirm",
+              JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+      if(response == JOptionPane.NO_OPTION || response == JOptionPane.CLOSED_OPTION)
+      {
+          return; // do nothing
+      }
 
-    // Get the selected row
-    int selection = jtableLog.getSelectedRow();
-    if(selection >= 0)
-    {
-      selection = jtableLog.convertRowIndexToModel(selection);
-      jtablemodelLog.removeRow(selection);
-      initEntryFields(); // We need to update the Snt field in case we deleted the last contact
-    }
-    else
-    {
-      JOptionPane.showMessageDialog(null, "Pease select entry!");
-    }
+      // Get the selected row
+      int selection = jtableLog.getSelectedRow();
+      if(selection >= 0)
+      {
+          selection = jtableLog.convertRowIndexToModel(selection);
+          jtablemodelLog.removeRow(selection);
+          initEntryFields(); // We need to update the Snt field in case we deleted the last contact
+      } else
+      {
+          JOptionPane.showMessageDialog(null, "Pease select entry!");
+      }
   }//GEN-LAST:event_jbuttonDeleteEntryActionPerformed
 
   private void jtogglebuttonConnectToRadioActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToRadioActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToRadioActionPerformed
-    JToggleButton tBtn = (JToggleButton) evt.getSource();
-    
-    if(settings.getRadioCommportName().isEmpty())
-    {
-      JOptionPane.showMessageDialog(null, "Commport not set!");
-    } 
-    // Connect
-    // --------------------
-    else if(tBtn.isSelected())
-    {
-      // Select the python file describing the radio protocol
-      if(loadRadioProtocolParser())
+      JToggleButton tBtn = (JToggleButton) evt.getSource();
+
+      if(settings.getRadioCommportName().isEmpty())
       {
-        connectRadio(); // now we can try to connect
-      } 
-    }
-    // Disconnect
-    // --------------------
-    else
-      disconnectRadio();
-    
-    
-    if(radioController.isConnected())
-    {
-      jtogglebuttonConnectToRadio.setSelected(true);
-      radioController.getKeyer().setCwSpeed(keyerSpeed); 
-      jcomboboxBand.setEnabled(false);
-      jcomboboxMode.setEnabled(false);
-      jcheckboxRadioPolling.setEnabled(true);
-      jtextfieldPollingTime.setEditable(true);
-    }
-    else
-    {
-      jtogglebuttonConnectToRadio.setSelected(false);
-      jcomboboxBand.setEnabled(true);
-      jcomboboxMode.setEnabled(true);
-      jcheckboxRadioPolling.setEnabled(false);
-      jtextfieldPollingTime.setEditable(false);
-    }
+          JOptionPane.showMessageDialog(null, "Commport not set!");
+      } // Connect
+      // --------------------
+      else if(tBtn.isSelected())
+      {
+          // Select the python file describing the radio protocol
+          if(loadRadioProtocolParser())
+          {
+              connectRadio(); // now we can try to connect
+          }
+      } // Disconnect
+      // --------------------
+      else
+      {
+          disconnectRadio();
+      }
+
+      if(radioController.isConnected())
+      {
+          jtogglebuttonConnectToRadio.setSelected(true);
+          radioController.getKeyer().setCwSpeed(keyerSpeed);
+          jcomboboxBand.setEnabled(false);
+          jcomboboxMode.setEnabled(false);
+          jcheckboxRadioPolling.setEnabled(true);
+          jtextfieldPollingTime.setEditable(true);
+      } else
+      {
+          jtogglebuttonConnectToRadio.setSelected(false);
+          jcomboboxBand.setEnabled(true);
+          jcomboboxMode.setEnabled(true);
+          jcheckboxRadioPolling.setEnabled(false);
+          jtextfieldPollingTime.setEditable(false);
+      }
   }//GEN-LAST:event_jtogglebuttonConnectToRadioActionPerformed
 
   private void jButton3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton3ActionPerformed
   {//GEN-HEADEREND:event_jButton3ActionPerformed
-    pressedF3();
+      pressedF3();
   }//GEN-LAST:event_jButton3ActionPerformed
 
   private void jButton1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton1ActionPerformed
   {//GEN-HEADEREND:event_jButton1ActionPerformed
-    pressedF1();
+      pressedF1();
   }//GEN-LAST:event_jButton1ActionPerformed
 
   private void jButton2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton2ActionPerformed
   {//GEN-HEADEREND:event_jButton2ActionPerformed
-    pressedF2();
+      pressedF2();
   }//GEN-LAST:event_jButton2ActionPerformed
 
   private void jButton4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton4ActionPerformed
   {//GEN-HEADEREND:event_jButton4ActionPerformed
-    pressedF4();
+      pressedF4();
   }//GEN-LAST:event_jButton4ActionPerformed
 
   private void jButton5ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton5ActionPerformed
   {//GEN-HEADEREND:event_jButton5ActionPerformed
-    pressedF5();
+      pressedF5();
   }//GEN-LAST:event_jButton5ActionPerformed
 
   private void jButton6ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton6ActionPerformed
   {//GEN-HEADEREND:event_jButton6ActionPerformed
-    pressedF6();
+      pressedF6();
   }//GEN-LAST:event_jButton6ActionPerformed
 
   private void jButton7ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton7ActionPerformed
   {//GEN-HEADEREND:event_jButton7ActionPerformed
-    pressedF7();
+      pressedF7();
   }//GEN-LAST:event_jButton7ActionPerformed
 
   private void jButton8ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton8ActionPerformed
   {//GEN-HEADEREND:event_jButton8ActionPerformed
-    pressedF8();
+      pressedF8();
   }//GEN-LAST:event_jButton8ActionPerformed
 
   private void jButton9ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton9ActionPerformed
   {//GEN-HEADEREND:event_jButton9ActionPerformed
-    pressedF9();
+      pressedF9();
   }//GEN-LAST:event_jButton9ActionPerformed
 
   private void jButton10ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton10ActionPerformed
   {//GEN-HEADEREND:event_jButton10ActionPerformed
-    pressedF10();
+      pressedF10();
   }//GEN-LAST:event_jButton10ActionPerformed
 
   private void jradiobuttonCQItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jradiobuttonCQItemStateChanged
@@ -2603,537 +2596,528 @@ public class MainWindow extends javax.swing.JFrame
 
   private void jcomboboxColumnCountItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcomboboxColumnCountItemStateChanged
   {//GEN-HEADEREND:event_jcomboboxColumnCountItemStateChanged
-     if (evt.getStateChange() == ItemEvent.SELECTED) 
-     {
-       settings.setBandmapColumnCount(Integer.parseInt((String)jcomboboxColumnCount.getSelectedItem()));
-       jtablemodelBandmap.fireTableStructureChanged();
-     }
+      if(evt.getStateChange() == ItemEvent.SELECTED)
+      {
+          settings.setBandmapColumnCount(Integer.parseInt((String) jcomboboxColumnCount.getSelectedItem()));
+          jtablemodelBandmap.fireTableStructureChanged();
+      }
   }//GEN-LAST:event_jcomboboxColumnCountItemStateChanged
 
   private void jcomboboxRowCountItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcomboboxRowCountItemStateChanged
   {//GEN-HEADEREND:event_jcomboboxRowCountItemStateChanged
-     if (evt.getStateChange() == ItemEvent.SELECTED) 
-     {
-       settings.setBandmapRowCount(Integer.parseInt((String)jcomboboxRowCount.getSelectedItem()));
-       jtablemodelBandmap.fireTableStructureChanged();
-     }
+      if(evt.getStateChange() == ItemEvent.SELECTED)
+      {
+          settings.setBandmapRowCount(Integer.parseInt((String) jcomboboxRowCount.getSelectedItem()));
+          jtablemodelBandmap.fireTableStructureChanged();
+      }
   }//GEN-LAST:event_jcomboboxRowCountItemStateChanged
 
   private void jcomboboxStepInHzItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcomboboxStepInHzItemStateChanged
   {//GEN-HEADEREND:event_jcomboboxStepInHzItemStateChanged
-     if (evt.getStateChange() == ItemEvent.SELECTED) 
-     {
-       settings.setBandmapStepInHz(Integer.parseInt((String)jcomboboxStepInHz.getSelectedItem()));
-     }
+      if(evt.getStateChange() == ItemEvent.SELECTED)
+      {
+          settings.setBandmapStepInHz(Integer.parseInt((String) jcomboboxStepInHz.getSelectedItem()));
+      }
   }//GEN-LAST:event_jcomboboxStepInHzItemStateChanged
 
   private void jmenuFontsActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jmenuFontsActionPerformed
   {//GEN-HEADEREND:event_jmenuFontsActionPerformed
-    jDialogFontChooser.setVisible(true);
+      jDialogFontChooser.setVisible(true);
   }//GEN-LAST:event_jmenuFontsActionPerformed
 
   private void jButton13ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton13ActionPerformed
   {//GEN-HEADEREND:event_jButton13ActionPerformed
-    fontchooser.setSelectedFont(jtextfieldCallsign.getFont());
-    if(fontchooser.showDialog(jtextfieldCallsign)==FontChooser.OK_OPTION)
-    {
-      jtextfieldCallsign.setFont(fontchooser.getSelectedFont());
-      storeFonts();
-    }
+      fontchooser.setSelectedFont(jtextfieldCallsign.getFont());
+      if(fontchooser.showDialog(jtextfieldCallsign) == FontChooser.OK_OPTION)
+      {
+          jtextfieldCallsign.setFont(fontchooser.getSelectedFont());
+          storeFonts();
+      }
   }//GEN-LAST:event_jButton13ActionPerformed
 
   private void jButton19ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton19ActionPerformed
   {//GEN-HEADEREND:event_jButton19ActionPerformed
-    jDialogFontChooser.setVisible(false);
+      jDialogFontChooser.setVisible(false);
   }//GEN-LAST:event_jButton19ActionPerformed
 
   private void jButton14ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton14ActionPerformed
   {//GEN-HEADEREND:event_jButton14ActionPerformed
-    fontchooser.setSelectedFont(jtextfieldSnt.getFont());
-    if(fontchooser.showDialog(jtextfieldSnt) == FontChooser.OK_OPTION)
-    {
-      jtextfieldSnt.setFont(fontchooser.getSelectedFont());
-      storeFonts();
-    }
+      fontchooser.setSelectedFont(jtextfieldSnt.getFont());
+      if(fontchooser.showDialog(jtextfieldSnt) == FontChooser.OK_OPTION)
+      {
+          jtextfieldSnt.setFont(fontchooser.getSelectedFont());
+          storeFonts();
+      }
   }//GEN-LAST:event_jButton14ActionPerformed
 
   private void jButton15ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton15ActionPerformed
   {//GEN-HEADEREND:event_jButton15ActionPerformed
-    fontchooser.setSelectedFont(jtextfieldRcv.getFont());
-    if(fontchooser.showDialog(jtextfieldRcv) == FontChooser.OK_OPTION)
-    {
-      jtextfieldRcv.setFont(fontchooser.getSelectedFont());
-      storeFonts();
-    }
+      fontchooser.setSelectedFont(jtextfieldRcv.getFont());
+      if(fontchooser.showDialog(jtextfieldRcv) == FontChooser.OK_OPTION)
+      {
+          jtextfieldRcv.setFont(fontchooser.getSelectedFont());
+          storeFonts();
+      }
   }//GEN-LAST:event_jButton15ActionPerformed
 
   private void jButton16ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton16ActionPerformed
   {//GEN-HEADEREND:event_jButton16ActionPerformed
-    fontchooser.setSelectedFont(jtableIncomingQso.getFont());
-    if(fontchooser.showDialog(jtableIncomingQso) == FontChooser.OK_OPTION)
-    {
-      jtableIncomingQso.setFont(fontchooser.getSelectedFont());
-      storeFonts();
-    }
+      fontchooser.setSelectedFont(jtableIncomingQso.getFont());
+      if(fontchooser.showDialog(jtableIncomingQso) == FontChooser.OK_OPTION)
+      {
+          jtableIncomingQso.setFont(fontchooser.getSelectedFont());
+          storeFonts();
+      }
   }//GEN-LAST:event_jButton16ActionPerformed
 
   private void jButton17ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton17ActionPerformed
   {//GEN-HEADEREND:event_jButton17ActionPerformed
-    fontchooser.setSelectedFont(jtableLog.getFont());
-    if(fontchooser.showDialog(jtableLog) == FontChooser.OK_OPTION)
-    {
-      jtableLog.setFont(fontchooser.getSelectedFont());
-      storeFonts();
-    }
+      fontchooser.setSelectedFont(jtableLog.getFont());
+      if(fontchooser.showDialog(jtableLog) == FontChooser.OK_OPTION)
+      {
+          jtableLog.setFont(fontchooser.getSelectedFont());
+          storeFonts();
+      }
   }//GEN-LAST:event_jButton17ActionPerformed
 
   private void jButton18ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton18ActionPerformed
   {//GEN-HEADEREND:event_jButton18ActionPerformed
-    fontchooser.setSelectedFont(jtableBandmap.getFont());
-    if(fontchooser.showDialog(jtableBandmap) == FontChooser.OK_OPTION)
-    {
-      jtableBandmap.setFont(fontchooser.getSelectedFont());
-      storeFonts();
-    }
+      fontchooser.setSelectedFont(jtableBandmap.getFont());
+      if(fontchooser.showDialog(jtableBandmap) == FontChooser.OK_OPTION)
+      {
+          jtableBandmap.setFont(fontchooser.getSelectedFont());
+          storeFonts();
+      }
   }//GEN-LAST:event_jButton18ActionPerformed
 
   private void jtextfieldRcvKeyTyped(java.awt.event.KeyEvent evt)//GEN-FIRST:event_jtextfieldRcvKeyTyped
   {//GEN-HEADEREND:event_jtextfieldRcvKeyTyped
-    switch(evt.getKeyChar())
-    {
-      case KeyEvent.VK_SPACE: // Move to Rcv field    
-        jtextfieldCallsign.requestFocusInWindow();
-        evt.consume();
-        break;
-      case KeyEvent.VK_ENTER: // Move to Rcv field    
-         // Log Qso
-        if(addEntryToLog())
-        {
-          if(settings.isEmsEnabled() && jradiobuttonCQ.isSelected())
-            pressedF3();
-          else if(settings.isEmsEnabled() && jradiobuttonSP.isSelected())
-            pressedF2();
+      switch(evt.getKeyChar())
+      {
+          case KeyEvent.VK_SPACE: // Move to Rcv field    
+              jtextfieldCallsign.requestFocusInWindow();
+              evt.consume();
+              break;
+          case KeyEvent.VK_ENTER: // Move to Rcv field    
+              // Log Qso
+              if(addEntryToLog())
+              {
+                  if(settings.isEmsEnabled() && jradiobuttonCQ.isSelected())
+                  {
+                      pressedF3();
+                  } else if(settings.isEmsEnabled() && jradiobuttonSP.isSelected())
+                  {
+                      pressedF2();
+                  }
 
-          initEntryFields();
-        }
-        evt.consume();
-        break;
-    }
+                  initEntryFields();
+              }
+              evt.consume();
+              break;
+      }
   }//GEN-LAST:event_jtextfieldRcvKeyTyped
 
   private void jbuttonSetCqFreqActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jbuttonSetCqFreqActionPerformed
   {//GEN-HEADEREND:event_jbuttonSetCqFreqActionPerformed
-    cqFrequency = getFreq();
-    jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
+      cqFrequency = getFreq();
+      jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
   }//GEN-LAST:event_jbuttonSetCqFreqActionPerformed
 
   private void jbuttonJumpToCqFreqActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jbuttonJumpToCqFreqActionPerformed
   {//GEN-HEADEREND:event_jbuttonJumpToCqFreqActionPerformed
-    radioController.setFrequency(cqFrequency);
+      radioController.setFrequency(cqFrequency);
   }//GEN-LAST:event_jbuttonJumpToCqFreqActionPerformed
 
   private void jcheckboxF1jumpsToCqStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_jcheckboxF1jumpsToCqStateChanged
   {//GEN-HEADEREND:event_jcheckboxF1jumpsToCqStateChanged
-    if (jcheckboxF1jumpsToCq.isSelected())
-    {
-      jbuttonSetCqFreq.setEnabled(true);
-    }
-    else
-    {
-      jbuttonSetCqFreq.setEnabled(false);
-    }
+      if(jcheckboxF1jumpsToCq.isSelected())
+      {
+          jbuttonSetCqFreq.setEnabled(true);
+      } else
+      {
+          jbuttonSetCqFreq.setEnabled(false);
+      }
   }//GEN-LAST:event_jcheckboxF1jumpsToCqStateChanged
 
   private void jbuttonCreateNewLogActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jbuttonCreateNewLogActionPerformed
   {//GEN-HEADEREND:event_jbuttonCreateNewLogActionPerformed
-    if(createNewLog())
-      jdialogLogSelection.dispose();
+      if(createNewLog())
+      {
+          jdialogLogSelection.dispose();
+      }
   }//GEN-LAST:event_jbuttonCreateNewLogActionPerformed
 
   private void jdialogLogSelectionWindowClosing(java.awt.event.WindowEvent evt)//GEN-FIRST:event_jdialogLogSelectionWindowClosing
   {//GEN-HEADEREND:event_jdialogLogSelectionWindowClosing
-    ((LogSelectionDialog)jdialogLogSelection).isProgramTerminated = true;
+      ((LogSelectionDialog) jdialogLogSelection).isProgramTerminated = true;
   }//GEN-LAST:event_jdialogLogSelectionWindowClosing
 
   private void jbuttonOpenExistingLogActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jbuttonOpenExistingLogActionPerformed
   {//GEN-HEADEREND:event_jbuttonOpenExistingLogActionPerformed
-    if(findExistingLog())
-      jdialogLogSelection.dispose();
+      if(findExistingLog())
+      {
+          jdialogLogSelection.dispose();
+      }
   }//GEN-LAST:event_jbuttonOpenExistingLogActionPerformed
 
   private void jmenuGenerateCabrilloActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jmenuGenerateCabrilloActionPerformed
   {//GEN-HEADEREND:event_jmenuGenerateCabrilloActionPerformed
-    JFileChooser fc = new JFileChooser();
-    fc.setFileFilter(new FileNameExtensionFilter("Cabrillo files (*.log)", "log"));
-    fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
-    try
-    {
-      int returnVal = fc.showSaveDialog(this.getParent());
-      if (returnVal != JFileChooser.APPROVE_OPTION)
+      JFileChooser fc = new JFileChooser();
+      fc.setFileFilter(new FileNameExtensionFilter("Cabrillo files (*.log)", "log"));
+      fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
+      try
       {
-        return;
-      } 
-    }
-    catch (Exception exc)
-    {
-      JOptionPane.showMessageDialog(null, "Error when trying to acquire cabrillo file.", "Error", JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-    
-    String absPath = fc.getSelectedFile().getAbsolutePath();
-    if(!absPath.endsWith(".log"))
-    {
-      absPath = absPath+".log";
-    }
-        
-    File file = new File(absPath);
-    
-    if(file.exists())
-    {
-      JOptionPane.showMessageDialog(null, "File already exists: "+file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-    
-    // Write the cabrillo file
-    try (PrintWriter printWriter = new PrintWriter(absPath))
-    {
-      printWriter.println("START-OF-LOG: 2.0");
-      printWriter.println("CALLSIGN: " + settings.getMyCallsign());
-      printWriter.println("CONTEST: ");
-      printWriter.println("CATEGORY: ");
-      printWriter.println("CLAIMED-SCORE: ");
-      printWriter.println("OPERATORS: ");
-      printWriter.println("NAME: ");
-      printWriter.println("ADDRESS: ");
-      printWriter.println("ADDRESS: ");
-      printWriter.println("CREATED-BY: " + PROGRAM_NAME + " " + PROGRAM_VERSION);
-      for (int i = 0; i < log.getQsoCount(); i++)
+          int returnVal = fc.showSaveDialog(this.getParent());
+          if(returnVal != JFileChooser.APPROVE_OPTION)
+          {
+              return;
+          }
+      } catch(Exception exc)
       {
-        printWriter.println(log.get(i).toStringCabrillo());
+          JOptionPane.showMessageDialog(null, "Error when trying to acquire cabrillo file.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
       }
-      printWriter.println("END-OF-LOG:");
-    }
-    catch (FileNotFoundException ex)
-    {
-      JOptionPane.showMessageDialog(null, "Couldn't generate the Cabrillo file", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-    
-    JOptionPane.showMessageDialog(null, "Cabrilo file created successfully.", "Success...", JOptionPane.INFORMATION_MESSAGE);
+
+      String absPath = fc.getSelectedFile().getAbsolutePath();
+      if(!absPath.endsWith(".log"))
+      {
+          absPath = absPath + ".log";
+      }
+
+      File file = new File(absPath);
+
+      if(file.exists())
+      {
+          JOptionPane.showMessageDialog(null, "File already exists: " + file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+      }
+
+      // Write the cabrillo file
+      try(PrintWriter printWriter = new PrintWriter(absPath))
+      {
+          printWriter.println("START-OF-LOG: 2.0");
+          printWriter.println("CALLSIGN: " + settings.getMyCallsign());
+          printWriter.println("CONTEST: ");
+          printWriter.println("CATEGORY: ");
+          printWriter.println("CLAIMED-SCORE: ");
+          printWriter.println("OPERATORS: ");
+          printWriter.println("NAME: ");
+          printWriter.println("ADDRESS: ");
+          printWriter.println("ADDRESS: ");
+          printWriter.println("CREATED-BY: " + PROGRAM_NAME + " " + PROGRAM_VERSION);
+          for(int i = 0; i < log.getQsoCount(); i++)
+          {
+              printWriter.println(log.get(i).toStringCabrillo());
+          }
+          printWriter.println("END-OF-LOG:");
+      } catch(FileNotFoundException ex)
+      {
+          JOptionPane.showMessageDialog(null, "Couldn't generate the Cabrillo file", "Error", JOptionPane.ERROR_MESSAGE);
+      }
+
+      JOptionPane.showMessageDialog(null, "Cabrilo file created successfully.", "Success...", JOptionPane.INFORMATION_MESSAGE);
   }//GEN-LAST:event_jmenuGenerateCabrilloActionPerformed
 
   private void jbuttonKeyerUPActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jbuttonKeyerUPActionPerformed
   {//GEN-HEADEREND:event_jbuttonKeyerUPActionPerformed
-    increaseKeyerSpeed();
+      increaseKeyerSpeed();
   }//GEN-LAST:event_jbuttonKeyerUPActionPerformed
 
   private void jbuttonKeyerDownActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jbuttonKeyerDownActionPerformed
   {//GEN-HEADEREND:event_jbuttonKeyerDownActionPerformed
-    decreaseKeyerSpeed();
+      decreaseKeyerSpeed();
   }//GEN-LAST:event_jbuttonKeyerDownActionPerformed
 
   private void jtextfieldFreqWidthActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtextfieldFreqWidthActionPerformed
   {//GEN-HEADEREND:event_jtextfieldFreqWidthActionPerformed
-    resizeFreqColumnWidth(jtableBandmap, Integer.parseInt(jtextfieldFreqWidth.getText()));
+      resizeFreqColumnWidth(jtableBandmap, Integer.parseInt(jtextfieldFreqWidth.getText()));
   }//GEN-LAST:event_jtextfieldFreqWidthActionPerformed
 
   private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem1ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem1ActionPerformed
-    intframeEntryWindow.toFront();
+      intframeEntryWindow.toFront();
   }//GEN-LAST:event_jMenuItem1ActionPerformed
 
   private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem2ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
-    intframeTimeToNextQso.toFront();
+      intframeTimeToNextQso.toFront();
   }//GEN-LAST:event_jMenuItem2ActionPerformed
 
   private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem3ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem3ActionPerformed
-    intframeBandmap.toFront();
+      intframeBandmap.toFront();
   }//GEN-LAST:event_jMenuItem3ActionPerformed
 
   private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
-    intframeRadioConnection.moveToFront();
-    jpanelRadioConnection.requestFocusInWindow();
+      intframeRadioConnection.moveToFront();
+      jpanelRadioConnection.requestFocusInWindow();
   }//GEN-LAST:event_jMenuItem4ActionPerformed
 
   private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem5ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem5ActionPerformed
-    intframeMisc.toFront();
+      intframeMisc.toFront();
   }//GEN-LAST:event_jMenuItem5ActionPerformed
 
   private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem6ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem6ActionPerformed
-    intframeLog.toFront();
+      intframeLog.toFront();
   }//GEN-LAST:event_jMenuItem6ActionPerformed
 
   private void jcheckboxRadioPollingItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jcheckboxRadioPollingItemStateChanged
   {//GEN-HEADEREND:event_jcheckboxRadioPollingItemStateChanged
-    if(jcheckboxRadioPolling.isSelected())
-    {
-      try
+      if(jcheckboxRadioPolling.isSelected())
       {
-        int period = Integer.parseInt(jtextfieldPollingTime.getText());
-        timerRadioPolling = new Timer(period, timerRadioPollingListener);
-        timerRadioPolling.setRepeats(true);
-      }catch(Exception exc)
+          try
+          {
+              int period = Integer.parseInt(jtextfieldPollingTime.getText());
+              timerRadioPolling = new Timer(period, timerRadioPollingListener);
+              timerRadioPolling.setRepeats(true);
+          } catch(Exception exc)
+          {
+              JOptionPane.showMessageDialog(null, "Enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+              jcheckboxRadioPolling.setSelected(false);
+              return;
+          }
+          radioController.setAutomaticInfo(false); // polling is started - we don't need the auto info from the radio
+          timerRadioPolling.start();
+      } else
       {
-        JOptionPane.showMessageDialog(null, "Enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
-        jcheckboxRadioPolling.setSelected(false);
-        return;
-      } 
-      radioController.setAutomaticInfo(false); // polling is started - we don't need the auto info from the radio
-      timerRadioPolling.start();
-    }
-    else
-    {
-      if(timerRadioPolling!=null)
-      {
-        timerRadioPolling.stop();
-        radioController.setAutomaticInfo(true); // polling is stopped - enable auto info
+          if(timerRadioPolling != null)
+          {
+              timerRadioPolling.stop();
+              radioController.setAutomaticInfo(true); // polling is stopped - enable auto info
+          }
       }
-    }
   }//GEN-LAST:event_jcheckboxRadioPollingItemStateChanged
 
   private void jtableBandmapMousePressed(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableBandmapMousePressed
   {//GEN-HEADEREND:event_jtableBandmapMousePressed
-    JTable target = (JTable) evt.getSource();
-    int row = target.getSelectedRow();
-    int col = target.getSelectedColumn();
+      JTable target = (JTable) evt.getSource();
+      int row = target.getSelectedRow();
+      int col = target.getSelectedColumn();
 
-    if (row > -1 && col > -1)
-    {
-      try
+      if(row > -1 && col > -1)
       {
-        int freq = jtablemodelBandmap.cellToFreq(row, col);
-        radioController.setFrequency(freq);
-        initEntryFields();
-        logger.log(Level.INFO, "new freq set -----------");
-      }
-      catch (Exception ex)
+          try
+          {
+              int freq = jtablemodelBandmap.cellToFreq(row, col);
+              radioController.setFrequency(freq);
+              initEntryFields();
+              logger.log(Level.INFO, "new freq set -----------");
+          } catch(Exception ex)
+          {
+              Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+          }
+      } else
       {
-        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+          Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, "Invalid row or col");
       }
-    }
-    else
-    {
-      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, "Invalid row or col");
-    }
 
-    // Return focus to callsign field
-    jtextfieldCallsign.requestFocusInWindow();
+      // Return focus to callsign field
+      jtextfieldCallsign.requestFocusInWindow();
   }//GEN-LAST:event_jtableBandmapMousePressed
 
   private void jtableIncomingQsoMousePressed(java.awt.event.MouseEvent evt)//GEN-FIRST:event_jtableIncomingQsoMousePressed
   {//GEN-HEADEREND:event_jtableIncomingQsoMousePressed
-    JTable target = (JTable) evt.getSource();
-    int row = target.getSelectedRow();
-    
+      JTable target = (JTable) evt.getSource();
+      int row = target.getSelectedRow();
 
-    try
-    {
-      if(radioController.getMode() != jtablemodelIncomingQso.getMode(row))
-        radioController.setMode(jtablemodelIncomingQso.getMode(row)); //set the mode used for this contact
-      radioController.setFrequency(jtablemodelIncomingQso.getFrequency(row)); // jump to the freq
-      
-      initEntryFields();  // clear the fields
-      
-      // Add the callsign into the Entry field if this is a S&P contact
-      if(jtablemodelIncomingQso.isSpQso(row))
+      try
       {
-        String callsign;
-//        if (settings.isQuickCallsignModeEnabled()) // If quick mode is enabled add only the suffix
-//        {
-//          callsign = Misc.toShortCallsign(jtablemodelIncomingQso.getCallsign(row), settings.getDefaultPrefix());
-//        }
-//        else
-//        {
-          callsign = jtablemodelIncomingQso.getCallsign(row);
-//        }
+          if(getMode() != jtablemodelIncomingQso.getMode(row))
+          {
+              radioController.setMode(jtablemodelIncomingQso.getMode(row)); //set the mode used for this contact
+          }
+          radioController.setFrequency(jtablemodelIncomingQso.getFrequency(row)); // jump to the freq
 
-        jtextfieldCallsign.setText(callsign);// set the callsign inside the callsign field
+          initEntryFields();  // clear the fields
+
+          // Add the callsign into the Entry field if this is a S&P contact
+          if(jtablemodelIncomingQso.isSpQso(row))
+          {
+              String callsign;
+
+              callsign = jtablemodelIncomingQso.getCallsign(row);
+
+              jtextfieldCallsign.setText(callsign);// set the callsign inside the callsign field
+          }
+
+      } catch(Exception ex)
+      {
+          Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
       }
 
-    }
-    catch (Exception ex)
-    {
-      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-    }
-
-    // Return focus to callsign field
-    jtextfieldCallsign.requestFocusInWindow();
+      // Return focus to callsign field
+      jtextfieldCallsign.requestFocusInWindow();
   }//GEN-LAST:event_jtableIncomingQsoMousePressed
 
   private void jtogglebuttonConnectToKeyerActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jtogglebuttonConnectToKeyerActionPerformed
   {//GEN-HEADEREND:event_jtogglebuttonConnectToKeyerActionPerformed
-    JToggleButton connectButton = (JToggleButton) evt.getSource();
-    
-    if(connectButton.isSelected())
-    {
-      if(connectKeyer() == false)
+      JToggleButton connectButton = (JToggleButton) evt.getSource();
+
+      if(connectButton.isSelected())
       {
-        jtogglebuttonConnectToKeyer.setSelected(false);
-        return;
-      }
-         
-      if(settings.getPttType() != PttTypes.NONE)
+          if(connectKeyer() == false)
+          {
+              jtogglebuttonConnectToKeyer.setSelected(false);
+              return;
+          }
+
+          if(settings.getPttType() != PttTypes.NONE)
+          {
+              if(connectPtt() == false)
+              {
+                  disconnectKeyer();
+                  jtogglebuttonConnectToKeyer.setSelected(false);
+                  return;
+              }
+          }
+
+          jtogglebuttonConnectToKeyer.setSelected(true);
+      } else
       {
-        if(connectPtt() == false)
-        {
           disconnectKeyer();
+          disconnectPtt();
           jtogglebuttonConnectToKeyer.setSelected(false);
-          return;
-        }
       }
-  
-      jtogglebuttonConnectToKeyer.setSelected(true);
-    }
-    else
-    {
-      disconnectKeyer();
-      disconnectPtt();
-      jtogglebuttonConnectToKeyer.setSelected(false);
-    }
-    
+
   }//GEN-LAST:event_jtogglebuttonConnectToKeyerActionPerformed
 
   private void jDialogSettingsComponentShown(java.awt.event.ComponentEvent evt)//GEN-FIRST:event_jDialogSettingsComponentShown
   {//GEN-HEADEREND:event_jDialogSettingsComponentShown
-    // Settings dialog is shown and we need to set the states of the controls
-    initSettingsDialog();
+      // Settings dialog is shown and we need to set the states of the controls
+      initSettingsDialog();
   }//GEN-LAST:event_jDialogSettingsComponentShown
 
   private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonSaveActionPerformed
   {//GEN-HEADEREND:event_jButtonSaveActionPerformed
-    jDialogSettings.setVisible(false); // Hide the SettingsDialog
-    storeSettings();       // Read the state of the controls and save them
+      jDialogSettings.setVisible(false); // Hide the SettingsDialog
+      storeSettings();       // Read the state of the controls and save them
 
-    initMainWindow(false);
+      initMainWindow(false);
   }//GEN-LAST:event_jButtonSaveActionPerformed
 
   private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonCancelActionPerformed
   {//GEN-HEADEREND:event_jButtonCancelActionPerformed
-    jDialogSettings.setVisible(false);
+      jDialogSettings.setVisible(false);
   }//GEN-LAST:event_jButtonCancelActionPerformed
 
   private void checkboxSettingsQuickModeStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_checkboxSettingsQuickModeStateChanged
   {//GEN-HEADEREND:event_checkboxSettingsQuickModeStateChanged
-    if(checkboxSettingsQuickMode.isSelected())
-    textfieldSettingsDefaultPrefix.setEnabled(true);
-    else
-    textfieldSettingsDefaultPrefix.setEnabled(false);
+      if(checkboxSettingsQuickMode.isSelected())
+      {
+          textfieldSettingsDefaultPrefix.setEnabled(true);
+      } else
+      {
+          textfieldSettingsDefaultPrefix.setEnabled(false);
+      }
   }//GEN-LAST:event_checkboxSettingsQuickModeStateChanged
 
   private void jComboBoxRadioComPortActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jComboBoxRadioComPortActionPerformed
   {//GEN-HEADEREND:event_jComboBoxRadioComPortActionPerformed
-    // TODO add your handling code here:
+      // TODO add your handling code here:
   }//GEN-LAST:event_jComboBoxRadioComPortActionPerformed
 
   private void jMenuItemHelpActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItemHelpActionPerformed
   {//GEN-HEADEREND:event_jMenuItemHelpActionPerformed
-    File htmlFile = new File("help.html");
-    try
-    {
-      Desktop.getDesktop().browse(htmlFile.toURI());
-    }
-    catch(IOException ex)
-    {
-      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-    }
+      File htmlFile = new File("help.html");
+      try
+      {
+          Desktop.getDesktop().browse(htmlFile.toURI());
+      } catch(IOException ex)
+      {
+          Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+      }
   }//GEN-LAST:event_jMenuItemHelpActionPerformed
 
   private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItemAboutActionPerformed
   {//GEN-HEADEREND:event_jMenuItemAboutActionPerformed
-    jDialogAbout.setVisible(true);
+      jDialogAbout.setVisible(true);
   }//GEN-LAST:event_jMenuItemAboutActionPerformed
 
   private void jButton20ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButton20ActionPerformed
   {//GEN-HEADEREND:event_jButton20ActionPerformed
-    jDialogAbout.setVisible(false);
+      jDialogAbout.setVisible(false);
   }//GEN-LAST:event_jButton20ActionPerformed
 
   private void jCheckBoxShowFreqItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jCheckBoxShowFreqItemStateChanged
   {//GEN-HEADEREND:event_jCheckBoxShowFreqItemStateChanged
-    if(jCheckBoxShowFreq.isSelected())
-    {
-      settings.setShowBandmapFreqColumns(true);
-    }
-    else
-    {
-      settings.setShowBandmapFreqColumns(false);
-    }
+      if(jCheckBoxShowFreq.isSelected())
+      {
+          settings.setShowBandmapFreqColumns(true);
+      } else
+      {
+          settings.setShowBandmapFreqColumns(false);
+      }
 
-    jtablemodelBandmap.refresh(getBandmapStartFreq());
+      jtablemodelBandmap.refresh(getBandmapStartFreq());
   }//GEN-LAST:event_jCheckBoxShowFreqItemStateChanged
 
   private void jCheckBoxAutoBandmapStartFreqItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
   {//GEN-HEADEREND:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
-    if(jCheckBoxAutoBandmapStartFreq.isSelected())
-    {
-      settings.setBandmapAutoFreq(true);
-    }
-    else
-    {
-      settings.setBandmapAutoFreq(false);
-    }
+      if(jCheckBoxAutoBandmapStartFreq.isSelected())
+      {
+          settings.setBandmapAutoFreq(true);
+      } else
+      {
+          settings.setBandmapAutoFreq(false);
+      }
   }//GEN-LAST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
 
   private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem7ActionPerformed
   {//GEN-HEADEREND:event_jMenuItem7ActionPerformed
-    JFileChooser fc = new JFileChooser();
-    fc.setFileFilter(new FileNameExtensionFilter("ADIF files (*.adif)", "adif"));
-    fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
-    try
-    {
-      int returnVal = fc.showSaveDialog(this.getParent());
-      if (returnVal != JFileChooser.APPROVE_OPTION)
+      JFileChooser fc = new JFileChooser();
+      fc.setFileFilter(new FileNameExtensionFilter("ADIF files (*.adif)", "adif"));
+      fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
+      try
       {
-        return;
-      } 
-    }
-    catch (Exception exc)
-    {
-      JOptionPane.showMessageDialog(null, "Error when trying to acquire adif file.", "Error", JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-    
-    String absPath = fc.getSelectedFile().getAbsolutePath();
-    if(!absPath.endsWith(".adif"))
-    {
-      absPath = absPath+".adif";
-    }
-        
-    File file = new File(absPath);
-    
-    if(file.exists())
-    {
-      JOptionPane.showMessageDialog(null, "File already exists: "+file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-    
-    // Write the cabrillo file
-    try (PrintWriter printWriter = new PrintWriter(absPath))
-    {
-      printWriter.println("<programid>" + PROGRAM_NAME);
-      printWriter.println("<programversion>" + PROGRAM_VERSION);
-      printWriter.println("<eoh>");
-      for (int i = 0; i < log.getQsoCount(); i++)
+          int returnVal = fc.showSaveDialog(this.getParent());
+          if(returnVal != JFileChooser.APPROVE_OPTION)
+          {
+              return;
+          }
+      } catch(Exception exc)
       {
-        printWriter.println(log.get(i).toStringAdif());
+          JOptionPane.showMessageDialog(null, "Error when trying to acquire adif file.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
       }
-    }
-    catch (FileNotFoundException ex)
-    {
-      JOptionPane.showMessageDialog(null, "Couldn't generate the adif file", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-    
-    JOptionPane.showMessageDialog(null, "Adif file created successfully.", "Success...", JOptionPane.INFORMATION_MESSAGE);
+
+      String absPath = fc.getSelectedFile().getAbsolutePath();
+      if(!absPath.endsWith(".adif"))
+      {
+          absPath = absPath + ".adif";
+      }
+
+      File file = new File(absPath);
+
+      if(file.exists())
+      {
+          JOptionPane.showMessageDialog(null, "File already exists: " + file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+      }
+
+      // Write the cabrillo file
+      try(PrintWriter printWriter = new PrintWriter(absPath))
+      {
+          printWriter.println("<programid>" + PROGRAM_NAME);
+          printWriter.println("<programversion>" + PROGRAM_VERSION);
+          printWriter.println("<eoh>");
+          for(int i = 0; i < log.getQsoCount(); i++)
+          {
+              printWriter.println(log.get(i).toStringAdif());
+          }
+      } catch(FileNotFoundException ex)
+      {
+          JOptionPane.showMessageDialog(null, "Couldn't generate the adif file", "Error", JOptionPane.ERROR_MESSAGE);
+      }
+
+      JOptionPane.showMessageDialog(null, "Adif file created successfully.", "Success...", JOptionPane.INFORMATION_MESSAGE);
   }//GEN-LAST:event_jMenuItem7ActionPerformed
 
   private void jComboBoxKeyerTypeItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jComboBoxKeyerTypeItemStateChanged
   {//GEN-HEADEREND:event_jComboBoxKeyerTypeItemStateChanged
 
-      
 //    String selected = jComboBoxKeyerType.getSelectedItem().toString();
 //    if(selected.compareTo(KeyerTypes.WINKEYER.toString()) == 0)
 //    {
@@ -3145,1601 +3129,1566 @@ public class MainWindow extends javax.swing.JFrame
 //      jComboBoxPttType.setEnabled(true);
 //    }
   }//GEN-LAST:event_jComboBoxKeyerTypeItemStateChanged
-  
-  
-  private void increaseKeyerSpeed()
-  {        
-   if(keyerSpeed>45)
-      return;
-    
-    keyerSpeed++;
-    keyer.setCwSpeed(keyerSpeed);
-    jlabelKeyerSpeed.setText(Integer.toString(keyerSpeed)+" WPM");
-  }
-  
-  private void decreaseKeyerSpeed()
-  {        
-    if(keyerSpeed<10)
-      return;
-    
-    keyerSpeed--;
-    keyer.setCwSpeed(keyerSpeed);
-    jlabelKeyerSpeed.setText(Integer.toString(keyerSpeed)+" WPM");
-  }
-   
-  /**
-   * Sends CW message when we press the enter button inside the callsign textfield
-   * 
-   * @return True if focus should move to Snt field
-   */
-  private boolean sendEnterSendsMessage()
-  {
-    // CQ mode
-    if(getTypeOfWork().equalsIgnoreCase(Qso.TYPE_OF_WORK_CQ))
-    {
-      if(isCallsignFieldEmpty())
-      {
-        pressedF1(); // If callsign field is empty - send CQ
-        return false; // do not move focus to Snt field
-      }
-      else
-      {
-        pressedF5(); // Send his callsign
-        pressedF2(); // and Snt serial number
-        return true; // move focus to Snt field
-      }
-      
-    }
-    // S&P mode
-    else
-    {
-      pressedF4(); // Send my callsign
-      return false; // do not move focus to Snt field
-    }
-    
-  }
-  
-  /**
-   * Will connect serial port (if needed) and init the keyer
-   * 
-   * @return true if connection was successful 
-   */
-  private boolean connectKeyer()
-  {
-    try
-    {
-      keyer = KeyerFactory.create(settings.getKeyerType(), 
-                                  serialportShare.getPort(settings.getKeyerCommportName()));
-    }
-    catch(Exception ex)
-    {
-      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-    
-    try
-    {
-      keyer.init();
-    }
-    catch(Exception ex)
-    {
-      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      serialportShare.releasePort(keyer.getCommport());
-      return false;
-    }
-    
-    keyer.setCwSpeed(keyerSpeed);
-    return true;
-  }
-  
-   
-  private void disconnectKeyer()
-  {
-    keyer.terminate();
-    serialportShare.releasePort(keyer.getCommport());
 
-    // When disconnected keying will be redirected to the radio (hopefully it will be supported)
-    keyer = radioController.getKeyer(); 
-    keyer.setCwSpeed(keyerSpeed);
-  }
+    private void increaseKeyerSpeed()
+    {
+        if(keyerSpeed > 45)
+        {
+            return;
+        }
 
-  
-  private boolean connectPtt()
-  {
-    if(settings.getKeyerType() == KeyerTypes.WINKEYER)
-    {
-      JOptionPane.showMessageDialog(null, "PTT will not work when sending CW with WinKeyer. To toggle your transceiver, use the pin provided by the WinKeyer.", "For your information...", JOptionPane.INFORMATION_MESSAGE);
-      //return false;
-    }
-    
-    
-    try
-    {
-      ptt = new DtrRtsPtt(serialportShare.getPort(settings.getPttCommportName()),
-                          settings.getPttType(),
-                          settings.getPttDelayInMilliseconds(),
-                          settings.getPttTailInMilliseconds());
-      ptt.init();
-      
-      keyer.usePtt(ptt); 
-      voiceKeyer.usePtt(ptt);
-    }
-    catch(Exception ex)
-    {
-      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-      
-    return true;
-  }
-  
-
-  private void disconnectPtt()
-  {
-    if(ptt!=null)
-    {
-      ptt.terminate();
-      serialportShare.releasePort(ptt.getCommport());
-    }
-    ptt = null;
-    
-    keyer.usePtt(null); 
-    voiceKeyer.usePtt(null);
-  }
-      
-  
-  private boolean connectRadio()
-  {
-    boolean result;
-    
-    try
-    {
-      result = radioController.connect(new LocalRadioControllerListener(),
-                                       serialportShare.getPort(settings.getRadioCommportName()),
-                                       settings.getRadioCommportBaudRate());
-    }
-    catch(Exception ex)
-    {
-      JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-    
-    if(!result)
-    {
-      JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Unknown Error...", JOptionPane.ERROR_MESSAGE);
-    }
-    
-    return result;
-  }
-  
-  private void disconnectRadio()
-  {
-    radioController.disconnect();
-    serialportShare.releasePort(radioController.getSerialPort());
-  }
-  
-  
-  /**
-   * Finds the current working dir and saves into the variable: pathToWorkingDir
-   */
-  private void determineWorkingDir()
-  {
-    File file = new File(".");
-		String currentDirectory = file.getAbsolutePath();
-    currentDirectory = currentDirectory.substring(0, currentDirectory.length()-1);
-    pathToWorkingDir = Paths.get(currentDirectory).toString();
-    System.out.println("Current working directory is: " + pathToWorkingDir); 
-  }
-    
-    
-  /**
-   * Opens a file chooser which lets the user select the appropriate radio protocol parser.
-   * @return true - if the loading was successful
-   */
-  private boolean loadRadioProtocolParser()
-  {
-    JFileChooser chooser;
-      
-    try
-    {
-        // Configure the FileChooser for python files
-      chooser = new JFileChooser();
-      chooser.setFileFilter(new FileNameExtensionFilter("Python files (*.py)", "py"));
-      chooser.setCurrentDirectory(Paths.get(pathToWorkingDir,"/pyrig").toFile());
-
-      int returnVal = chooser.showOpenDialog(this.getParent());
-      if (returnVal != JFileChooser.APPROVE_OPTION)
-        return false;
-    }catch(Exception exc)
-    {
-        logger.log(Level.SEVERE, "Coudln't start file chooser", exc);
-        return false;
-    }
-   
-    boolean result = radioController.loadProtocolParser(chooser.getCurrentDirectory().getName(),  // Module name
-                                                        chooser.getSelectedFile().getName());     // Class name
-    if (result == false)
-    {
-      JOptionPane.showMessageDialog(null, "Error when trying to load the radio protocol parser file!", "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-     
-    // Show the serial settings that we are going to use when connecting to this radio
-    JOptionPane.showMessageDialog(null, radioController.getInfo());
-    return true;
-  }
-  
-  
-  /**
-   * Reads the info from the entry window and if all data is valid it saves it into the Log
-   *
-   * @return true - if the QSO was successfully logged
-   *         false - 
-   */
-  boolean addEntryToLog()
-  {   
-    // Do some validation of the data
-    // ------------------------------
-    if(isCallsignFieldEmpty() || !Qso.isValidCallsign(getCallsignFromTextField()))
-    {
-      JOptionPane.showMessageDialog(null, "Invalid callsign!");
-      jtextfieldCallsign.requestFocusInWindow();
-      return false;
+        keyerSpeed++;
+        keyer.setCwSpeed(keyerSpeed);
+        jlabelKeyerSpeed.setText(Integer.toString(keyerSpeed) + " WPM");
     }
 
-    if(!Qso.isValidSerial(jtextfieldSnt.getText()))
+    private void decreaseKeyerSpeed()
     {
-      JOptionPane.showMessageDialog(null, "Invalid Snt!");
-      jtextfieldSnt.requestFocusInWindow();
-      return false;
-    }
-    
-    if(!Qso.isValidSerial(jtextfieldRcv.getText()))
-    {
-      JOptionPane.showMessageDialog(null, "Invalid Rcv!");
-      jtextfieldRcv.requestFocusInWindow();
-      return false;
-    }
-  
-    // Format
-    String Rcv = jtextfieldRcv.getText().replaceAll("\\s", ""); // Remove any empty spaces
-    Rcv = jtextfieldRcv.getText().substring(0, 3)+" "+jtextfieldRcv.getText().substring(3); // Add blank space between the two parts of the SNT
-    
-    String Snt = jtextfieldSnt.getText().replaceAll("\\s", ""); // Remove any empty spaces
-    Snt = Snt.substring(0, 3) + " " + Snt.substring(3);  // Add blank space between the two parts of the RCV
+        if(keyerSpeed < 10)
+        {
+            return;
+        }
 
-    
-    // Add qso to log
-    // ------------------------------
-    Qso qso;
-    try
+        keyerSpeed--;
+        keyer.setCwSpeed(keyerSpeed);
+        jlabelKeyerSpeed.setText(Integer.toString(keyerSpeed) + " WPM");
+    }
+
+    /**
+     * Sends CW message when we press the enter button inside the callsign
+     * textfield
+     *
+     * @return True if focus should move to Snt field
+     */
+    private boolean sendEnterSendsMessage()
     {
-      qso = new Qso(getFreq(),
-                    getMode(),     
+        // CQ mode
+        if(getTypeOfWork().equalsIgnoreCase(Qso.TYPE_OF_WORK_CQ))
+        {
+            if(isCallsignFieldEmpty())
+            {
+                pressedF1(); // If callsign field is empty - send CQ
+                return false; // do not move focus to Snt field
+            } else
+            {
+                pressedF5(); // Send his callsign
+                pressedF2(); // and Snt serial number
+                return true; // move focus to Snt field
+            }
+
+        } // S&P mode
+        else
+        {
+            pressedF4(); // Send my callsign
+            return false; // do not move focus to Snt field
+        }
+
+    }
+
+    /**
+     * Will connect serial port (if needed) and init the keyer
+     *
+     * @return true if connection was successful
+     */
+    private boolean connectKeyer()
+    {
+        try
+        {
+            keyer = KeyerFactory.create(settings.getKeyerType(),
+                    serialportShare.getPort(settings.getKeyerCommportName()));
+        } catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        try
+        {
+            keyer.init();
+        } catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            serialportShare.releasePort(keyer.getCommport());
+            return false;
+        }
+
+        keyer.setCwSpeed(keyerSpeed);
+        return true;
+    }
+
+    private void disconnectKeyer()
+    {
+        keyer.terminate();
+        serialportShare.releasePort(keyer.getCommport());
+
+        // When disconnected keying will be redirected to the radio (hopefully it will be supported)
+        keyer = radioController.getKeyer();
+        keyer.setCwSpeed(keyerSpeed);
+    }
+
+    private boolean connectPtt()
+    {
+        if(settings.getKeyerType() == KeyerTypes.WINKEYER)
+        {
+            JOptionPane.showMessageDialog(null, "PTT will not work when sending CW with WinKeyer. To toggle your transceiver, use the pin provided by the WinKeyer.", "For your information...", JOptionPane.INFORMATION_MESSAGE);
+            //return false;
+        }
+
+        try
+        {
+            ptt = new DtrRtsPtt(serialportShare.getPort(settings.getPttCommportName()),
+                    settings.getPttType(),
+                    settings.getPttDelayInMilliseconds(),
+                    settings.getPttTailInMilliseconds());
+            ptt.init();
+
+            keyer.usePtt(ptt);
+            voiceKeyer.usePtt(ptt);
+        } catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void disconnectPtt()
+    {
+        if(ptt != null)
+        {
+            ptt.terminate();
+            serialportShare.releasePort(ptt.getCommport());
+        }
+        ptt = null;
+
+        keyer.usePtt(null);
+        voiceKeyer.usePtt(null);
+    }
+
+    private boolean connectRadio()
+    {
+        boolean result;
+
+        try
+        {
+            result = radioController.connect(new LocalRadioControllerListener(),
+                    serialportShare.getPort(settings.getRadioCommportName()),
+                    settings.getRadioCommportBaudRate());
+        } catch(Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        if(!result)
+        {
+            JOptionPane.showMessageDialog(null, "Could not connect to radio!", "Unknown Error...", JOptionPane.ERROR_MESSAGE);
+        }
+
+        return result;
+    }
+
+    private void disconnectRadio()
+    {
+        radioController.disconnect();
+        serialportShare.releasePort(radioController.getSerialPort());
+    }
+
+    /**
+     * Finds the current working dir and saves into the variable:
+     * pathToWorkingDir
+     */
+    private void determineWorkingDir()
+    {
+        File file = new File(".");
+        String currentDirectory = file.getAbsolutePath();
+        currentDirectory = currentDirectory.substring(0, currentDirectory.length() - 1);
+        pathToWorkingDir = Paths.get(currentDirectory).toString();
+        System.out.println("Current working directory is: " + pathToWorkingDir);
+    }
+
+    /**
+     * Opens a file chooser which lets the user select the appropriate radio
+     * protocol parser.
+     *
+     * @return true - if the loading was successful
+     */
+    private boolean loadRadioProtocolParser()
+    {
+        JFileChooser chooser;
+
+        try
+        {
+            // Configure the FileChooser for python files
+            chooser = new JFileChooser();
+            chooser.setFileFilter(new FileNameExtensionFilter("Python files (*.py)", "py"));
+            chooser.setCurrentDirectory(Paths.get(pathToWorkingDir, "/pyrig").toFile());
+
+            int returnVal = chooser.showOpenDialog(this.getParent());
+            if(returnVal != JFileChooser.APPROVE_OPTION)
+            {
+                return false;
+            }
+        } catch(Exception exc)
+        {
+            logger.log(Level.SEVERE, "Coudln't start file chooser", exc);
+            return false;
+        }
+
+        boolean result = radioController.loadProtocolParser(chooser.getCurrentDirectory().getName(), // Module name
+                chooser.getSelectedFile().getName());     // Class name
+        if(result == false)
+        {
+            JOptionPane.showMessageDialog(null, "Error when trying to load the radio protocol parser file!", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Show the serial settings that we are going to use when connecting to this radio
+        JOptionPane.showMessageDialog(null, radioController.getInfo());
+        return true;
+    }
+
+    /**
+     * Reads the info from the entry window and if all data is valid it saves it
+     * into the Log
+     *
+     * @return true - if the QSO was successfully logged false -
+     */
+    boolean addEntryToLog()
+    {
+        // Do some validation of the data
+        // ------------------------------
+        if(isCallsignFieldEmpty() || !Qso.isValidCallsign(getCallsignFromTextField()))
+        {
+            JOptionPane.showMessageDialog(null, "Invalid callsign!");
+            jtextfieldCallsign.requestFocusInWindow();
+            return false;
+        }
+
+        if(!Qso.isValidSerial(jtextfieldSnt.getText()))
+        {
+            JOptionPane.showMessageDialog(null, "Invalid Snt!");
+            jtextfieldSnt.requestFocusInWindow();
+            return false;
+        }
+
+        if(!Qso.isValidSerial(jtextfieldRcv.getText()))
+        {
+            JOptionPane.showMessageDialog(null, "Invalid Rcv!");
+            jtextfieldRcv.requestFocusInWindow();
+            return false;
+        }
+
+        // Format
+        String Rcv = jtextfieldRcv.getText().replaceAll("\\s", ""); // Remove any empty spaces
+        Rcv = jtextfieldRcv.getText().substring(0, 3) + " " + jtextfieldRcv.getText().substring(3); // Add blank space between the two parts of the SNT
+
+        String Snt = jtextfieldSnt.getText().replaceAll("\\s", ""); // Remove any empty spaces
+        Snt = Snt.substring(0, 3) + " " + Snt.substring(3);  // Add blank space between the two parts of the RCV
+
+        // Add qso to log
+        // ------------------------------
+        Qso qso;
+        try
+        {
+            qso = new Qso(getFreq(),
+                    getMode(),
                     settings.getMyCallsign(),
                     getCallsignFromTextField(),
-                    Snt, 
+                    Snt,
                     Rcv,
                     getTypeOfWork());
-    }
-    catch (Exception exc)
-    {
-      return false;
+        } catch(Exception exc)
+        {
+            return false;
+        }
+
+        jtablemodelLog.addRow(qso);
+        return true;
     }
 
-    jtablemodelLog.addRow(qso);
-    return true;
-  }
+    /**
+     * Determines if the current Type of work is SP or CQ
+     *
+     * @return
+     */
+    private String getTypeOfWork()
+    {
+        if(jradiobuttonSP.isSelected())
+        {
+            return Qso.TYPE_OF_WORK_SP;
+        } else
+        {
+            return Qso.TYPE_OF_WORK_CQ;
+        }
+    }
 
-  
-  /**
-   * Determines if the current Type of work is SP or CQ
-   * @return 
-   */
-  private String getTypeOfWork()
-  {
-    if(jradiobuttonSP.isSelected())
-      return Qso.TYPE_OF_WORK_SP;
-    else
-      return Qso.TYPE_OF_WORK_CQ;
-  }
-  
-  
-  private KeyerTypes getSelectedKeyerType()
-  {
-    return KeyerTypes.valueOf(jComboBoxKeyerType.getSelectedItem().toString());
-  }
-  
-  private PttTypes getSelectedPttType()
-  {
-    return PttTypes.valueOf(jComboBoxPttType.getSelectedItem().toString());
-  }
+    private KeyerTypes getSelectedKeyerType()
+    {
+        return KeyerTypes.valueOf(jComboBoxKeyerType.getSelectedItem().toString());
+    }
 
-  /**
-   * Determines the current working mode. Takes into account if the connected
-   * to the radio or not.
-   * @return - String describing the mode (e.g. "cw", "ssb")
-   */
-  private RadioModes getMode()
-  {
-    // If radio is connected get the frequency from there
-    if(radioController.isConnected())
+    private PttTypes getSelectedPttType()
     {
-      return radioController.getMode();
+        return PttTypes.valueOf(jComboBoxPttType.getSelectedItem().toString());
     }
-    // If no radio is connected - read the mode from the combobox model
-    else
+
+    /**
+     * Determines the current working mode. Takes into account if the connected
+     * to the radio or not.
+     *
+     * @return - String describing the mode (e.g. "cw", "ssb")
+     */
+    private RadioModes getMode()
     {
-      String md = jcomboboxMode.getSelectedItem().toString();
-      return RadioModes.valueOf(md);
+        // If radio is connected get the frequency from there
+        if(radioController.isConnected())
+        {
+            return radioController.getMode();
+        } // If no radio is connected - read the mode from the combobox model
+        else
+        {
+            String md = jcomboboxMode.getSelectedItem().toString();
+            return RadioModes.valueOf(md);
+        }
     }
-  }
-  
-  
-  /**
-   * Determines the current working frequency. Takes into account if the connected
-   * to the radio or not.
-   * @return - frequency in Hz
-   */
-  private int getFreq()
-  {
-    int freq;
-    
-    // If radio is connected get the frequency from there
-    if(radioController.isConnected())
+
+    /**
+     * Determines the current working frequency. Takes into account if the
+     * connected to the radio or not.
+     *
+     * @return - frequency in Hz
+     */
+    private int getFreq()
     {
-      freq = radioController.getFrequency();
+        int freq;
+
+        // If radio is connected get the frequency from there
+        if(radioController.isConnected())
+        {
+            freq = radioController.getFrequency();
+        } // If no radio is connected - read the freq from the dropdown box
+        else
+        {
+            String temp = jcomboboxBand.getSelectedItem().toString();
+            // convert to Hz
+            freq = Math.round(Float.parseFloat(temp) * 1000000);
+        }
+
+        return freq;
     }
-    // If no radio is connected - read the freq from the dropdown box
-    else
+
+    /**
+     * Gets the callsign from the jtextfieldCallsign. If the callsign was
+     * inserted in the short form (e.g. HH) this function will return the full
+     * form (i.e. LZ2HH)
+     *
+     * @return - the callsign in its full form (e.g. LZ6HH)
+     */
+    private String getCallsignFromTextField()
     {
-      String temp = jcomboboxBand.getSelectedItem().toString();
-      // convert to Hz
-      freq = Math.round(Float.parseFloat(temp)*1000000);
-    }
-    
-    return freq;
-  }
-  
-  
-  /**
-   * Gets the callsign from the jtextfieldCallsign.
-   * If the callsign was inserted in the short form (e.g. HH) this function will return the full
-   * form (i.e. LZ2HH)
-   * @return - the callsign in its full form (e.g. LZ6HH)
-   */
-  private String getCallsignFromTextField()
-  {
-    String callsign = jtextfieldCallsign.getText();
-    
+        String callsign = jtextfieldCallsign.getText();
+
 //    if(settings.isQuickCallsignModeEnabled())
 //    {
 //      callsign = settings.getDefaultPrefix()+callsign;
 //    }
-    
-    return callsign;
-  }
-  
-  
-  /**
-   * Prints info concerning the callsign:
-   * NEW - If no qso before
-   * OK - Qso before but the required time has elapsed
-   * DUPE time left... - Qso before and the required time has not elapsed
-   * @param callsign
-   * @return 
-   */
-  private String getCallsignStatusText(String callsign)
-  {
-    String statusText = "";
-
-    Qso qso = log.getLatestQso(callsign, getMode());
-
-    // Unknown callsign - OK to work
-    if (qso == null)
-    {
-      statusText = "NEW";
+        return callsign;
     }
-    else
-    {
-      // DUPE
-      if (log.getSecondsLeft(qso, settings.getQsoRepeatPeriod()) > 0)
-      {
-        // Print DUPE
-        statusText = statusText.concat("DUPE   ");
 
-        //Print the time left till next possible contact
-        statusText = statusText.concat("time left " + 
-                TimeUtils.getTimeLeftFormatted(log.getSecondsLeft(qso, settings.getQsoRepeatPeriod())));
-        // Make it red
-        statusText = "<html><font color=red>"+statusText+"</font></html>";
-      }
-      else
-      {
-        statusText = "OK";
-      }
-    }
-    
-    return statusText;
-  }
-  
-  
-  /**
-   * Cleans/prepares the entry fields for the next QSO
-   */
-  private void initEntryFields()
-  {
-    // Clean the callsign field
-    if(settings.isQuickCallsignModeEnabled())
-      jtextfieldCallsign.setText(settings.getDefaultPrefix());
-    else
-      jtextfieldCallsign.setText("");
-    
-    // Set the new Snt 
-    setSntField();
-    //jtextfieldSnt.setText(log.getNextSentReport());
-    // Cean the Rcv field
-    jtextfieldRcv.setText("");
-    // Clean the callsign status
-    jlabelCallsignStatus.setText("NEW");
-    // Set focus to callsign field
-    jtextfieldCallsign.requestFocusInWindow();
-    
-    
-    jtablemodelIncomingQso.init(); 
-  }
-  
-  
-  private void setSntField()
-  {
-    String snt = settings.getContestExchange();
-    
-    // {#} - is [serial number]
-    String serial = String.format("%03d", log.getQsoCount()+1);
-    snt = snt.replaceAll("\\{#\\}", serial); 
-    
-    // {$} - is [first part of last Rcv] 
-    String lastRcv = log.getFirstPartOfLastRcv();
-    snt = snt.replaceAll("\\{\\$\\}", lastRcv);
-     
-    jtextfieldSnt.setText(snt);
-  }
-  
-  
-  /**
-   * @return Returns a new DefaultComboBoxModel containing all available COM ports
-   */
-  private DefaultComboBoxModel getComportsComboboxModel()
-  {
-    String[] portNames = SerialPortList.getPortNames();
-    return new DefaultComboBoxModel(portNames);
-  }
-  
-  
-  private void storeFonts()
-  {
-    // Store the fonts being in use
-    settings.setFont(ApplicationSettings.FontIndex.BANDMAP, jtableBandmap.getFont());
-    settings.setFont(ApplicationSettings.FontIndex.CALLSIGN, jtextfieldCallsign.getFont());
-    settings.setFont(ApplicationSettings.FontIndex.INCOMING_QSO, jtableIncomingQso.getFont());
-    settings.setFont(ApplicationSettings.FontIndex.LOG, jtableLog.getFont());
-    settings.setFont(ApplicationSettings.FontIndex.RCV, jtextfieldRcv.getFont());
-    settings.setFont(ApplicationSettings.FontIndex.SNT, jtextfieldSnt.getFont());
-  }
-  
-  
-  private void restoreFonts()
-  {
-    // Restore the fonts
-    jtextfieldCallsign.setFont(settings.getFonts(ApplicationSettings.FontIndex.CALLSIGN));
-    jtextfieldSnt.setFont(settings.getFonts(ApplicationSettings.FontIndex.SNT));
-    jtextfieldRcv.setFont(settings.getFonts(ApplicationSettings.FontIndex.RCV));
-    jtableBandmap.setFont(settings.getFonts(ApplicationSettings.FontIndex.BANDMAP));
-    jtableIncomingQso.setFont(settings.getFonts(ApplicationSettings.FontIndex.INCOMING_QSO));
-    jtableLog.setFont(settings.getFonts(ApplicationSettings.FontIndex.LOG));
-  }
-  
-  /**
-   * Initialize the controls of the main windows
-   */
-  private void initMainWindow(boolean isStartup)
-  {
-    if(isStartup)
+    /**
+     * Prints info concerning the callsign: NEW - If no qso before OK - Qso
+     * before but the required time has elapsed DUPE time left... - Qso before
+     * and the required time has not elapsed
+     *
+     * @param callsign
+     * @return
+     */
+    private String getCallsignStatusText(String callsign)
     {
-      // Restore the last used dimensions for the different frames
-      this.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.JFRAME));
-      intframeBandmap.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP));
-      intframeEntryWindow.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.ENTRY));
-      intframeTimeToNextQso.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO));
-      intframeLog.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.LOG));
-      intframeRadioConnection.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.RADIO));
-      intframeMisc.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS));
+        String statusText = "";
 
-      // Restore the bandmap settings
-      jcomboboxStepInHz.setSelectedItem(Integer.toString(settings.getBandmapStepInHz()));
-      jcomboboxColumnCount.setSelectedItem(Integer.toString(settings.getBandmapColumnCount()));
-      jcomboboxRowCount.setSelectedItem(Integer.toString(settings.getBandmapRowCount()));
-      jCheckBoxShowFreq.setSelected(settings.isShowBandmapFreqColumns());
-      //jtextfieldFreqWidth.setText(settings.get);
-  
-      restoreFonts();
-    }
-    
-    // Update the Function keys button text
-    jButton4.setText("F4 "+settings.getMyCallsign());
-    jButton6.setText("F6 "+settings.getFunctionKeyMessage(5));
-    jButton7.setText("F7 "+settings.getFunctionKeyMessage(6));
-    jButton8.setText("F8 "+settings.getFunctionKeyMessage(7));
-    jButton9.setText("F9 "+settings.getFunctionKeyMessage(8));
-    //jButton10.setText("F10 "+settings.getFunctionKeyText(9));
-    
-    // Set the CQ frequency
-    jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency))); 
-    
-    initEntryFields();
-  }
-    
-    
-  /**
-   * User has opened the setting dialog and we need to load the state of the controls
-   */
-  private void initSettingsDialog()
-  {
-    //--------------------------------
-    // Radio
-    //--------------------------------
-    // Commport
-    if(((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).getIndexOf(settings.getRadioCommportName()) < 0)
-    {
-      ((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).addElement(settings.getRadioCommportName()); // Add last used commport if not in the list
-    }
-    jComboBoxRadioComPort.setSelectedItem(settings.getRadioCommportName());
-    // Baud rate
-    jComboBoxRadioComPortBaudRate.setSelectedItem(CommUtils.BaudRate.getName(settings.getRadioCommportBaudRate()));
-    // DTR
-    if(settings.isRadioCommportDtrOn())
-      jRadioButtonRadioDtrOn.setSelected(true);
-    else
-      jRadioButtonRadioDtrOff.setSelected(true);
-    // RTS
-    if(settings.isRadioCommportRtsOn())
-      jRadioButtonRadioRtsOn.setSelected(true);
-    else
-      jRadioButtonRadioRtsOff.setSelected(true);
-    
-    //--------------------------------
-    // Keyer
-    //--------------------------------
-    // Type
-    jComboBoxKeyerType.setSelectedItem(settings.getKeyerType().toString());
-    // Commport
-    if(((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).getIndexOf(settings.getKeyerCommportName()) < 0)
-    {
-      // Add last used commport if not in the list
-      ((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).addElement(settings.getKeyerCommportName());
-    }
-    jComboBoxKeyerComPort.setSelectedItem(settings.getKeyerCommportName());
+        Qso qso = log.getLatestQso(callsign, getMode());
 
-    //--------------------------------
-    // PTT
-    //--------------------------------
-    // Type
-    jComboBoxPttType.setSelectedItem(settings.getPttType().toString());
+        // Unknown callsign - OK to work
+        if(qso == null)
+        {
+            statusText = "NEW";
+        } else
+        {
+            // DUPE
+            if(log.getSecondsLeft(qso, settings.getQsoRepeatPeriod()) > 0)
+            {
+                // Print DUPE
+                statusText = statusText.concat("DUPE   ");
+
+                //Print the time left till next possible contact
+                statusText = statusText.concat("time left "
+                        + TimeUtils.getTimeLeftFormatted(log.getSecondsLeft(qso, settings.getQsoRepeatPeriod())));
+                // Make it red
+                statusText = "<html><font color=red>" + statusText + "</font></html>";
+            } else
+            {
+                statusText = "OK";
+            }
+        }
+
+        return statusText;
+    }
+
+    /**
+     * Cleans/prepares the entry fields for the next QSO
+     */
+    private void initEntryFields()
+    {
+        // Clean the callsign field
+        if(settings.isQuickCallsignModeEnabled())
+        {
+            jtextfieldCallsign.setText(settings.getDefaultPrefix());
+        } else
+        {
+            jtextfieldCallsign.setText("");
+        }
+
+        // Set the new Snt 
+        setSntField();
+        //jtextfieldSnt.setText(log.getNextSentReport());
+        // Cean the Rcv field
+        jtextfieldRcv.setText("");
+        // Clean the callsign status
+        jlabelCallsignStatus.setText("NEW");
+        // Set focus to callsign field
+        jtextfieldCallsign.requestFocusInWindow();
+
+        jtablemodelIncomingQso.init();
+    }
+
+    private void setSntField()
+    {
+        String snt = settings.getContestExchange();
+
+        // {#} - is [serial number]
+        String serial = String.format("%03d", log.getQsoCount() + 1);
+        snt = snt.replaceAll("\\{#\\}", serial);
+
+        // {$} - is [first part of last Rcv] 
+        String lastRcv = log.getFirstPartOfLastRcv();
+        snt = snt.replaceAll("\\{\\$\\}", lastRcv);
+
+        jtextfieldSnt.setText(snt);
+    }
+
+    /**
+     * @return Returns a new DefaultComboBoxModel containing all available COM
+     * ports
+     */
+    private DefaultComboBoxModel getComportsComboboxModel()
+    {
+        String[] portNames = SerialPortList.getPortNames();
+        return new DefaultComboBoxModel(portNames);
+    }
+
+    private void storeFonts()
+    {
+        // Store the fonts being in use
+        settings.setFont(ApplicationSettings.FontIndex.BANDMAP, jtableBandmap.getFont());
+        settings.setFont(ApplicationSettings.FontIndex.CALLSIGN, jtextfieldCallsign.getFont());
+        settings.setFont(ApplicationSettings.FontIndex.INCOMING_QSO, jtableIncomingQso.getFont());
+        settings.setFont(ApplicationSettings.FontIndex.LOG, jtableLog.getFont());
+        settings.setFont(ApplicationSettings.FontIndex.RCV, jtextfieldRcv.getFont());
+        settings.setFont(ApplicationSettings.FontIndex.SNT, jtextfieldSnt.getFont());
+    }
+
+    private void restoreFonts()
+    {
+        // Restore the fonts
+        jtextfieldCallsign.setFont(settings.getFonts(ApplicationSettings.FontIndex.CALLSIGN));
+        jtextfieldSnt.setFont(settings.getFonts(ApplicationSettings.FontIndex.SNT));
+        jtextfieldRcv.setFont(settings.getFonts(ApplicationSettings.FontIndex.RCV));
+        jtableBandmap.setFont(settings.getFonts(ApplicationSettings.FontIndex.BANDMAP));
+        jtableIncomingQso.setFont(settings.getFonts(ApplicationSettings.FontIndex.INCOMING_QSO));
+        jtableLog.setFont(settings.getFonts(ApplicationSettings.FontIndex.LOG));
+    }
+
+    /**
+     * Initialize the controls of the main windows
+     */
+    private void initMainWindow(boolean isStartup)
+    {
+        if(isStartup)
+        {
+            // Restore the last used dimensions for the different frames
+            this.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.JFRAME));
+            intframeBandmap.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.BANDMAP));
+            intframeEntryWindow.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.ENTRY));
+            intframeTimeToNextQso.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.INCOMING_QSO));
+            intframeLog.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.LOG));
+            intframeRadioConnection.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.RADIO));
+            intframeMisc.setBounds(settings.getFrameDimensions(ApplicationSettings.FrameIndex.SETTINGS));
+
+            // Restore the bandmap settings
+            jcomboboxStepInHz.setSelectedItem(Integer.toString(settings.getBandmapStepInHz()));
+            jcomboboxColumnCount.setSelectedItem(Integer.toString(settings.getBandmapColumnCount()));
+            jcomboboxRowCount.setSelectedItem(Integer.toString(settings.getBandmapRowCount()));
+            jCheckBoxShowFreq.setSelected(settings.isShowBandmapFreqColumns());
+            //jtextfieldFreqWidth.setText(settings.get);
+
+            restoreFonts();
+        }
+
+        // Update the Function keys button text
+        jButton4.setText("F4 " + settings.getMyCallsign());
+        jButton6.setText("F6 " + settings.getFunctionKeyMessage(5));
+        jButton7.setText("F7 " + settings.getFunctionKeyMessage(6));
+        jButton8.setText("F8 " + settings.getFunctionKeyMessage(7));
+        jButton9.setText("F9 " + settings.getFunctionKeyMessage(8));
+        //jButton10.setText("F10 "+settings.getFunctionKeyText(9));
+
+        // Set the CQ frequency
+        jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
+
+        initEntryFields();
+    }
+
+    /**
+     * User has opened the setting dialog and we need to load the state of the
+     * controls
+     */
+    private void initSettingsDialog()
+    {
+        //--------------------------------
+        // Radio
+        //--------------------------------
+        // Commport
+        if(((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).getIndexOf(settings.getRadioCommportName()) < 0)
+        {
+            ((DefaultComboBoxModel) jComboBoxRadioComPort.getModel()).addElement(settings.getRadioCommportName()); // Add last used commport if not in the list
+        }
+        jComboBoxRadioComPort.setSelectedItem(settings.getRadioCommportName());
+        // Baud rate
+        jComboBoxRadioComPortBaudRate.setSelectedItem(CommUtils.BaudRate.getName(settings.getRadioCommportBaudRate()));
+        // DTR
+        if(settings.isRadioCommportDtrOn())
+        {
+            jRadioButtonRadioDtrOn.setSelected(true);
+        } else
+        {
+            jRadioButtonRadioDtrOff.setSelected(true);
+        }
+        // RTS
+        if(settings.isRadioCommportRtsOn())
+        {
+            jRadioButtonRadioRtsOn.setSelected(true);
+        } else
+        {
+            jRadioButtonRadioRtsOff.setSelected(true);
+        }
+
+        //--------------------------------
+        // Keyer
+        //--------------------------------
+        // Type
+        jComboBoxKeyerType.setSelectedItem(settings.getKeyerType().toString());
+        // Commport
+        if(((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).getIndexOf(settings.getKeyerCommportName()) < 0)
+        {
+            // Add last used commport if not in the list
+            ((DefaultComboBoxModel) jComboBoxKeyerComPort.getModel()).addElement(settings.getKeyerCommportName());
+        }
+        jComboBoxKeyerComPort.setSelectedItem(settings.getKeyerCommportName());
+
+        //--------------------------------
+        // PTT
+        //--------------------------------
+        // Type
+        jComboBoxPttType.setSelectedItem(settings.getPttType().toString());
 //    // Disable editing if Winkey is selected
 //    if(settings.getKeyerType() == KeyerTypes.WINKEYER)
 //      jComboBoxPttType.setEnabled(false);
-     // Commport
-    if(((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).getIndexOf(settings.getPttCommportName()) < 0)
-    {
-      ((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).addElement(settings.getPttCommportName()); // Add last used commport if not in the list
-    }
-    jComboBoxPttCommport.setSelectedItem(settings.getPttCommportName());
-    // Delay
-    jTextFieldPttDelay.setText(Integer.toString(settings.getPttDelayInMilliseconds()));
-    jTextFieldPttTailDelay.setText(Integer.toString(settings.getPttTailInMilliseconds()));
-    //--------------------------------
-    // Callsign
-    //--------------------------------
-    textfieldSettingsMyCallsign.setText(settings.getMyCallsign().toUpperCase());
+        // Commport
+        if(((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).getIndexOf(settings.getPttCommportName()) < 0)
+        {
+            ((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).addElement(settings.getPttCommportName()); // Add last used commport if not in the list
+        }
+        jComboBoxPttCommport.setSelectedItem(settings.getPttCommportName());
+        // Delay
+        jTextFieldPttDelay.setText(Integer.toString(settings.getPttDelayInMilliseconds()));
+        jTextFieldPttTailDelay.setText(Integer.toString(settings.getPttTailInMilliseconds()));
+        //--------------------------------
+        // Callsign
+        //--------------------------------
+        textfieldSettingsMyCallsign.setText(settings.getMyCallsign().toUpperCase());
 
-    //--------------------------------
-    // Other 
-    //--------------------------------
-    // Default prefix
-    checkboxSettingsQuickMode.setSelected(settings.isQuickCallsignModeEnabled());
-    textfieldSettingsDefaultPrefix.setText(settings.getDefaultPrefix());
-    if (settings.isQuickCallsignModeEnabled() == false)
-      textfieldSettingsDefaultPrefix.setEnabled(false); // Disable the "default prefix" text field if the "Quick callsign mode" is disabled
-    // T as 0
-    checkboxSendLeadingZeroAsT.setSelected(settings.isSendLeadingZeroAsT());
-    checkboxSendZeroAsT.setSelected(settings.isSendZeroAsT());
-    // Bandmap auto set start frequncy
-    jCheckBoxAutoBandmapStartFreq.setSelected(settings.isBandmapAutoFreq());
-    // ESM 
-    checkboxESM.setSelected(settings.isEmsEnabled());
-    //TODO checkboxF1JumpsToCq.setSelected(settings.isAutoCqJump()); 
-     // Incoming qso hide after
-    jTextFieldTimeToNextQso.setText(Integer.toString(settings.getIncomingQsoHiderAfter()));
-    
-    
-    //--------------------------------
-    // Function keys 
-    //--------------------------------
-    jtextfieldfF1.setText(settings.getFunctionKeyMessage(0));
-    jTextFieldF2.setText(settings.getFunctionKeyMessage(1));
-    jtextfieldfF3.setText(settings.getFunctionKeyMessage(2));
-    jtextfieldfF6.setText(settings.getFunctionKeyMessage(5));
-    jtextfieldfF7.setText(settings.getFunctionKeyMessage(6));
-    jtextfieldF8.setText(settings.getFunctionKeyMessage(7));
-    jtextfieldF9.setText(settings.getFunctionKeyMessage(8));
-    jtextfieldF10.setText(settings.getFunctionKeyMessage(9));
+        //--------------------------------
+        // Other 
+        //--------------------------------
+        // Default prefix
+        checkboxSettingsQuickMode.setSelected(settings.isQuickCallsignModeEnabled());
+        textfieldSettingsDefaultPrefix.setText(settings.getDefaultPrefix());
+        if(settings.isQuickCallsignModeEnabled() == false)
+        {
+            textfieldSettingsDefaultPrefix.setEnabled(false); // Disable the "default prefix" text field if the "Quick callsign mode" is disabled
+        }    // T as 0
+        checkboxSendLeadingZeroAsT.setSelected(settings.isSendLeadingZeroAsT());
+        checkboxSendZeroAsT.setSelected(settings.isSendZeroAsT());
+        // Bandmap auto set start frequncy
+        jCheckBoxAutoBandmapStartFreq.setSelected(settings.isBandmapAutoFreq());
+        // ESM 
+        checkboxESM.setSelected(settings.isEmsEnabled());
+        //TODO checkboxF1JumpsToCq.setSelected(settings.isAutoCqJump()); 
+        // Incoming qso hide after
+        jTextFieldTimeToNextQso.setText(Integer.toString(settings.getIncomingQsoHiderAfter()));
 
-    //--------------------------------
-    // Contest rules
-    //--------------------------------
-    // Repeat period in mins
-    jtextfieldQsoRepeatPeriod.setText(Integer.toString(settings.getQsoRepeatPeriod()));
-    // Exchange rule
-    jTextFieldContestExchange.setText(settings.getContestExchange());
-  }
-    
-    
-  /**
-   * User has closed the setting dialog and we need to save the state of the controls
-   */
-  private boolean storeSettings()
-  { 
-    //--------------------------------
-    // Radio
-    //--------------------------------
-    // Commport
-    if(jComboBoxRadioComPort.getSelectedItem() != null)
-      settings.setRadioCommportName(jComboBoxRadioComPort.getSelectedItem().toString());
-    // Baud rate
-    String comport = jComboBoxRadioComPortBaudRate.getSelectedItem().toString();
-    settings.setRadioCommportBaudRate(CommUtils.BaudRate.getBaudRate(comport));
-    // DTR
-    settings.setRadioCommportDtr(jRadioButtonRadioDtrOn.isSelected());
-    // RTS
-    settings.setRadioCommportRts(jRadioButtonRadioRtsOn.isSelected());
-   
-    //--------------------------------
-    // Keyer
-    //--------------------------------
-    // Type
-    settings.setKeyerType(getSelectedKeyerType());
-    // Commport
-    if(jComboBoxKeyerComPort.getSelectedItem() != null)
-      settings.setKeyerCommPortName(jComboBoxKeyerComPort.getSelectedItem().toString());
+        //--------------------------------
+        // Function keys 
+        //--------------------------------
+        jtextfieldfF1.setText(settings.getFunctionKeyMessage(0));
+        jTextFieldF2.setText(settings.getFunctionKeyMessage(1));
+        jtextfieldfF3.setText(settings.getFunctionKeyMessage(2));
+        jtextfieldfF6.setText(settings.getFunctionKeyMessage(5));
+        jtextfieldfF7.setText(settings.getFunctionKeyMessage(6));
+        jtextfieldF8.setText(settings.getFunctionKeyMessage(7));
+        jtextfieldF9.setText(settings.getFunctionKeyMessage(8));
+        jtextfieldF10.setText(settings.getFunctionKeyMessage(9));
 
-    //--------------------------------
-    // PTT
-    //--------------------------------
-    // Type
-    settings.setPttType(getSelectedPttType());
-    // Commport
-    if(jComboBoxPttCommport.getSelectedItem() != null)
-      settings.setPttCommportName(jComboBoxPttCommport.getSelectedItem().toString());
-    // Delay
-    settings.setPttDelayInMilliseconds(Integer.parseInt(jTextFieldPttDelay.getText()));
-    settings.setPttTailInMilliseconds(Integer.parseInt(jTextFieldPttTailDelay.getText()));
-    
-    //--------------------------------
-    // Callsign
-    //--------------------------------
-    if(!Qso.isValidCallsign(textfieldSettingsMyCallsign.getText()))
-    {
-      JOptionPane.showMessageDialog(null, "Invalid callsign!"); // Validate myCallsign
-      return false;
-    }
-    settings.setMyCallsign(textfieldSettingsMyCallsign.getText());
-
-    //--------------------------------
-    // Other 
-    //--------------------------------
-    // Default prefix
-    settings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
-    settings.setDefaultPrefix(textfieldSettingsDefaultPrefix.getText());
-    //TODO settings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
-    settings.setEmsEnabled(checkboxESM.isSelected());
-    settings.setSendLeadingZeroAsT(checkboxSendLeadingZeroAsT.isSelected());    
-    settings.setSendZeroAsT(checkboxSendZeroAsT.isSelected()); 
-    // Hide after
-    settings.setIncomingQsoHiderAfter(Integer.parseInt(jTextFieldTimeToNextQso.getText()));
-    
-    //--------------------------------
-    // Function keys 
-    //--------------------------------
-    settings.setFunctionKeyMessage(0, jtextfieldfF1.getText());
-    settings.setFunctionKeyMessage(1, jTextFieldF2.getText());
-    settings.setFunctionKeyMessage(2, jtextfieldfF3.getText());
-    settings.setFunctionKeyMessage(5, jtextfieldfF6.getText());
-    settings.setFunctionKeyMessage(6, jtextfieldfF7.getText());
-    settings.setFunctionKeyMessage(7, jtextfieldF8.getText());
-    settings.setFunctionKeyMessage(8, jtextfieldF9.getText());
-    settings.setFunctionKeyMessage(9, jtextfieldF10.getText());
-
-    //--------------------------------
-    // Contest rules
-    //--------------------------------
-    // Repeat period 
-    settings.setQsoRepeatPeriod(Integer.parseInt(jtextfieldQsoRepeatPeriod.getText()));
-    // Exchange rule
-    settings.setContestExchange(jTextFieldContestExchange.getText());
-    
-    settings.SaveSettingsToDisk(); // Save all settings to disk
-    
-    initEntryFields();
-    return true;
-  }
-
-  
-  /**
-   * 
-   * @return  Frequency in Hz
-   */
-  private int getBandmapStartFreq()
-  {
-    int freq = 3500000;
-    
-    try
-    {
-      freq = Integer.parseInt(jtextfieldBandmapStartFreq.getText());
-      freq *= 1000;
-    }
-    catch(Exception exc)
-    {
-      Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, exc);
-    }
-    
-    
-    if(freq<1800000)
-      return 1800000;
-    if(freq>28000000)
-      return 28000000;
-    
-    return freq;
-  }
-  
-  
-  /**
-   * Sets the jtextfiled with the bandmap frequency
-   * 
-   * @param freqInHz 
-   */
-  private void setBandmapStartFreq(int freqInHz)
-  {
-    if(freqInHz < 1800000)
-    {
-      freqInHz = 1800000;
-    }
-    if(freqInHz > 28000000)
-    {
-      freqInHz = 28000000;
+        //--------------------------------
+        // Contest rules
+        //--------------------------------
+        // Repeat period in mins
+        jtextfieldQsoRepeatPeriod.setText(Integer.toString(settings.getQsoRepeatPeriod()));
+        // Exchange rule
+        jTextFieldContestExchange.setText(settings.getContestExchange());
     }
 
-    freqInHz = freqInHz / 1000;
-    
-    String frequency = Integer.toString(freqInHz);
-    if(!jtextfieldBandmapStartFreq.getText().equals(frequency))
-      jtextfieldBandmapStartFreq.setText(frequency);
-  }
-  
-  
-  private void pressedF1()
-  {
-    // if "jump to cq freq" is enabled we will jump to the cq frequency (cq freq can be set through the button "set cq freq"
-    if(jcheckboxF1jumpsToCq.isSelected())
-    { 
-      if(getFreq()<(cqFrequency-50) || getFreq()>(cqFrequency+50) )
-      {
+    /**
+     * User has closed the setting dialog and we need to save the state of the
+     * controls
+     */
+    private boolean storeSettings()
+    {
+        //--------------------------------
+        // Radio
+        //--------------------------------
+        // Commport
+        if(jComboBoxRadioComPort.getSelectedItem() != null)
+        {
+            settings.setRadioCommportName(jComboBoxRadioComPort.getSelectedItem().toString());
+        }
+        // Baud rate
+        String comport = jComboBoxRadioComPortBaudRate.getSelectedItem().toString();
+        settings.setRadioCommportBaudRate(CommUtils.BaudRate.getBaudRate(comport));
+        // DTR
+        settings.setRadioCommportDtr(jRadioButtonRadioDtrOn.isSelected());
+        // RTS
+        settings.setRadioCommportRts(jRadioButtonRadioRtsOn.isSelected());
+
+        //--------------------------------
+        // Keyer
+        //--------------------------------
+        // Type
+        settings.setKeyerType(getSelectedKeyerType());
+        // Commport
+        if(jComboBoxKeyerComPort.getSelectedItem() != null)
+        {
+            settings.setKeyerCommPortName(jComboBoxKeyerComPort.getSelectedItem().toString());
+        }
+
+        //--------------------------------
+        // PTT
+        //--------------------------------
+        // Type
+        settings.setPttType(getSelectedPttType());
+        // Commport
+        if(jComboBoxPttCommport.getSelectedItem() != null)
+        {
+            settings.setPttCommportName(jComboBoxPttCommport.getSelectedItem().toString());
+        }
+        // Delay
+        settings.setPttDelayInMilliseconds(Integer.parseInt(jTextFieldPttDelay.getText()));
+        settings.setPttTailInMilliseconds(Integer.parseInt(jTextFieldPttTailDelay.getText()));
+
+        //--------------------------------
+        // Callsign
+        //--------------------------------
+        if(!Qso.isValidCallsign(textfieldSettingsMyCallsign.getText()))
+        {
+            JOptionPane.showMessageDialog(null, "Invalid callsign!"); // Validate myCallsign
+            return false;
+        }
+        settings.setMyCallsign(textfieldSettingsMyCallsign.getText());
+
+        //--------------------------------
+        // Other 
+        //--------------------------------
+        // Default prefix
+        settings.setQuickCallsignMode(checkboxSettingsQuickMode.isSelected());
+        settings.setDefaultPrefix(textfieldSettingsDefaultPrefix.getText());
+        //TODO settings.setAutoCqJump(checkboxF1JumpsToCq.isSelected());
+        settings.setEmsEnabled(checkboxESM.isSelected());
+        settings.setSendLeadingZeroAsT(checkboxSendLeadingZeroAsT.isSelected());
+        settings.setSendZeroAsT(checkboxSendZeroAsT.isSelected());
+        // Hide after
+        settings.setIncomingQsoHiderAfter(Integer.parseInt(jTextFieldTimeToNextQso.getText()));
+
+        //--------------------------------
+        // Function keys 
+        //--------------------------------
+        settings.setFunctionKeyMessage(0, jtextfieldfF1.getText());
+        settings.setFunctionKeyMessage(1, jTextFieldF2.getText());
+        settings.setFunctionKeyMessage(2, jtextfieldfF3.getText());
+        settings.setFunctionKeyMessage(5, jtextfieldfF6.getText());
+        settings.setFunctionKeyMessage(6, jtextfieldfF7.getText());
+        settings.setFunctionKeyMessage(7, jtextfieldF8.getText());
+        settings.setFunctionKeyMessage(8, jtextfieldF9.getText());
+        settings.setFunctionKeyMessage(9, jtextfieldF10.getText());
+
+        //--------------------------------
+        // Contest rules
+        //--------------------------------
+        // Repeat period 
+        settings.setQsoRepeatPeriod(Integer.parseInt(jtextfieldQsoRepeatPeriod.getText()));
+        // Exchange rule
+        settings.setContestExchange(jTextFieldContestExchange.getText());
+
+        settings.SaveSettingsToDisk(); // Save all settings to disk
+
+        initEntryFields();
+        return true;
+    }
+
+    /**
+     *
+     * @return Frequency in Hz
+     */
+    private int getBandmapStartFreq()
+    {
+        int freq = 3500000;
+
         try
         {
-          radioController.setFrequency(cqFrequency);
-          Thread.sleep(300); // w8 for radio to jump to frequency
-        }
-        catch (InterruptedException ex)
+            freq = Integer.parseInt(jtextfieldBandmapStartFreq.getText());
+            freq *= 1000;
+        } catch(Exception exc)
         {
-          Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, exc);
         }
-      }
-    }
-    // if not enabled - remember the cq frequency
-    else
-    {
-      cqFrequency = getFreq();
-      jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
-    }
-    
-    String text = settings.getFunctionKeyMessage(0);  // Get the text for the F1 key
-    text = text.replaceAll("\\{mycall\\}", settings.getMyCallsign()); // Substitute {mycall} with my callsign
-    text = text + " ";
-    sendCw(text); // Send to keyer
-    playCqWav();
-    
-    // Select the CQ radio button
-    jradiobuttonCQ.setSelected(true);
-    
-    int period = 0;
-    // Continious CQ is enabled ...
-    if(jcheckboxContinuousCq.isSelected())
-    {
-      try
-      {
-        period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());        
-      }
-      catch(NumberFormatException numberFormatException)
-      {
-        period +=3000; // default length if crap is entered by the user
-      }
-  
-      
-      if(getMode()== RadioModes.CW || getMode()== RadioModes.CWR)
-      {
-          period += MorseCode.getDurationOfMessage(text, keyerSpeed); 
-      }
-      else if(getMode()== RadioModes.LSB || getMode()== RadioModes.USB)
-      {  
-          period += VoiceKeyer.getLengthInSeconds(new File("cq.wav"));
-      }
-      
-              
-      if(timerContinuousCq.isRunning())
-      {
-        timerContinuousCq.stop();
-      }
-      timerContinuousCq.setInitialDelay(period);
-      timerContinuousCq.start();
-    }
-  }
-  
-  
-  private void pressedF2()
-  {  
-    String toSend =  settings.getFunctionKeyMessage(1).toLowerCase();
-    
-    // Check if "{exch}" is present 
-    if(toSend.contains("{exch}"))
-    {
-      String exchange;
-      
-      // If jtextfieldCallsign is empty we should get exchange from last QSO
-      if(isCallsignFieldEmpty() && log.getSize() > 0)
-      {
-        exchange = log.getLastQso().getSnt();
-      }
-      else
-      {
-        exchange = jtextfieldSnt.getText();
-      }
-      
-      if(settings.isSendLeadingZeroAsT())
-      {
-        exchange = RcvFormatter.leadingZerosToT(exchange);  
-      }
 
-      if(settings.isSendZeroAsT())
-      {
-        exchange = exchange.replace('0', 't');
-      }
-      
-      toSend = toSend.replaceAll("\\{exch\\}", exchange);  // Substitute all "{exch}"
-    }
-    
-    toSend = toSend.replaceAll("\\{mycall\\}", settings.getMyCallsign());  // Substitute all "{mycall}"
-  
-    sendCw(toSend + " ");
-  }
-  
-  private void pressedF3()
-  {
-    sendCw(settings.getFunctionKeyMessage(2)+" ");
-  }
-  
-  private void pressedF4()
-  {
-    sendCw(settings.getMyCallsign()+" ");
-  }
-  
-  private void pressedF5()
-  {
-    sendCw(getCallsignFromTextField()+" ");
-  }
-  
-  private void pressedF6()
-  {
-    sendCw(settings.getFunctionKeyMessage(5)+" ");
-  }
-  
-  private void pressedF7()
-  {
-    sendCw(settings.getFunctionKeyMessage(6)+" ");
-  }
-  
-  private void pressedF8()
-  {
-    sendCw(settings.getFunctionKeyMessage(7)+" ");
-  }
-  
-  private void pressedF9()
-  {
-    sendCw(settings.getFunctionKeyMessage(8)+" ");
-  }
-  
-  private void pressedF10()
-  {
-    sendCw(settings.getFunctionKeyMessage(9)+" ");
-  }
-  
-  private void pressedF11()
-  {
-    if(Qso.isValidCallsign(getCallsignFromTextField()))
-      jtablemodelBandmap.addSpot(getCallsignFromTextField(), getFreq(), getMode());
-    initEntryFields();
-  }
-  
-  boolean isCallsignFieldEmpty()
-  {
-    if(settings.isQuickCallsignModeEnabled())
-      return settings.getDefaultPrefix().compareTo(jtextfieldCallsign.getText()) == 0;
-   
-    return jtextfieldCallsign.getText().isEmpty();
-  }
-  
-  private void pressedEsc()
-  {
-    keyer.stopSendingCw();
-    voiceKeyer.stopVoice();
-    if(timerContinuousCq.isRunning())
-      timerContinuousCq.stop();
-  }
-  
-  private void pressedF12()
-  {
-    initEntryFields();
-  }
-  
-  
-  private int calculateFrequencyChange()
-  {
-    return Math.abs(cqFrequency-getFreq());
-  }
-  
-  
-  /**
-   * Will try to transmit CW is mode is CW or CWR
-   */
-  void sendCw(String msg)
-  {
-    if(getMode() == RadioModes.CW || getMode() == RadioModes.CWR)
-    {
-      keyer.sendCw(msg);
-      jLabelStatus.setText(msg);
-    }
-    
-  }
-  
-  
-  void playCqWav()
-  {
-      if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
-      {
-        voiceKeyer.sendVoice(new File("cq.wav"));
-        jLabelStatus.setText("Playing cq.wav file.");
-      }
-  }
-  
-  
-  class LocalRadioControllerListener implements RadioController.RadioControllerListener
-  {
-    private void updateBandmapStartFreq(int freq, RadioModes mode)
-    {
-      switch(mode)
-      {
-        case CW:
-        case CWR:
-          if(Misc.freqToBand(freq).equals("160"))
-          {
-            setBandmapStartFreq(1800000);
-          }
-          else if(Misc.freqToBand(freq).equals("80"))
-          {
-            setBandmapStartFreq(3500000);
-          }
-          else if(Misc.freqToBand(freq).equals("40"))
-          {
-            setBandmapStartFreq(7000000);
-          }
-          else if(Misc.freqToBand(freq).equals("20"))
-          {
-            setBandmapStartFreq(14000000);
-          }
-          else if(Misc.freqToBand(freq).equals("15"))
-          {
-            setBandmapStartFreq(21000000);
-          }
-          else if(Misc.freqToBand(freq).equals("10"))
-          {
-            setBandmapStartFreq(28000000);
-          }
-          break;
-          
-        case LSB:
-        case USB:
-          if(Misc.freqToBand(freq).equals("160"))
-          {
-            setBandmapStartFreq(1800000);
-          }
-          else if(Misc.freqToBand(freq).equals("80"))
-          {
-            setBandmapStartFreq(3600000);
-          }
-          else if(Misc.freqToBand(freq).equals("40"))
-          {
-            setBandmapStartFreq(7060000);
-          }
-          else if(Misc.freqToBand(freq).equals("20"))
-          {
-            setBandmapStartFreq(14100000);
-          }
-          else if(Misc.freqToBand(freq).equals("15"))
-          {
-            setBandmapStartFreq(21150000);
-          }
-          else if(Misc.freqToBand(freq).equals("10"))
-          {
-            setBandmapStartFreq(28400000);
-          }
-          break;
-      }
-    }
-    
-    
-    @Override
-    public void frequency()
-    {
-      /* Create and display the form */
-      java.awt.EventQueue.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
+        if(freq < 1800000)
         {
-          // Update the Radio panel
-          jtextfieldFrequency.setText(radioController.getActiveVfo().toString()+" " +Integer.toString(radioController.getFrequency()));
-          
-          // Set to S&P if in CQ mode and CQ frequency has changed with 500Hz
-          if(jradiobuttonCQ.isSelected() && calculateFrequencyChange()>500)
-          {
-            jradiobuttonSP.setSelected(true);
-            pressedEsc();
-          }
-          
-          // We need to repaint the bandmap table so that the fequency marker is updated
-          jtableBandmap.repaint();
-          
-          
-          if(settings.isBandmapAutoFreq())
-          {
-            updateBandmapStartFreq(radioController.getFrequency(), radioController.getMode());
-          }
+            return 1800000;
         }
-      });
-     
-    }
-    
-   
-    
-    @Override
-    public void mode()
-    {
-      /* Create and display the form */
-      java.awt.EventQueue.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
+        if(freq > 28000000)
         {
-          jtextfieldMode.setText(radioController.getMode().toString());
+            return 28000000;
         }
-      });
+
+        return freq;
     }
 
-    @Override
-    public void vfo()
-    {
-      /* Create and display the form */
-      java.awt.EventQueue.invokeLater(new Runnable()
-      {
-        @Override
-        public void run()
-        {
-          jtextfieldMode.setText(radioController.getMode().toString());
-          jtextfieldFrequency.setText(radioController.getActiveVfo().toString()+" " +Integer.toString(radioController.getFrequency()));
-        
-          // Set to S&P if in CQ mode and CQ frequency has changed with 500Hz
-          if(jradiobuttonCQ.isSelected() && calculateFrequencyChange()>500)
-          {
-            jradiobuttonSP.setSelected(true);
-          }
-          
-          // We need to repaint the bandmap table so that the fequency marker is updated
-          jtableBandmap.repaint();
-        }
-      });
-    }
-    
-  }
-  /**
-   * @param args the command line arguments
-   */
-  public static void main(String args[])
-  {
-    /* Set the Nimbus look and feel */
-    //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-     * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+    /**
+     * Sets the jtextfiled with the bandmap frequency
+     *
+     * @param freqInHz
      */
-    try
+    private void setBandmapStartFreq(int freqInHz)
     {
-      for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
-      {
-        if ("Nimbus".equals(info.getName()))
+        if(freqInHz < 1800000)
         {
-          javax.swing.UIManager.setLookAndFeel(info.getClassName());
-          break;
+            freqInHz = 1800000;
         }
-      }
-    }
-    catch (ClassNotFoundException ex)
-    {
-      java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    }
-    catch (InstantiationException ex)
-    {
-      java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    }
-    catch (IllegalAccessException ex)
-    {
-      java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    }
-    catch (javax.swing.UnsupportedLookAndFeelException ex)
-    {
-      java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-    }
-    //</editor-fold>
+        if(freqInHz > 28000000)
+        {
+            freqInHz = 28000000;
+        }
 
-    /* Create and display the form */
-    java.awt.EventQueue.invokeLater(new Runnable()
-    {
-      public void run()
-      {
-        new MainWindow().setVisible(true);
-      }
-    });
-  }
+        freqInHz = freqInHz / 1000;
 
-  
-  /**
-   * Will return true if new db4o log file can be created. Theabsolute path 
-   * for the log file will be written in logDbFile.
-   * 
-   * @return true in case the db4o file can be created
-   */
-  private boolean createNewLog()
-  {
-    JFileChooser fc = new JFileChooser();
-    fc.setFileFilter(new FileNameExtensionFilter("Log database files (*.db4o)", "db4o"));
-    fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
-    try
-    {
-      int returnVal = fc.showSaveDialog(this.getParent());
-      if (returnVal != JFileChooser.APPROVE_OPTION)
-      {
-        return false;
-      } 
+        String frequency = Integer.toString(freqInHz);
+        if(!jtextfieldBandmapStartFreq.getText().equals(frequency))
+        {
+            jtextfieldBandmapStartFreq.setText(frequency);
+        }
     }
-    catch (Exception exc)
-    {
-      JOptionPane.showMessageDialog(null, "Error when trying to acquire log database file.", "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-    
-    logDbFile = fc.getSelectedFile().getAbsolutePath();
-    if(!logDbFile.endsWith(".db4o"))
-    {
-      logDbFile = logDbFile+".db4o";
-    }
-        
-    File file = new File(logDbFile);
-    
-    if(file.exists())
-    {
-      JOptionPane.showMessageDialog(null, "File already exists: "+file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-    return true;
-  }
-          
-  /**
-   * Will return true if existing .db4o log file was found. The log file absolute path will be 
-   * written in logDbFile.
-   * 
-   * @return true in case the db4o file was found.
-   */
-  private boolean findExistingLog()
-  {
-    JFileChooser fc = new JFileChooser();
-    fc.setFileFilter(new FileNameExtensionFilter("Log database files (*.db4o)", "db4o"));
-    fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
-    try
-    {
-      int returnVal = fc.showOpenDialog(this.getParent());
-      if (returnVal != JFileChooser.APPROVE_OPTION)
-      {
-        return false;
-      } 
-    }
-    catch (Exception exc)
-    {
-      JOptionPane.showMessageDialog(null, "Error when trying to acquire log database file.", "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-    
-    logDbFile = fc.getSelectedFile().getAbsolutePath();
-    File file = new File(logDbFile);
-    
-    if(!file.exists())
-    {
-      JOptionPane.showMessageDialog(null, "Log file not found: "+file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-    return true;
-  }
 
-  
-  
-  private class MyDispatcher implements KeyEventDispatcher
-  {
-    long lastCtrlAltPressed = 0;
-    
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent evt)
+    private void pressedF1()
     {
-      if (evt.getID() != KeyEvent.KEY_RELEASED) 
-      {
-        return false;
-      }
-        
-      
-      // Function keys events
-      switch (evt.getKeyCode())
-      {
-        case KeyEvent.VK_CONTROL:   
-        case KeyEvent.VK_ALT:
-          lastCtrlAltPressed = System.currentTimeMillis();          
-          break;
-          
-        case KeyEvent.VK_F1:
-          if(evt.isControlDown() || evt.isAltDown() || 
-             System.currentTimeMillis() - lastCtrlAltPressed < 100)  // sometimes people release the Alt key earlier
-          {
+        // if "jump to cq freq" is enabled we will jump to the cq frequency (cq freq can be set through the button "set cq freq"
+        if(jcheckboxF1jumpsToCq.isSelected())
+        {
+            if(getFreq() < (cqFrequency - 50) || getFreq() > (cqFrequency + 50))
+            {
+                try
+                {
+                    radioController.setFrequency(cqFrequency);
+                    Thread.sleep(300); // w8 for radio to jump to frequency
+                } catch(InterruptedException ex)
+                {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } // if not enabled - remember the cq frequency
+        else
+        {
             cqFrequency = getFreq();
             jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
-            evt.consume();
-          }
-          else
-          {
-              pressedF1();
-              evt.consume();
-          }
-          break;
-          
-        case KeyEvent.VK_F2:
-          pressedF2();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_F3:
-          pressedF3();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_F4:
-          pressedF4();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_F5:
-          pressedF5();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_F6:
-          pressedF6();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_F7:
-          pressedF7();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_F8:
-          pressedF8();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_F9:
-          pressedF9();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_QUOTE: // ' = Sends TU message and enter in log
-          if(addEntryToLog())
-          {
-            initEntryFields();
-            jtextfieldCallsign.requestFocusInWindow(); // Move focus to Callsign field
-            pressedF3();
-          }
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_SEMICOLON: // ;  = Sends call and exchange
-          pressedF5();
-          pressedF2();
-          evt.consume();
-          break;
-          
+        }
+
+        String text = settings.getFunctionKeyMessage(0);  // Get the text for the F1 key
+        text = text.replaceAll("\\{mycall\\}", settings.getMyCallsign()); // Substitute {mycall} with my callsign
+        text = text + " ";
+        sendCw(text); // Send to keyer
+        playCqWav();
+
+        // Select the CQ radio button
+        jradiobuttonCQ.setSelected(true);
+
+        int period = 0;
+        // Continious CQ is enabled ...
+        if(jcheckboxContinuousCq.isSelected())
+        {
+            try
+            {
+                period += Integer.parseInt(jtextfieldContinuousCqPeriod.getText());
+            } catch(NumberFormatException numberFormatException)
+            {
+                period += 3000; // default length if crap is entered by the user
+            }
+
+            if(getMode() == RadioModes.CW || getMode() == RadioModes.CWR)
+            {
+                period += MorseCode.getDurationOfMessage(text, keyerSpeed);
+            } else if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
+            {
+                period += VoiceKeyer.getLengthInSeconds(new File("cq.wav"));
+            }
+
+            if(timerContinuousCq.isRunning())
+            {
+                timerContinuousCq.stop();
+            }
+            timerContinuousCq.setInitialDelay(period);
+            timerContinuousCq.start();
+        }
+    }
+
+    private void pressedF2()
+    {
+        String toSend = settings.getFunctionKeyMessage(1).toLowerCase();
+
+        // Check if "{exch}" is present 
+        if(toSend.contains("{exch}"))
+        {
+            String exchange;
+
+            // If jtextfieldCallsign is empty we should get exchange from last QSO
+            if(isCallsignFieldEmpty() && log.getSize() > 0)
+            {
+                exchange = log.getLastQso().getSnt();
+            } else
+            {
+                exchange = jtextfieldSnt.getText();
+            }
+
+            if(settings.isSendLeadingZeroAsT())
+            {
+                exchange = RcvFormatter.leadingZerosToT(exchange);
+            }
+
+            if(settings.isSendZeroAsT())
+            {
+                exchange = exchange.replace('0', 't');
+            }
+
+            toSend = toSend.replaceAll("\\{exch\\}", exchange);  // Substitute all "{exch}"
+        }
+
+        toSend = toSend.replaceAll("\\{mycall\\}", settings.getMyCallsign());  // Substitute all "{mycall}"
+
+        sendCw(toSend + " ");
+    }
+
+    private void pressedF3()
+    {
+        sendCw(settings.getFunctionKeyMessage(2) + " ");
+    }
+
+    private void pressedF4()
+    {
+        sendCw(settings.getMyCallsign() + " ");
+    }
+
+    private void pressedF5()
+    {
+        sendCw(getCallsignFromTextField() + " ");
+    }
+
+    private void pressedF6()
+    {
+        sendCw(settings.getFunctionKeyMessage(5) + " ");
+    }
+
+    private void pressedF7()
+    {
+        sendCw(settings.getFunctionKeyMessage(6) + " ");
+    }
+
+    private void pressedF8()
+    {
+        sendCw(settings.getFunctionKeyMessage(7) + " ");
+    }
+
+    private void pressedF9()
+    {
+        sendCw(settings.getFunctionKeyMessage(8) + " ");
+    }
+
+    private void pressedF10()
+    {
+        sendCw(settings.getFunctionKeyMessage(9) + " ");
+    }
+
+    private void pressedF11()
+    {
+        if(Qso.isValidCallsign(getCallsignFromTextField()))
+        {
+            jtablemodelBandmap.addSpot(getCallsignFromTextField(), getFreq(), getMode());
+        }
+        initEntryFields();
+    }
+
+    boolean isCallsignFieldEmpty()
+    {
+        if(settings.isQuickCallsignModeEnabled())
+        {
+            return settings.getDefaultPrefix().compareTo(jtextfieldCallsign.getText()) == 0;
+        }
+
+        return jtextfieldCallsign.getText().isEmpty();
+    }
+
+    private void pressedEsc()
+    {
+        keyer.stopSendingCw();
+        voiceKeyer.stopVoice();
+        if(timerContinuousCq.isRunning())
+        {
+            timerContinuousCq.stop();
+        }
+    }
+
+    private void pressedF12()
+    {
+        initEntryFields();
+    }
+
+    private int calculateFrequencyChange()
+    {
+        return Math.abs(cqFrequency - getFreq());
+    }
+
+    /**
+     * Will try to transmit CW is mode is CW or CWR
+     */
+    void sendCw(String msg)
+    {
+        if(getMode() == RadioModes.CW || getMode() == RadioModes.CWR)
+        {
+            keyer.sendCw(msg);
+            jLabelStatus.setText(msg);
+        }
+
+    }
+
+    void playCqWav()
+    {
+        if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
+        {
+            voiceKeyer.sendVoice(new File("cq.wav"));
+            jLabelStatus.setText("Playing cq.wav file.");
+        }
+    }
+
+    class LocalRadioControllerListener implements RadioController.RadioControllerListener
+    {
+
+        private void updateBandmapStartFreq(int freq, RadioModes mode)
+        {
+            switch(mode)
+            {
+                case CW:
+                case CWR:
+                    if(Misc.freqToBand(freq).equals("160"))
+                    {
+                        setBandmapStartFreq(1800000);
+                    } else if(Misc.freqToBand(freq).equals("80"))
+                    {
+                        setBandmapStartFreq(3500000);
+                    } else if(Misc.freqToBand(freq).equals("40"))
+                    {
+                        setBandmapStartFreq(7000000);
+                    } else if(Misc.freqToBand(freq).equals("20"))
+                    {
+                        setBandmapStartFreq(14000000);
+                    } else if(Misc.freqToBand(freq).equals("15"))
+                    {
+                        setBandmapStartFreq(21000000);
+                    } else if(Misc.freqToBand(freq).equals("10"))
+                    {
+                        setBandmapStartFreq(28000000);
+                    }
+                    break;
+
+                case LSB:
+                case USB:
+                    if(Misc.freqToBand(freq).equals("160"))
+                    {
+                        setBandmapStartFreq(1800000);
+                    } else if(Misc.freqToBand(freq).equals("80"))
+                    {
+                        setBandmapStartFreq(3600000);
+                    } else if(Misc.freqToBand(freq).equals("40"))
+                    {
+                        setBandmapStartFreq(7060000);
+                    } else if(Misc.freqToBand(freq).equals("20"))
+                    {
+                        setBandmapStartFreq(14100000);
+                    } else if(Misc.freqToBand(freq).equals("15"))
+                    {
+                        setBandmapStartFreq(21150000);
+                    } else if(Misc.freqToBand(freq).equals("10"))
+                    {
+                        setBandmapStartFreq(28400000);
+                    }
+                    break;
+            }
+        }
+
+        @Override
+        public void frequency()
+        {
+            /* Create and display the form */
+            java.awt.EventQueue.invokeLater(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    // Update the Radio panel
+                    jtextfieldFrequency.setText(radioController.getActiveVfo().toString() + " " + Integer.toString(radioController.getFrequency()));
+
+                    // Set to S&P if in CQ mode and CQ frequency has changed with 500Hz
+                    if(jradiobuttonCQ.isSelected() && calculateFrequencyChange() > 500)
+                    {
+                        jradiobuttonSP.setSelected(true);
+                        pressedEsc();
+                    }
+
+                    // We need to repaint the bandmap table so that the fequency marker is updated
+                    jtableBandmap.repaint();
+
+                    if(settings.isBandmapAutoFreq())
+                    {
+                        updateBandmapStartFreq(radioController.getFrequency(), radioController.getMode());
+                    }
+                }
+            });
+
+        }
+
+        @Override
+        public void mode()
+        {
+            /* Create and display the form */
+            java.awt.EventQueue.invokeLater(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    jtextfieldMode.setText(radioController.getMode().toString());
+                }
+            });
+        }
+
+        @Override
+        public void vfo()
+        {
+            /* Create and display the form */
+            java.awt.EventQueue.invokeLater(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    jtextfieldMode.setText(radioController.getMode().toString());
+                    jtextfieldFrequency.setText(radioController.getActiveVfo().toString() + " " + Integer.toString(radioController.getFrequency()));
+
+                    // Set to S&P if in CQ mode and CQ frequency has changed with 500Hz
+                    if(jradiobuttonCQ.isSelected() && calculateFrequencyChange() > 500)
+                    {
+                        jradiobuttonSP.setSelected(true);
+                    }
+
+                    // We need to repaint the bandmap table so that the fequency marker is updated
+                    jtableBandmap.repaint();
+                }
+            });
+        }
+
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[])
+    {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+     * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try
+        {
+            for(javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
+            {
+                if("Nimbus".equals(info.getName()))
+                {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch(ClassNotFoundException ex)
+        {
+            java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch(InstantiationException ex)
+        {
+            java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch(IllegalAccessException ex)
+        {
+            java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch(javax.swing.UnsupportedLookAndFeelException ex)
+        {
+            java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable()
+        {
+            public void run()
+            {
+                new MainWindow().setVisible(true);
+            }
+        });
+    }
+
+    /**
+     * Will return true if new db4o log file can be created. Theabsolute path
+     * for the log file will be written in logDbFile.
+     *
+     * @return true in case the db4o file can be created
+     */
+    private boolean createNewLog()
+    {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new FileNameExtensionFilter("Log database files (*.db4o)", "db4o"));
+        fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
+        try
+        {
+            int returnVal = fc.showSaveDialog(this.getParent());
+            if(returnVal != JFileChooser.APPROVE_OPTION)
+            {
+                return false;
+            }
+        } catch(Exception exc)
+        {
+            JOptionPane.showMessageDialog(null, "Error when trying to acquire log database file.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        logDbFile = fc.getSelectedFile().getAbsolutePath();
+        if(!logDbFile.endsWith(".db4o"))
+        {
+            logDbFile = logDbFile + ".db4o";
+        }
+
+        File file = new File(logDbFile);
+
+        if(file.exists())
+        {
+            JOptionPane.showMessageDialog(null, "File already exists: " + file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Will return true if existing .db4o log file was found. The log file
+     * absolute path will be written in logDbFile.
+     *
+     * @return true in case the db4o file was found.
+     */
+    private boolean findExistingLog()
+    {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(new FileNameExtensionFilter("Log database files (*.db4o)", "db4o"));
+        fc.setCurrentDirectory(Paths.get(pathToWorkingDir, "/logs/").toFile());
+        try
+        {
+            int returnVal = fc.showOpenDialog(this.getParent());
+            if(returnVal != JFileChooser.APPROVE_OPTION)
+            {
+                return false;
+            }
+        } catch(Exception exc)
+        {
+            JOptionPane.showMessageDialog(null, "Error when trying to acquire log database file.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        logDbFile = fc.getSelectedFile().getAbsolutePath();
+        File file = new File(logDbFile);
+
+        if(!file.exists())
+        {
+            JOptionPane.showMessageDialog(null, "Log file not found: " + file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    private class MyDispatcher implements KeyEventDispatcher
+    {
+
+        long lastCtrlAltPressed = 0;
+
+        @Override
+        public boolean dispatchKeyEvent(KeyEvent evt)
+        {
+            if(evt.getID() != KeyEvent.KEY_RELEASED)
+            {
+                return false;
+            }
+
+            // Function keys events
+            switch(evt.getKeyCode())
+            {
+                case KeyEvent.VK_CONTROL:
+                case KeyEvent.VK_ALT:
+                    lastCtrlAltPressed = System.currentTimeMillis();
+                    break;
+
+                case KeyEvent.VK_F1:
+                    if(evt.isControlDown() || evt.isAltDown()
+                            || System.currentTimeMillis() - lastCtrlAltPressed < 100)  // sometimes people release the Alt key earlier
+                    {
+                        cqFrequency = getFreq();
+                        jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
+                        evt.consume();
+                    } else
+                    {
+                        pressedF1();
+                        evt.consume();
+                    }
+                    break;
+
+                case KeyEvent.VK_F2:
+                    pressedF2();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_F3:
+                    pressedF3();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_F4:
+                    pressedF4();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_F5:
+                    pressedF5();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_F6:
+                    pressedF6();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_F7:
+                    pressedF7();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_F8:
+                    pressedF8();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_F9:
+                    pressedF9();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_QUOTE: // ' = Sends TU message and enter in log
+                    if(addEntryToLog())
+                    {
+                        initEntryFields();
+                        jtextfieldCallsign.requestFocusInWindow(); // Move focus to Callsign field
+                        pressedF3();
+                    }
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_SEMICOLON: // ;  = Sends call and exchange
+                    pressedF5();
+                    pressedF2();
+                    evt.consume();
+                    break;
+
 //        case KeyEvent.VK_F10:
 //          pressedF10();
 //          evt.consume();
 //          break;
-          
-        case KeyEvent.VK_F11:
-          pressedF11();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_W:
-          if(evt.isControlDown() || evt.isAltDown() || 
-             System.currentTimeMillis() - lastCtrlAltPressed < 100)  // sometimes people release the Alt key earlier
-          {
-            pressedF12();
-            evt.consume();
-            break;
-          } 
-         break; 
-          
-        case KeyEvent.VK_F12:
-          pressedF12();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_PAGE_UP:
-          increaseKeyerSpeed();
-          evt.consume();
-          break;
-         
-        case KeyEvent.VK_PAGE_DOWN:
-          decreaseKeyerSpeed();
-          evt.consume();
-          break;
-          
-        case KeyEvent.VK_ESCAPE:
-          pressedEsc();
-          break;
-      }
-      return false;
-    }
-  }
-  
-  
-  /**
-   * Used for coloring the cells within the IncomingQso table
-   */
-  class IncomingQsoTableCellRender extends DefaultTableCellRenderer
-  {
-    
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column)
-    {
-      Component comp = super.getTableCellRendererComponent(table, value,isSelected, hasFocus, row, column);
-      //SJComponent jc = (JComponent) comp;
-            
-      if(jtablemodelIncomingQso.containsExpiredCallsign(row, column))
-      {
-        setForeground(Color.BLUE);
-      }
-      else
-      {
-        setForeground(Color.black);    
-      }
-          
-      // Set row height
-      FontMetrics fm = comp.getFontMetrics(comp.getFont());
-      
-      if(table.getRowHeight() != fm.getHeight())
-      {
-        table.setRowHeight(fm.getHeight());
-      }
-      
-      return this;
-    }
-  }
-   
-  
-  /**
-   * Used for coloring the cells within the Bandmap table
-   */
-  class BandmapTableCellRender extends DefaultTableCellRenderer
-  {
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column)
-    {
-      Component comp = super.getTableCellRendererComponent(table, value,isSelected, hasFocus, row, column);
-      //SJComponent jc = (JComponent) comp;
-            
-      
-      //((JLabel)comp).setToolTipText(Integer.toString(jtablemodelBandmap.cellToFreq(row, column))); find a better way to set it checking all the time
-            
-      // Show the current freq of the radio by highlighting the appropriate cell
-      if(jtablemodelBandmap.isCurrentFreqInThisCell(row, column, getFreq()))
-      {
-        setBackground(Color.LIGHT_GRAY);
-      }
-      // Show CQ freq in green
-      else if(jtablemodelBandmap.isCurrentFreqInThisCell(row, column, cqFrequency))
-      {
-        setBackground(Color.GREEN);
-      }
-      else
-      {
-        setBackground(Color.white);    
-        setForeground(Color.black);    
-      }
-      
-      // Set row height
-      FontMetrics fm = comp.getFontMetrics(comp.getFont());
-      
-      if(table.getRowHeight() != fm.getHeight())
-      {
-        table.setRowHeight(fm.getHeight());
-      }
-      
-      return this;
-    }
-  }
-  
-  /**
-   * Used for coloring the cells within the IncomingQso table
-   */
-  class LogTableCellRender extends DefaultTableCellRenderer
-  {
-    
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column)
-    {
-      Component comp = super.getTableCellRendererComponent(table, value,isSelected, hasFocus, row, column);
-      //SJComponent jc = (JComponent) comp;
-          
-      // Set row height
-      FontMetrics fm = comp.getFontMetrics(comp.getFont());
-      
-      if(table.getRowHeight() != fm.getHeight())
-      {
-        table.setRowHeight(fm.getHeight());
-      }
+                case KeyEvent.VK_F11:
+                    pressedF11();
+                    evt.consume();
+                    break;
 
-      return this;
-    }
-  }
-  
-  
-  class DigitsOnlyFilter extends DocumentFilter
-  {
-    @Override
-    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
-    {
-      fb.insertString(offset, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+                case KeyEvent.VK_W:
+                    if(evt.isControlDown() || evt.isAltDown()
+                            || System.currentTimeMillis() - lastCtrlAltPressed < 100)  // sometimes people release the Alt key earlier
+                    {
+                        pressedF12();
+                        evt.consume();
+                        break;
+                    }
+                    break;
+
+                case KeyEvent.VK_F12:
+                    pressedF12();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_PAGE_UP:
+                    increaseKeyerSpeed();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_PAGE_DOWN:
+                    decreaseKeyerSpeed();
+                    evt.consume();
+                    break;
+
+                case KeyEvent.VK_ESCAPE:
+                    pressedEsc();
+                    break;
+            }
+            return false;
+        }
     }
 
-    @Override
-    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+    /**
+     * Used for coloring the cells within the IncomingQso table
+     */
+    class IncomingQsoTableCellRender extends DefaultTableCellRenderer
     {
-      fb.replace(offset, length, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
-    }
-  }
-  
-  class PttDelayDocumentFilter extends DocumentFilter
-  { 
-    @Override
-    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
-    {
-      int currentLength = fb.getDocument().getLength();
-      int overlimit =  (currentLength+text.length()) - 3/*max length*/;
-      if(overlimit > 0)
-      {
-        fb.insertString(offset, text.substring(0, text.length()-overlimit), attrs);
-        return;
-      }
-      fb.insertString(offset, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column)
+        {
+            Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            //SJComponent jc = (JComponent) comp;
+
+            if(jtablemodelIncomingQso.containsExpiredCallsign(row, column))
+            {
+                setForeground(Color.BLUE);
+            } else
+            {
+                setForeground(Color.black);
+            }
+
+            // Set row height
+            FontMetrics fm = comp.getFontMetrics(comp.getFont());
+
+            if(table.getRowHeight() != fm.getHeight())
+            {
+                table.setRowHeight(fm.getHeight());
+            }
+
+            return this;
+        }
     }
 
-    @Override
-    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+    /**
+     * Used for coloring the cells within the Bandmap table
+     */
+    class BandmapTableCellRender extends DefaultTableCellRenderer
     {
-      int currentLength = fb.getDocument().getLength();
-      int overlimit =  (currentLength+text.length()) - 3/*max length*/ - length;
-      if(overlimit > 0)
-      {
-        fb.insertString(offset, text.substring(0, text.length()-overlimit), attrs);
-        return;
-      }
-      fb.replace(offset, length, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
-    }
-  }
-  
-  
-  class CallsignDocumentFilter extends DocumentFilter
-  {
 
-    @Override
-    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
-    {
-      fb.insertString(offset, text.toUpperCase().replaceAll("[^A-Z0-9/]*$", ""), attrs);
-    }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column)
+        {
+            Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            //SJComponent jc = (JComponent) comp;
 
-    @Override
-    public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
-    {
-      fb.replace(offset, length, text.toUpperCase().replaceAll("[^A-Z0-9/]*$", ""), attrs);
-    }
-  }
-  
-  
-  class SerialNumberDocumentFilter extends DocumentFilter
-  {
-   
-    @Override
-    public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException
-    {
-      text = text.replaceAll("[^A-Za-z0-9]*$", "");
-      int overlimit = fb.getDocument().getLength()+text.length() - SERIAL_NUMBER_MAX_LENGTH;
-      if(overlimit > 0)
-      {
-        fb.insertString(offset, text.substring(0, text.length()-overlimit), attr);
-        return;
-      }
-      fb.insertString(offset, text.toUpperCase(), attr);
+            //((JLabel)comp).setToolTipText(Integer.toString(jtablemodelBandmap.cellToFreq(row, column))); find a better way to set it checking all the time
+            // Show the current freq of the radio by highlighting the appropriate cell
+            if(jtablemodelBandmap.isCurrentFreqInThisCell(row, column, getFreq()))
+            {
+                setBackground(Color.LIGHT_GRAY);
+            } // Show CQ freq in green
+            else if(jtablemodelBandmap.isCurrentFreqInThisCell(row, column, cqFrequency))
+            {
+                setBackground(Color.GREEN);
+            } else
+            {
+                setBackground(Color.white);
+                setForeground(Color.black);
+            }
+
+            // Set row height
+            FontMetrics fm = comp.getFontMetrics(comp.getFont());
+
+            if(table.getRowHeight() != fm.getHeight())
+            {
+                table.setRowHeight(fm.getHeight());
+            }
+
+            return this;
+        }
     }
 
-    @Override
-    public void replace(DocumentFilter.FilterBypass fb,   // FilterBypass that can be used to mutate Document
-                        int offset,                       // Location in Document where we are inserting text
-                        int length,                       // Length of text to delete (in case we delete and insert at the same time)
-                        String text,                      // Text to insert, null indicates no text to insert
-                        AttributeSet attrs) throws BadLocationException // the attributes to associate with the inserted content. This may be null if there are no attributes.
+    /**
+     * Used for coloring the cells within the IncomingQso table
+     */
+    class LogTableCellRender extends DefaultTableCellRenderer
     {
-      int currentLength = fb.getDocument().getLength();
-      int overLimit = (currentLength + text.length()) - SERIAL_NUMBER_MAX_LENGTH - length;
-      if (overLimit > 0)
-      {
-        text = text.substring(0, text.length() - overLimit);
-      }
-      
-      text = text.replaceAll("[^A-Za-z0-9]*$", "");
-      fb.replace(offset, length, text.toUpperCase(), attrs);
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column)
+        {
+            Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            //SJComponent jc = (JComponent) comp;
+
+            // Set row height
+            FontMetrics fm = comp.getFontMetrics(comp.getFont());
+
+            if(table.getRowHeight() != fm.getHeight())
+            {
+                table.setRowHeight(fm.getHeight());
+            }
+
+            return this;
+        }
     }
-    
-    @Override
-    public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException
+
+    class DigitsOnlyFilter extends DocumentFilter
     {
-      fb.remove(offset, length);
+
+        @Override
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
+        {
+            fb.insertString(offset, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+        }
+
+        @Override
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+        {
+            fb.replace(offset, length, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+        }
     }
-  }
-  
+
+    class PttDelayDocumentFilter extends DocumentFilter
+    {
+
+        @Override
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
+        {
+            int currentLength = fb.getDocument().getLength();
+            int overlimit = (currentLength + text.length()) - 3/*max length*/;
+            if(overlimit > 0)
+            {
+                fb.insertString(offset, text.substring(0, text.length() - overlimit), attrs);
+                return;
+            }
+            fb.insertString(offset, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+        }
+
+        @Override
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+        {
+            int currentLength = fb.getDocument().getLength();
+            int overlimit = (currentLength + text.length()) - 3/*max length*/ - length;
+            if(overlimit > 0)
+            {
+                fb.insertString(offset, text.substring(0, text.length() - overlimit), attrs);
+                return;
+            }
+            fb.replace(offset, length, text.toUpperCase().replaceAll("[^0-9]+", ""), attrs);
+        }
+    }
+
+    class CallsignDocumentFilter extends DocumentFilter
+    {
+
+        @Override
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attrs) throws BadLocationException
+        {
+            fb.insertString(offset, text.toUpperCase().replaceAll("[^A-Z0-9/]*$", ""), attrs);
+        }
+
+        @Override
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+        {
+            fb.replace(offset, length, text.toUpperCase().replaceAll("[^A-Z0-9/]*$", ""), attrs);
+        }
+    }
+
+    class SerialNumberDocumentFilter extends DocumentFilter
+    {
+
+        @Override
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException
+        {
+            text = text.replaceAll("[^A-Za-z0-9]*$", "");
+            int overlimit = fb.getDocument().getLength() + text.length() - SERIAL_NUMBER_MAX_LENGTH;
+            if(overlimit > 0)
+            {
+                fb.insertString(offset, text.substring(0, text.length() - overlimit), attr);
+                return;
+            }
+            fb.insertString(offset, text.toUpperCase(), attr);
+        }
+
+        @Override
+        public void replace(DocumentFilter.FilterBypass fb, // FilterBypass that can be used to mutate Document
+                int offset, // Location in Document where we are inserting text
+                int length, // Length of text to delete (in case we delete and insert at the same time)
+                String text, // Text to insert, null indicates no text to insert
+                AttributeSet attrs) throws BadLocationException // the attributes to associate with the inserted content. This may be null if there are no attributes.
+        {
+            int currentLength = fb.getDocument().getLength();
+            int overLimit = (currentLength + text.length()) - SERIAL_NUMBER_MAX_LENGTH - length;
+            if(overLimit > 0)
+            {
+                text = text.substring(0, text.length() - overLimit);
+            }
+
+            text = text.replaceAll("[^A-Za-z0-9]*$", "");
+            fb.replace(offset, length, text.toUpperCase(), attrs);
+        }
+
+        @Override
+        public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException
+        {
+            fb.remove(offset, length);
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupRadioDtr;
     private javax.swing.ButtonGroup buttonGroupRadioRts;

@@ -20,7 +20,6 @@
 package org.lz1aq.lzlog;
 
 import java.util.Objects;
-import org.lz1aq.log.Qso;
 import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.Misc;
 

@@ -22,7 +22,6 @@ package org.lz1aq.lzlog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
 import javax.swing.table.AbstractTableModel;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.LogListener;
@@ -38,7 +37,7 @@ public class BandmapTableModel extends AbstractTableModel
 {
 
     private int startFreqInHz;
-    private ApplicationSettings appSettings;
+    private final ApplicationSettings appSettings;
 
     /**
      * Reference to the Log
@@ -127,7 +126,6 @@ public class BandmapTableModel extends AbstractTableModel
     /**
      * Updates content of the table.
      *
-     * @param appSettings
      * @param startFreq
      */
     public synchronized void refresh(int startFreq)
