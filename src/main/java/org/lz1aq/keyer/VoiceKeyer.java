@@ -20,7 +20,6 @@
 package org.lz1aq.keyer;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.AudioFormat;
@@ -30,7 +29,6 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import org.lz1aq.ptt.Ptt;
 
 /**
@@ -132,6 +130,10 @@ public class VoiceKeyer
                 {
                     ptt.on();
                 }
+                else
+                {
+                    LOGGER.log(Level.WARNING, "PTT not connected.");
+                }
                 
             } 
             else if (event.getType() == LineEvent.Type.STOP)
@@ -139,6 +141,10 @@ public class VoiceKeyer
                 if (ptt != null)
                 {
                     ptt.off();
+                }
+                else
+                {
+                    LOGGER.log(Level.WARNING, "PTT not connected.");
                 }
                 clip.close();
             }

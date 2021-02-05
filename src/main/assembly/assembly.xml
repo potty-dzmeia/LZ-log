@@ -50,6 +50,7 @@
             <outputDirectory></outputDirectory>
             <includes>
                 <include>help.html</include>
+                <include>cq.wav</include>
             </includes>
         </fileSet>
       

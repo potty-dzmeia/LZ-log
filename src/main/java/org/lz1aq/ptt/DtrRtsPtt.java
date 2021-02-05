@@ -30,7 +30,7 @@ import jssc.SerialPortException;
  */
 public class DtrRtsPtt implements Ptt
 {
-  private static final Logger logger = Logger.getLogger(DtrRtsPtt.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(DtrRtsPtt.class.getName());
 
   private SerialPort    serialPort;
   private final int     delayInMs;
@@ -56,6 +56,8 @@ public class DtrRtsPtt implements Ptt
     control_pin     = pin;
     this.delayInMs  = delayInMs;
     this.tailInMs   = tailInMs;
+    
+    LOGGER.setLevel(Level.WARNING);
   }
    
 
@@ -81,7 +83,7 @@ public class DtrRtsPtt implements Ptt
     }
     catch(SerialPortException ex)
     {
-      logger.log(Level.SEVERE, null, ex);
+      LOGGER.log(Level.SEVERE, null, ex);
     }
   }
              
@@ -93,11 +95,11 @@ public class DtrRtsPtt implements Ptt
     {
       setControlPin(true);
       Thread.sleep(this.delayInMs);
-      logger.info("ptt.ON");
+      LOGGER.info("ptt.ON");
     }
     catch(Exception ex)
     {
-      logger.log(Level.SEVERE, null, ex);
+      LOGGER.log(Level.SEVERE, null, ex);
     }
   }
   
@@ -108,11 +110,11 @@ public class DtrRtsPtt implements Ptt
     {
       Thread.sleep(tailInMs);
       setControlPin(false);
-      logger.info("ptt.OFF");
+      LOGGER.info("ptt.OFF");
     }
     catch(Exception ex)
     {
-      logger.log(Level.SEVERE, null, ex);
+      LOGGER.log(Level.SEVERE, null, ex);
     }
   }
   

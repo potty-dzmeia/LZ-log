@@ -35,11 +35,12 @@ public class WinKeyer implements Keyer
 
     private final int baudRate = 1200;
     private final SerialPort serialPort;
-    private static final Logger logger = Logger.getLogger(WinKeyer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(WinKeyer.class.getName());
 
     public WinKeyer(SerialPort port)
     {
         serialPort = port;
+        LOGGER.setLevel(Level.WARNING);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class WinKeyer implements Keyer
             serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
         } catch (SerialPortException ex)
         {
-            logger.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -78,12 +79,12 @@ public class WinKeyer implements Keyer
         textToSend = textToSend.toUpperCase();
         try
         {
-            logger.log(Level.INFO, "Outgoing bytes (" + textToSend.getBytes().length + ") ------> " + textToSend);
+            LOGGER.log(Level.INFO, "Outgoing bytes (" + textToSend.getBytes().length + ") ------> " + textToSend);
             serialPort.writeBytes(textToSend.getBytes());
             serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
         } catch (SerialPortException ex)
         {
-            logger.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -99,7 +100,7 @@ public class WinKeyer implements Keyer
             serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
         } catch (SerialPortException ex)
         {
-            logger.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
 
     }
@@ -119,13 +120,13 @@ public class WinKeyer implements Keyer
 
         try
         {
-            logger.log(Level.INFO, "Set speed to:" + wpm);
+            LOGGER.log(Level.INFO, "Set speed to:" + wpm);
             serialPort.writeByte((byte) 0x02);
             serialPort.writeByte((byte) wpm);
             serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
         } catch (SerialPortException ex)
         {
-            logger.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
 
     }
@@ -152,7 +153,7 @@ public class WinKeyer implements Keyer
         byte b[] = serialPort.readBytes();
         if (b == null || b[0] != 0x65)
         {
-            logger.log(Level.SEVERE, "No response from WK3 on the echo command!");
+            LOGGER.log(Level.SEVERE, "No response from WK3 on the echo command!");
             throw new Exception("No response from WK3!");
         }
 
@@ -170,7 +171,7 @@ public class WinKeyer implements Keyer
             Thread.sleep(500); // delay to make sure WK is good to go
         } catch (InterruptedException ex)
         {
-            logger.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 

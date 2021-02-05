@@ -23,7 +23,6 @@ import org.lz1aq.radio.event.NotsupportedEvent;
 import org.lz1aq.radio.event.RadioListener;
 import org.lz1aq.radio.event.ConfirmationEvent;
 import org.lz1aq.py.rig.I_EncodedTransaction;
-import org.lz1aq.py.rig.I_SerialSettings;
 import org.lz1aq.py.rig.I_DecodedTransaction;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -52,7 +51,8 @@ import org.lz1aq.utils.Misc;
  */
 public class Radio
 {
-  private static final Logger       logger = Logger.getLogger(Radio.class.getName());
+  private static final Logger       LOGGER = Logger.getLogger(Radio.class.getName());
+  
   private static final int QUEUE_SIZE = 30;   // Max number of commands that queueWithTransactions can hold
   
   private final CopyOnWriteArrayList<RadioListener>  eventListeners;      
@@ -82,6 +82,8 @@ public class Radio
     threadPortWriter      = new Thread(new PortWriter(), "threadPortWrite");    
     receiveBuffer         = new DynamicByteArray(200);  // Set the initial size to some reasonable value
     eventListeners        = new CopyOnWriteArrayList<>();
+    
+    LOGGER.setLevel(Level.WARNING);
   }
   
  
@@ -131,11 +133,11 @@ public class Radio
   public void disconnect() throws SerialPortException
   {
     if(!isConnected())
-      logger.warning("Radio already disconnected!");
+      LOGGER.warning("Radio already disconnected!");
     
     this.queueTransactions(radioProtocolParser.encodeCleanup());
     // Wait a little to give a chance for the cleanup data to be sent to the radio
-    try{Thread.sleep(150);} catch (InterruptedException ex){logger.log(Level.SEVERE, null, ex);}
+    try{Thread.sleep(150);} catch (InterruptedException ex){LOGGER.log(Level.SEVERE, null, ex);}
     
     threadPortWriter.interrupt();
     serialPort.removeEventListener();    
@@ -313,14 +315,14 @@ public class Radio
         if(b==null)
           return;
         
-        logger.log(Level.INFO, "Incoming bytes ("+b.length+") <------ " + Misc.toHexString(b) );
+        LOGGER.log(Level.INFO, "Incoming bytes ("+b.length+") <------ " + Misc.toHexString(b) );
         
         // Read all there is and add it to our receive buffer
         receiveBuffer.write(b);
        
       } catch (SerialPortException | IOException ex)
       {
-        logger.log(Level.WARNING, ex.toString(), ex);
+        LOGGER.log(Level.WARNING, ex.toString(), ex);
       }
       
       // Do parsing till there is nothing to be parsed...
@@ -376,12 +378,12 @@ public class Radio
             // Write to serial port
             try
             {
-              logger.log(Level.INFO, "Outgoing bytes ("+trans.getTransaction().length+") ------> " + new String(trans.getTransaction(),"UTF-8" ));
+              LOGGER.log(Level.INFO, "Outgoing bytes ("+trans.getTransaction().length+") ------> " + new String(trans.getTransaction(),"UTF-8" ));
               serialPort.writeBytes(trans.getTransaction());
               serialPort.purgePort(SerialPort.PURGE_TXCLEAR);
             } catch (SerialPortException | UnsupportedEncodingException ex)
             {
-              logger.log(Level.SEVERE, null, ex);
+              LOGGER.log(Level.SEVERE, null, ex);
             }
                         
             // Wait for confirmation from the radio (optional)
@@ -423,9 +425,9 @@ public class Radio
       boolean ret = false;
       
       if(confirmationStatus != ConfirmationTypes.EMPTY)
-        logger.log(Level.WARNING, "\"confirmationStatus\" is not EMPTY!");
+        LOGGER.log(Level.WARNING, "\"confirmationStatus\" is not EMPTY!");
       if(isWaitingForConfirmation == true)
-        logger.log(Level.WARNING, "\"isWaitingForConfirmation\" is not false!");
+        LOGGER.log(Level.WARNING, "\"isWaitingForConfirmation\" is not false!");
       
       synchronized(this)
       {
@@ -438,7 +440,7 @@ public class Radio
             wait(trans.getTimeout());
         
         if(confirmationStatus == ConfirmationTypes.EMPTY)
-          logger.log(Level.SEVERE, "Timeout expired - no confirmation from the radio!");
+          LOGGER.log(Level.SEVERE, "Timeout expired - no confirmation from the radio!");
         
         
         if(confirmationStatus == ConfirmationTypes.POSITIVE)
@@ -469,7 +471,7 @@ public class Radio
     @Override
     public void eventNotsupported(NotsupportedEvent e)
     {
-      logger.log(Level.WARNING, "The following transaction couldn't be decoded: " + e.getData());
+      LOGGER.log(Level.WARNING, "The following transaction couldn't be decoded: " + e.getData());
     }
   }
           
@@ -483,17 +485,17 @@ public class Radio
   {
     if(trans.length == 0)
     {
-      logger.log(Level.WARNING, "I_EncodedTransaction[] is empty"); //, Misc.getStack()
+      LOGGER.log(Level.WARNING, "I_EncodedTransaction[] is empty"); //, Misc.getStack()
       return;
     }
     if(!isConnected()) 
     {
-      logger.warning("Not connected to radio! Please call the connect() method!");
+      LOGGER.warning("Not connected to radio! Please call the connect() method!");
       return;
     }
     if(threadPortWriter.getState() == Thread.State.NEW )
     {
-      logger.warning("You need to call the start() method first!");
+      LOGGER.warning("You need to call the start() method first!");
       return;
     }
    
@@ -502,7 +504,7 @@ public class Radio
     {
       if(queueWithTransactions.size() >= QUEUE_SIZE)
       {
-        logger.warning("Max queue sized reached!");
+        LOGGER.warning("Max queue sized reached!");
         return;
       }
       queueWithTransactions.offer(tr);
@@ -522,9 +524,9 @@ public class Radio
     synchronized(threadPortWriter)
     {
       if(confirmationStatus != ConfirmationTypes.EMPTY)
-        logger.log(Level.WARNING, "Upon receiving of confirmation from the radio the \"confirmation\" var is not empty!");
+        LOGGER.log(Level.WARNING, "Upon receiving of confirmation from the radio the \"confirmation\" var is not empty!");
       if(isWaitingForConfirmation == false)
-        logger.log(Level.WARNING, "Upon receiving of confirmation from the radio the \"isWaitingForConfirmation\" var is false!");
+        LOGGER.log(Level.WARNING, "Upon receiving of confirmation from the radio the \"isWaitingForConfirmation\" var is false!");
       
       
       // signal that confirmation has arrived  
