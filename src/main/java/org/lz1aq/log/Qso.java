@@ -111,14 +111,12 @@ public class Qso
    * Holds all the QSO parameters (such as "date", "time", "mode" ....)
    */
   private final ArrayList<QsoParameter> qsoParams;
-  private DateTime utc;
-  
-  
+
   
   
   public Qso(long freq, RadioModes mode, String myCall, String hisCall)
   {  
-    this.utc = TimeUtils.getUTC();
+     DateTime utc = TimeUtils.getUTC();
     
     qsoParams = new ArrayList<>();
     qsoParams.add(new QsoParameter(DATE_TXT, TimeUtils.toQsoDate(utc)));
@@ -132,7 +130,7 @@ public class Qso
   
   public Qso(long freq, RadioModes mode, String myCall, String hisCall, ArrayList<QsoParameter> extraQsoParams)
   {
-    this.utc = TimeUtils.getUTC();
+    DateTime utc = TimeUtils.getUTC();
     
     qsoParams = new ArrayList<>();
     qsoParams.add(new QsoParameter(DATE_TXT, TimeUtils.toQsoDate(utc)));
@@ -167,7 +165,7 @@ public class Qso
     }
               
             
-    this.utc = TimeUtils.getUTC();
+    DateTime utc = TimeUtils.getUTC();
     
     qsoParams = new ArrayList<>();
     qsoParams.add(new QsoParameter(DATE_TXT, TimeUtils.toQsoDate(utc)));
@@ -452,7 +450,8 @@ public class Qso
   
   public synchronized long getElapsedSeconds()
   { 
-    return (TimeUtils.getUTC().getMillis()-utc.getMillis())/1000;
+    DateTime qso_dt = TimeUtils.toDateTime(getDate(), getTime());
+    return (TimeUtils.getUTC().getMillis()-qso_dt.getMillis())/1000;
   }
   
   

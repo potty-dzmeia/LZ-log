@@ -19,12 +19,14 @@
 // ***************************************************************************
 package org.lz1aq.lzlog;
 
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 import org.lz1aq.log.Log;
+import org.lz1aq.log.LogListener;
 import org.lz1aq.log.Qso;
 import org.lz1aq.radio.RadioModes;
 import org.lz1aq.utils.Misc;
@@ -36,247 +38,279 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class TimeToNextQsoTableModel extends AbstractTableModel
 {
-  private final static int NUMBER_OF_COLUMNS = 4;
-  
-  
-  /** Reference to the Log */
-  private final Log log;
-  /** This will hold all the unique callsigns that have been worked */
-  private ArrayList<IncomingQso> incomingQsoArrayList; 
-  
-  
-  
-  public TimeToNextQsoTableModel(Log log)
-  {
-    incomingQsoArrayList = new ArrayList<>(0);
-    this.log = log;
-  }
 
-
-  @Override
-  public int getRowCount()
-  {
-    return incomingQsoArrayList.size();
-  }
-
-  @Override
-  public int getColumnCount()
-  {
-    return NUMBER_OF_COLUMNS;
-  }
-  
-  
-  @Override
-  public String getColumnName(int col)
-  {
-    switch(col)
-      {
-        case 0:
-          return "hisCall";    
-        case 1:
-          return "freq";
-        case 2:
-          return "type";
-        case 3:
-          return "time left";
-        default:
-          return "should not be used";
-      }
-  }
-  
-
-  @Override
-  public Object getValueAt(int rowIndex, int columnIndex)
-  {
-    switch(columnIndex)
-    {
-      case 0:
-        return incomingQsoArrayList.get(rowIndex).hisCall;
-      case 1: 
-        return Misc.toIncomingQsoFreq(incomingQsoArrayList.get(rowIndex).frequency);
-      case 2:
-        return incomingQsoArrayList.get(rowIndex).typeOfWork; // CQ or S&P
-      case 3: 
-        return TimeUtils.getTimeLeftFormatted(incomingQsoArrayList.get(rowIndex).getSecondsLeft());
-      default:
-          return "should not happen";
-    }
+    private final static int NUMBER_OF_COLUMNS = 5;
+    private static final Logger logger = Logger.getLogger(TimeToNextQsoTableModel.class.getName());
     
-  }
-  
-  @Override
-  public boolean isCellEditable(int row, int col)
-  {
-    return false;
-  }
-  
-  
-  public int getFrequency(int row) throws Exception
-  {
-    return Integer.parseInt(incomingQsoArrayList.get(row).frequency);
-  }
-  
-  public RadioModes getMode(int row) throws Exception
-  {
-    return incomingQsoArrayList.get(row).mode;
-  }
-   
-  public String getCallsign(int row) throws Exception
-  {
-    return incomingQsoArrayList.get(row).hisCall;
-  }
-  
-  public boolean  isSpQso(int row) throws Exception
-  {
-    return incomingQsoArrayList.get(row).getTypeOfWork().equalsIgnoreCase(Qso.TYPE_OF_WORK_SP);
-  }
-  
-  
-  /**
-   * If we should go and work the callsign contained in this cell.
-   * @param row
-   * @param col
-   * @return 
-   */
-  public boolean containsExpiredCallsign(int row, int col)
-  {
-    return incomingQsoArrayList.get(row).isExpired();
-  }
-  
-  
-  /**
-   * Updates the content of the table.
-   *
-   * @param appsettings - settings used by the application
-   */
-  public synchronized void refresh(ApplicationSettings appsettings)
-  {
-    ArrayList<String> callsigns = log.getUniqueCallsigns();
     
-    incomingQsoArrayList = new ArrayList<>(0);
+    /**
+     * Reference to the Log
+     */
+    private final Log log;
     
-    // For each callsign insert the last qso with this station.
-    for(String callsign : callsigns)
-    {
-      Qso lastQso = log.getLastQso(callsign);
-      if( log.getSecondsLeft(lastQso, appsettings.getQsoRepeatPeriod()) < appsettings.getIncomingQsoHiderAfter()*(-1) )
-        continue;
-      IncomingQso incoming = new IncomingQso(lastQso.getHisCallsign(),
-                                            lastQso.getType(),
-                                            lastQso.getFrequency(),
-                                            lastQso.getMode(),
-                                            lastQso.getElapsedSeconds(),
-                                            log.getSecondsLeft(lastQso, appsettings.getQsoRepeatPeriod()));
-      incomingQsoArrayList.add(incoming);
-    }
-    
-    // Now order the array starting from the Qso with the highest value for elapsed time 
-    Collections.sort(incomingQsoArrayList);
-    
-    this.fireTableDataChanged();
-  }
-  
-  
-  
-  
-  public class IncomingQso implements Comparable<IncomingQso>
-  {
-    private String  hisCall;
-    private String  typeOfWork; // CQ or SP
-    private String  frequency;
-    private RadioModes  mode;
-    //private String  timeLeftFormatted;
-    private long    secondsLeft;
-    private long    elapsedSeconds; // How many seconds before being able to work the station again
+    /**
+     * This will hold all the unique callsign/mode that have been worked
+     */
+    private final CopyOnWriteArrayList<Qso> listTimeToNextQso;
+    private final ApplicationSettings appSettings;
 
-   
-    
-    public IncomingQso(String hisCall, 
-                       String typeOfWork, 
-                       String freq, 
-                       RadioModes mode,
-                       long secondsElapsed, 
-                       long secondsLeft)
+    public TimeToNextQsoTableModel(Log log, ApplicationSettings appsettings)
     {
-      this.hisCall = hisCall;
-      this.typeOfWork = typeOfWork;
-      this.frequency = freq;
-      this.elapsedSeconds = secondsElapsed;
-      this.secondsLeft = secondsLeft;
-      this.mode = mode;
-    }
-   
-   
-    
-    public String getHisCall()
-    {
-      return hisCall;
-    }
+        this.log = log;
+        this.appSettings = appsettings;
 
-    public String getTypeOfWork()
-    {
-      return typeOfWork;
-    }
-
-    public String getFrequency()
-    {
-      return frequency;
-    }
-
-    
-
-    public void setHisCall(String hisCall)
-    {
-      this.hisCall = hisCall;
-    }
-
-    public void setTypeOfWork(String typeOfWork)
-    {
-      this.typeOfWork = typeOfWork;
-    }
-
-    public void setFrequency(String frequency)
-    {
-      this.frequency = frequency;
-    }
-
-    public void setElapsedSeconds(long elapsedSeconds)
-    {
-      this.elapsedSeconds = elapsedSeconds;
-    }
-
-    public void setSecondsLeft(int left)
-    {
-      this.secondsLeft = left;
-    }
-
-    public long getElapsedSeconds()
-    {
-      return elapsedSeconds;
-    }
-
-    public long getSecondsLeft()
-    {
-      return secondsLeft;
-    }
-    
-    public boolean isExpired()
-    {
-      return (secondsLeft<=0);
+        listTimeToNextQso = new CopyOnWriteArrayList<>();
+        this.log.addEventListener(new TimeToNextQsoTableModel.LocalLogListener());
     }
 
     @Override
-    public int compareTo(IncomingQso o)
+    public int getRowCount()
     {
-      if(this.elapsedSeconds < o.elapsedSeconds)
-        return 1;
-      else if(this.elapsedSeconds == o.elapsedSeconds)
-        return 0;
-      else
+        return listTimeToNextQso.size();
+    }
+
+    @Override
+    public int getColumnCount()
+    {
+        return NUMBER_OF_COLUMNS;
+    }
+
+    @Override
+    public String getColumnName(int col)
+    {
+        switch (col)
+        {
+            case 0:
+                return "callsign";
+            case 1:
+                return "freq";
+            case 2:
+                return "mode";
+            case 3:
+                return "type";
+            case 4:
+                return "time left";
+            default:
+                return "should not be used";
+        }
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex)
+    {
+        switch (columnIndex)
+        {
+            case 0:
+                return listTimeToNextQso.get(rowIndex).getHisCallsign();
+            case 1:
+                return Misc.toIncomingQsoFreq(listTimeToNextQso.get(rowIndex).getFrequency());
+            case 2:
+                return listTimeToNextQso.get(rowIndex).getMode();
+            case 3:
+                return listTimeToNextQso.get(rowIndex).getType(); // CQ or S&P
+            case 4:
+                long secsLeft = log.getSecondsLeft(listTimeToNextQso.get(rowIndex), appSettings.getQsoRepeatPeriod());
+                return TimeUtils.getTimeLeftFormatted(secsLeft);
+
+            default:
+                return "should not happen";
+        }
+
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int col)
+    {
+        return false;
+    }
+
+    public int getFrequency(int row) throws Exception
+    {
+        return Integer.parseInt(listTimeToNextQso.get(row).getFrequency());
+    }
+
+    public RadioModes getMode(int row) throws Exception
+    {
+        return listTimeToNextQso.get(row).getMode();
+    }
+
+    public String getCallsign(int row) throws Exception
+    {
+        return listTimeToNextQso.get(row).getHisCallsign();
+    }
+
+    public boolean isSpQso(int row) throws Exception
+    {
+        return listTimeToNextQso.get(row).getType().equalsIgnoreCase(Qso.TYPE_OF_WORK_SP);
+    }
+
+    /**
+     * If we should go and work the callsign contained in this cell.
+     *
+     * @param row
+     * @param col
+     * @return
+     */
+    public boolean containsExpiredCallsign(int row, int col)
+    {
+        long secsLeft = log.getSecondsLeft(listTimeToNextQso.get(row), appSettings.getQsoRepeatPeriod());
+
+        return secsLeft < 0;
+        //return incomingQsoArrayList.get(row).isExpired();
+    }
+
+    /**
+     * Updates the content of the table.
+     */
+    public synchronized void refresh()
+    {
+
+        for(Qso qso:listTimeToNextQso)
+        {
+            if( log.getSecondsLeft(qso, appSettings.getQsoRepeatPeriod()) < appSettings.getIncomingQsoHiderAfter()*(-1) )
+            {
+                listTimeToNextQso.remove(qso);
+            }
+        }
+        this.fireTableDataChanged();
+    }
+
+    
+    /**
+     * Finds a QSO within listTimeToNextQso[] which has the same combination of callsign/mode
+     * @param call
+     * @param mode
+     * @return 
+     */
+    private int find(String call, RadioModes mode)
+    {
+        for(int i=0; i<listTimeToNextQso.size(); i++)
+        {
+            if(call.equalsIgnoreCase(listTimeToNextQso.get(i).getHisCallsign()) && mode==listTimeToNextQso.get(i).getMode())
+            {
+                return i;
+            }
+        }
         return -1;
     }
-  }
+    
+    /**
+     * Sorts the listTimeToNextQso[]
+     */
+    private void sort()
+    {
+        Collections.sort(listTimeToNextQso, new Comparator<Qso>() {
+        @Override
+        public int compare(Qso qso1, Qso qso2)
+        {
+            if(qso1.getElapsedSeconds() > qso2.getElapsedSeconds())
+                return -1;
+            else if(qso1.getElapsedSeconds() == qso2.getElapsedSeconds())
+                return 0;
+            else
+                return 1;
+        }
+    });
+    }
+    
+    
+    private class LocalLogListener implements LogListener
+    {
 
-  
-  
+        /**
+         * Insert all the latest QSOs per callsign/mode inside listTimeToNextQso
+         */
+        @Override
+        public void eventInit()
+        {
+            listTimeToNextQso.clear();
+            
+            // For each logged QSO check if it is the latest per callsign/mode
+            for (int i = 0; i < log.getSize(); i++)
+            {
+                String call = log.get(i).getHisCallsign();
+                RadioModes mode = log.get(i).getMode();
+                int local_index = find(call, mode);   
+                
+                // Callsign/Mode combination already available inside listTimeToNextQso
+                if(local_index >= 0)
+                {
+                    // Make sure that the locally found QSO has an older date before substituting
+                    if(listTimeToNextQso.get(local_index).getElapsedSeconds()>log.get(i).getElapsedSeconds())
+                    {
+                        listTimeToNextQso.remove(local_index);
+                        listTimeToNextQso.add(log.get(i));
+                    }
+                }
+                // Callsign/Mode not available inside listTimeToNextQso --> add
+                else
+                {
+                    listTimeToNextQso.add(log.get(i));
+                }
+            }
+
+            sort();
+        }
+
+        @Override
+        public void eventQsoAdded(Qso qso)
+        {
+            int local_index = find(qso.getHisCallsign(), qso.getMode());
+
+            // Callsign/Mode combination already available inside listTimeToNextQso
+            if (local_index >= 0)
+            {
+                // Make sure that the locally found QSO has an older date before substituting
+                if (listTimeToNextQso.get(local_index).getElapsedSeconds() > qso.getElapsedSeconds())
+                {
+                    listTimeToNextQso.remove(local_index);
+                    listTimeToNextQso.add(qso);
+                }
+            } 
+            // Callsign/Mode not available inside listTimeToNextQso --> add
+            else
+            {
+                listTimeToNextQso.add(qso);
+            }
+        }
+
+        @Override
+        public void eventQsoRemoved(Qso qso)
+        {
+            // Remove QSO from list
+            boolean res = listTimeToNextQso.remove(qso);
+            
+            // The QSO which was removed from the log was not inside the local list
+            if(res == false)
+            {
+               logger.log(Level.INFO, "Deleted QSO not in listTimeToNextQso[]");
+               return; 
+            }
+            
+            
+            String call = qso.getHisCallsign();
+            RadioModes mode = qso.getMode();
+            
+            // Sanity check
+            int local_index = find(call, mode);
+            if(local_index >= 0)
+            {
+                logger.log(Level.SEVERE, "Second combination of callsign/mode was found!");
+            }
+            
+            // Search for substitution of this entry
+            for (int i=0; i<log.getSize(); i++)
+            {
+                eventQsoAdded(log.get(i));
+            }
+            
+        }
+
+        @Override
+        public void eventQsoModified(Qso qso)
+        {
+            sort();
+        }
+    }
+
 }

@@ -606,7 +606,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="16" style="0"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="QSO repeat period [sec]:"/>
+                        <Property name="text" type="java.lang.String" value="QSO repeat period [min]:"/>
                         <Property name="toolTipText" type="java.lang.String" value="After what period we can work the same station again."/>
                       </Properties>
                       <Constraints>
@@ -620,8 +620,8 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="18" style="0"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="1800"/>
-                        <Property name="toolTipText" type="java.lang.String" value="Usually is 30 minutes - i.e. 1800 seconds."/>
+                        <Property name="text" type="java.lang.String" value="30"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Usually is 30 minutes."/>
                       </Properties>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

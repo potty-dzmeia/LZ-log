@@ -17,64 +17,18 @@
 // *   Free Software Foundation, Inc.,                                       
 // *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             
 // ***************************************************************************
-package org.lz1aq.utils;
+package org.lz1aq.log;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.util.EventListener;
 
 /**
  *
- * @author chavdar
+ * @author Admin
  */
-public class TimeUtils
+public interface LogListener extends EventListener
 {
-  private static final DateTimeFormatter qsoTime = DateTimeFormat.forPattern("HHmm");
-  private static final DateTimeFormatter qsoDate = DateTimeFormat.forPattern("yyyy-MM-dd");
-  private static final DateTimeFormatter qsoDateAndTime = DateTimeFormat.forPattern("yyyy-MM-dd HHmm ZZZ");
-  
-  static public DateTime getUTC()
-  {
-    return new DateTime(DateTimeZone.UTC);
-  }
-  
-  static public String toQsoTime(DateTime dt)
-  {
-    return qsoTime.print(dt);
-  }
-  
-  static public String toQsoDate(DateTime dt)
-  {
-    return qsoDate.print(dt);
-  }
-  
-  /**
-   * Converts "
-   * @param date
-   * @param time
-   * @return 
-   */
-  static public DateTime toDateTime(String date, String time)
-  {
-      DateTime dt = qsoDateAndTime.parseDateTime(date+" "+time+" UTC");
-      return dt;
-  }
-  
-  
-  /**
-   * 
-   * @param secondsleft
-   * @return 
-   */
-  public static String getTimeLeftFormatted(long secondsleft)
-  {
-    long second = secondsleft % 60;
-    long minute = (secondsleft / 60) % 60;
-    
-    if(secondsleft < 0)
-      return String.format("-%02d:%02d", Math.abs(minute), Math.abs(second));
-    else
-      return String.format(" %02d:%02d", Math.abs(minute), Math.abs(second));
-  }
+  public void eventInit();
+  public void eventQsoAdded(Qso qso);
+  public void eventQsoRemoved(Qso qso);
+  public void eventQsoModified(Qso qso);
 }

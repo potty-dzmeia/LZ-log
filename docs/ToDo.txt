@@ -1,4 +1,7 @@
 High priority:
+- remove all uneeded functions from Log class
+- 
+
 - freq columns in bandmap are not resized when we remove the frequency option
 
 - Check the install directory and open warning pop-up informing the user what directories are allowed.

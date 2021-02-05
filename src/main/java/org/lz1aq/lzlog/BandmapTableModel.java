@@ -96,7 +96,7 @@ public class BandmapTableModel extends AbstractTableModel
     {
       if (isCurrentFreqInThisCell(rowIndex, columnIndex, spot.getFreq()))
       {
-        cellBuilder.addSpot(spot.getCallsign());
+        cellBuilder.addSpot(spot.getCallsign(), spot.getMode());
       }
     }
      
@@ -253,7 +253,7 @@ public class BandmapTableModel extends AbstractTableModel
      * Adds callsign which has '*' in front (all Manually spotted callsigns have '*' in front)
      * @param callsign 
      */
-    void addSpot(String callsign)
+    void addSpot(String callsign, RadioModes mode)
     {  
       String call;
       
@@ -268,7 +268,7 @@ public class BandmapTableModel extends AbstractTableModel
       
     
       // If not a Dupe the callsign must be in BLUE
-      if(!log.isDupe(callsign, appSettings.getQsoRepeatPeriod()))
+      if(!log.isDupe(callsign, mode, appSettings.getQsoRepeatPeriod()))
       {
         isIsHtml = true; // If we add one blue callsign the whole cell must be HTML formatted
         cellText.append("<b><font color=blue>");
@@ -302,7 +302,7 @@ public class BandmapTableModel extends AbstractTableModel
       }
       
       // If not a Dupe the callsign must be in BLUE
-      if(!log.isDupe(qso.getHisCallsign(), appSettings.getQsoRepeatPeriod()))
+      if(!log.isDupe(qso.getHisCallsign(), qso.getMode(), appSettings.getQsoRepeatPeriod()))
       {
         isIsHtml = true; // If we add one blue callsign the whole cell must be HTML formatted
         cellText.append("<b><font color=blue>");

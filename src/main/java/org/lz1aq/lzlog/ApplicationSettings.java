@@ -53,7 +53,7 @@ public final class ApplicationSettings
   static final String PROPERTY_MY_CALL_SIGN = "my_callsign";
   static final String PROPERTY_QUICK_CALLSIGN_MODE = "quick_callsign_mode";
   static final String PROPERTY_DEFAULT_PREFIX = "default_prefix";
-  static final String PROPERTY_QSO_REPEAT_PERIOD_SEC = "qso_repeat_period";
+  static final String PROPERTY_QSO_REPEAT_PERIOD_MIN = "qso_repeat_period";
   static final String PROPERTY_CONTEST_EXCHANGE = "contest_exchange";
   static final String PROPERTY_INCOMING_QSO_MAX_ENTRIES = "incoming_qso_max_entries";
   static final String PROPERTY_INCOMING_QSO_HIDE_AFTER = "incoming_qso_hide_after";
@@ -120,7 +120,7 @@ public final class ApplicationSettings
   private boolean isSendLeadingZeroAsT;
   private boolean isSendZeroAsT;
   private String defaultPrefix;
-  private int qsoRepeatPeriodInSeconds;
+  private int qsoRepeatPeriodInMins;
   private String contestExchange;
   private final Rectangle[] framesDimensions; // Postition and size of all frames used by the program
   private final Font[] fonts; // Fonts used by the program
@@ -423,23 +423,23 @@ public final class ApplicationSettings
   }
 
   /**
-   * Get the allowed repeat period for Qso in seconds
+   * Get the allowed repeat period for Qso in minutes
    *
    * @return
    */
   public int getQsoRepeatPeriod()
   {
-    return this.qsoRepeatPeriodInSeconds;
+    return this.qsoRepeatPeriodInMins;
   }
 
   /**
-   * Set the allowed repeat period for Qso in seconds
+   * Set the allowed repeat period for Qso in minutes
    *
    * @param periodInSeconds
    */
-  public void setQsoRepeatPeriod(int periodInSeconds)
+  public void setQsoRepeatPeriod(int periodInMinutes)
   {
-    this.qsoRepeatPeriodInSeconds = periodInSeconds;
+    this.qsoRepeatPeriodInMins = periodInMinutes;
   }
 
   /**
@@ -604,7 +604,7 @@ public final class ApplicationSettings
     prop.setProperty(PROPERTY_SEND_LEADING_ZERO_AS_T, Boolean.toString(isSendLeadingZeroAsT));
     prop.setProperty(PROPERTY_SEND_ZERO_AS_T, Boolean.toString(isSendZeroAsT));
     prop.setProperty(PROPERTY_DEFAULT_PREFIX, defaultPrefix);
-    prop.setProperty(PROPERTY_QSO_REPEAT_PERIOD_SEC, Integer.toString(qsoRepeatPeriodInSeconds));
+    prop.setProperty(PROPERTY_QSO_REPEAT_PERIOD_MIN, Integer.toString(qsoRepeatPeriodInMins));
 
     // Now save the texts for the function keys
     setProperties(PROPERTY_FUNCTION_KEYS, functionKeyTexts);
@@ -774,16 +774,16 @@ public final class ApplicationSettings
         SetSettingToDefault(PROPERTY_DEFAULT_PREFIX);
 
       // Repeat period for Qso
-      temp = prop.getProperty(PROPERTY_QSO_REPEAT_PERIOD_SEC);
+      temp = prop.getProperty(PROPERTY_QSO_REPEAT_PERIOD_MIN);
       if(temp == null)
-        SetSettingToDefault(PROPERTY_QSO_REPEAT_PERIOD_SEC);
+        SetSettingToDefault(PROPERTY_QSO_REPEAT_PERIOD_MIN);
       else
-        qsoRepeatPeriodInSeconds = Integer.parseInt(temp);
+        qsoRepeatPeriodInMins = Integer.parseInt(temp);
       
       // Incoming qso hide after
       temp = prop.getProperty(PROPERTY_INCOMING_QSO_HIDE_AFTER);
       if (temp == null)
-        SetSettingToDefault(PROPERTY_QSO_REPEAT_PERIOD_SEC);
+        SetSettingToDefault(PROPERTY_QSO_REPEAT_PERIOD_MIN);
       else
         incomingQsoHiderAfter = Integer.parseInt(temp); 
       
@@ -850,7 +850,7 @@ public final class ApplicationSettings
     SetSettingToDefault(PROPERTY_MY_CALL_SIGN);
     SetSettingToDefault(PROPERTY_QUICK_CALLSIGN_MODE);
     SetSettingToDefault(PROPERTY_DEFAULT_PREFIX);
-    SetSettingToDefault(PROPERTY_QSO_REPEAT_PERIOD_SEC);
+    SetSettingToDefault(PROPERTY_QSO_REPEAT_PERIOD_MIN);
     SetSettingToDefault(PROPERTY_CONTEST_EXCHANGE);
     SetSettingToDefault(PROPERTY_INCOMING_QSO_MAX_ENTRIES);
     SetSettingToDefault(PROPERTY_INCOMING_QSO_HIDE_AFTER);
@@ -931,8 +931,8 @@ public final class ApplicationSettings
         defaultPrefix = "LZ";
         break;
         
-      case PROPERTY_QSO_REPEAT_PERIOD_SEC:
-        qsoRepeatPeriodInSeconds = 1800;
+      case PROPERTY_QSO_REPEAT_PERIOD_MIN:
+        qsoRepeatPeriodInMins = 30;
         break;
         
       case PROPERTY_INCOMING_QSO_MAX_ENTRIES:

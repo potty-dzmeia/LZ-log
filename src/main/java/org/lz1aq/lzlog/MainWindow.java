@@ -41,6 +41,9 @@ import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -123,7 +126,7 @@ public class MainWindow extends javax.swing.JFrame
     @Override
     public void actionPerformed(ActionEvent evt)
     {
-      jtablemodelIncomingQso.refresh(settings);
+      jtablemodelIncomingQso.refresh();
       jtablemodelBandmap.refresh(settings, getBandmapStartFreq());
     }
   };
@@ -199,7 +202,7 @@ public class MainWindow extends javax.swing.JFrame
     jtablemodelLog.setInvisible(4); // Hide myCall
     jtableLog.setModel(jtablemodelLog);
     
-    jtablemodelIncomingQso = new TimeToNextQsoTableModel(log);
+    jtablemodelIncomingQso = new TimeToNextQsoTableModel(log, settings);
     jtableIncomingQso.setModel(jtablemodelIncomingQso);
     
     jtablemodelBandmap = new BandmapTableModel(log, getBandmapStartFreq(), settings);
@@ -352,7 +355,8 @@ public class MainWindow extends javax.swing.JFrame
    */
   @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
         java.awt.GridBagConstraints gridBagConstraints;
 
         buttonGroupTypeOfWork = new javax.swing.ButtonGroup();
@@ -546,8 +550,10 @@ public class MainWindow extends javax.swing.JFrame
         jDialogSettings.setAlwaysOnTop(true);
         jDialogSettings.setModal(true);
         jDialogSettings.setType(java.awt.Window.Type.UTILITY);
-        jDialogSettings.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentShown(java.awt.event.ComponentEvent evt) {
+        jDialogSettings.addComponentListener(new java.awt.event.ComponentAdapter()
+        {
+            public void componentShown(java.awt.event.ComponentEvent evt)
+            {
                 jDialogSettingsComponentShown(evt);
             }
         });
@@ -560,8 +566,10 @@ public class MainWindow extends javax.swing.JFrame
         jPanel5.setLayout(new java.awt.GridBagLayout());
 
         jButtonCancel.setText("Cancel");
-        jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonCancel.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButtonCancelActionPerformed(evt);
             }
         });
@@ -575,8 +583,10 @@ public class MainWindow extends javax.swing.JFrame
         jPanel5.add(jButtonCancel, gridBagConstraints);
 
         jButtonSave.setText("Save");
-        jButtonSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonSave.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButtonSaveActionPerformed(evt);
             }
         });
@@ -635,8 +645,10 @@ public class MainWindow extends javax.swing.JFrame
         jPanelRadio.setLayout(new java.awt.GridBagLayout());
 
         jComboBoxRadioComPort.setModel(getComportsComboboxModel());
-        jComboBoxRadioComPort.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jComboBoxRadioComPort.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jComboBoxRadioComPortActionPerformed(evt);
             }
         });
@@ -788,8 +800,10 @@ public class MainWindow extends javax.swing.JFrame
         jPanel3.add(jLabel25, gridBagConstraints);
 
         jComboBoxKeyerType.setModel(KeyerTypes.getComboxModel());
-        jComboBoxKeyerType.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jComboBoxKeyerType.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jComboBoxKeyerTypeItemStateChanged(evt);
             }
         });
@@ -962,7 +976,7 @@ public class MainWindow extends javax.swing.JFrame
         jPanelContestRules.add(jLabel34, gridBagConstraints);
 
         jLabel29.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
-        jLabel29.setText("QSO repeat period [sec]:");
+        jLabel29.setText("QSO repeat period [min]:");
         jLabel29.setToolTipText("After what period we can work the same station again.");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -974,8 +988,8 @@ public class MainWindow extends javax.swing.JFrame
         jPanelContestRules.add(jLabel29, gridBagConstraints);
 
         jtextfieldQsoRepeatPeriod.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jtextfieldQsoRepeatPeriod.setText("1800");
-        jtextfieldQsoRepeatPeriod.setToolTipText("Usually is 30 minutes - i.e. 1800 seconds.");
+        jtextfieldQsoRepeatPeriod.setText("30");
+        jtextfieldQsoRepeatPeriod.setToolTipText("Usually is 30 minutes.");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -1022,8 +1036,10 @@ public class MainWindow extends javax.swing.JFrame
 
         checkboxSettingsQuickMode.setText("Enable quick callsign entry");
         checkboxSettingsQuickMode.setToolTipText("If enabled will allow to enter callsign by using only the sufix");
-        checkboxSettingsQuickMode.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+        checkboxSettingsQuickMode.addChangeListener(new javax.swing.event.ChangeListener()
+        {
+            public void stateChanged(javax.swing.event.ChangeEvent evt)
+            {
                 checkboxSettingsQuickModeStateChanged(evt);
             }
         });
@@ -1102,8 +1118,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jCheckBoxAutoBandmapStartFreq.setText("Automatic bandmap frequency change");
         jCheckBoxAutoBandmapStartFreq.setToolTipText("If enabled your bandmap start frequency will change depending on the Selected Frequency and Band.");
-        jCheckBoxAutoBandmapStartFreq.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jCheckBoxAutoBandmapStartFreq.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jCheckBoxAutoBandmapStartFreqItemStateChanged(evt);
             }
         });
@@ -1140,48 +1158,60 @@ public class MainWindow extends javax.swing.JFrame
         jPanel10.setLayout(new java.awt.GridLayout(7, 1));
 
         jButton13.setText("Callsign");
-        jButton13.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton13.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton13ActionPerformed(evt);
             }
         });
         jPanel10.add(jButton13);
 
         jButton14.setText("Snt");
-        jButton14.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton14.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton14ActionPerformed(evt);
             }
         });
         jPanel10.add(jButton14);
 
         jButton15.setText("Rcv");
-        jButton15.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton15.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton15ActionPerformed(evt);
             }
         });
         jPanel10.add(jButton15);
 
         jButton16.setText("TimeToNextQso");
-        jButton16.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton16.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton16ActionPerformed(evt);
             }
         });
         jPanel10.add(jButton16);
 
         jButton17.setText("Log");
-        jButton17.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton17.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton17ActionPerformed(evt);
             }
         });
         jPanel10.add(jButton17);
 
         jButton18.setText("Bandmap");
-        jButton18.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton18.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton18ActionPerformed(evt);
             }
         });
@@ -1190,8 +1220,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton19.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jButton19.setText("OK");
         jButton19.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jButton19.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton19.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton19ActionPerformed(evt);
             }
         });
@@ -1209,16 +1241,20 @@ public class MainWindow extends javax.swing.JFrame
         jdialogLogSelection.setMinimumSize(new java.awt.Dimension(200, 150));
         jdialogLogSelection.setModal(true);
         jdialogLogSelection.setResizable(false);
-        jdialogLogSelection.addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent evt) {
+        jdialogLogSelection.addWindowListener(new java.awt.event.WindowAdapter()
+        {
+            public void windowClosing(java.awt.event.WindowEvent evt)
+            {
                 jdialogLogSelectionWindowClosing(evt);
             }
         });
         jdialogLogSelection.getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jbuttonCreateNewLog.setText("New log");
-        jbuttonCreateNewLog.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jbuttonCreateNewLog.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jbuttonCreateNewLogActionPerformed(evt);
             }
         });
@@ -1230,8 +1266,10 @@ public class MainWindow extends javax.swing.JFrame
         jdialogLogSelection.getContentPane().add(jbuttonCreateNewLog, gridBagConstraints);
 
         jbuttonOpenExistingLog.setText("Existing log");
-        jbuttonOpenExistingLog.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jbuttonOpenExistingLog.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jbuttonOpenExistingLogActionPerformed(evt);
             }
         });
@@ -1264,8 +1302,10 @@ public class MainWindow extends javax.swing.JFrame
         jPanel13.add(jScrollPane6, gridBagConstraints);
 
         jButton20.setText("Close");
-        jButton20.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton20.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton20ActionPerformed(evt);
             }
         });
@@ -1282,11 +1322,14 @@ public class MainWindow extends javax.swing.JFrame
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(PROGRAM_NAME+" by LZ1ABC");
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowOpened(java.awt.event.WindowEvent evt) {
+        addWindowListener(new java.awt.event.WindowAdapter()
+        {
+            public void windowOpened(java.awt.event.WindowEvent evt)
+            {
                 formWindowOpened(evt);
             }
-            public void windowClosing(java.awt.event.WindowEvent evt) {
+            public void windowClosing(java.awt.event.WindowEvent evt)
+            {
                 formWindowClosing(evt);
             }
         });
@@ -1300,8 +1343,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jtableIncomingQso.setFont(new java.awt.Font("Liberation Mono", 0, 18)); // NOI18N
         jtableIncomingQso.setRowHeight(30);
-        jtableIncomingQso.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
+        jtableIncomingQso.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
                 jtableIncomingQsoMousePressed(evt);
             }
         });
@@ -1310,7 +1355,7 @@ public class MainWindow extends javax.swing.JFrame
         intframeTimeToNextQso.getContentPane().add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
         jDesktopPane1.add(intframeTimeToNextQso);
-        intframeTimeToNextQso.setBounds(490, 10, 468, 442);
+        intframeTimeToNextQso.setBounds(490, 10, 468, 436);
 
         intframeBandmap.setIconifiable(true);
         intframeBandmap.setResizable(true);
@@ -1321,8 +1366,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jtableBandmap.setCellSelectionEnabled(true);
         jtableBandmap.setGridColor(new java.awt.Color(233, 233, 233));
-        jtableBandmap.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
+        jtableBandmap.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent evt)
+            {
                 jtableBandmapMousePressed(evt);
             }
         });
@@ -1339,8 +1386,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jcomboboxStepInHz.setModel(getBandmapStepInHzComboboxModel());
         jcomboboxStepInHz.setToolTipText("Bandmap resolution");
-        jcomboboxStepInHz.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jcomboboxStepInHz.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jcomboboxStepInHzItemStateChanged(evt);
             }
         });
@@ -1356,8 +1405,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jcomboboxColumnCount.setModel(getBandmapColumnCountComboboxModel());
         jcomboboxColumnCount.setToolTipText("Number of columns");
-        jcomboboxColumnCount.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jcomboboxColumnCount.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jcomboboxColumnCountItemStateChanged(evt);
             }
         });
@@ -1373,8 +1424,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jcomboboxRowCount.setModel(getBandmapRowCountComboboxModel());
         jcomboboxRowCount.setToolTipText("Number of rows");
-        jcomboboxRowCount.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jcomboboxRowCount.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jcomboboxRowCountItemStateChanged(evt);
             }
         });
@@ -1427,8 +1480,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jtextfieldFreqWidth.setText("20");
         jtextfieldFreqWidth.setToolTipText("Width of the frequency columns ");
-        jtextfieldFreqWidth.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jtextfieldFreqWidth.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jtextfieldFreqWidthActionPerformed(evt);
             }
         });
@@ -1479,8 +1534,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jCheckBoxShowFreq.setText("Show freq. ");
         jCheckBoxShowFreq.setToolTipText("If the frequency columns should be visible");
-        jCheckBoxShowFreq.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jCheckBoxShowFreq.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jCheckBoxShowFreqItemStateChanged(evt);
             }
         });
@@ -1503,7 +1560,7 @@ public class MainWindow extends javax.swing.JFrame
         intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
         jDesktopPane1.add(intframeBandmap);
-        intframeBandmap.setBounds(500, 520, 561, 467);
+        intframeBandmap.setBounds(500, 520, 488, 459);
 
         intframeLog.setIconifiable(true);
         intframeLog.setResizable(true);
@@ -1531,8 +1588,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jbuttonDeleteEntry.setToolTipText("Deletes Qso from the Log.");
         jbuttonDeleteEntry.setLabel("Delete entry");
-        jbuttonDeleteEntry.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jbuttonDeleteEntry.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jbuttonDeleteEntryActionPerformed(evt);
             }
         });
@@ -1571,8 +1630,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jtogglebuttonConnectToRadio.setText("Connect");
         jtogglebuttonConnectToRadio.setToolTipText("");
-        jtogglebuttonConnectToRadio.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jtogglebuttonConnectToRadio.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jtogglebuttonConnectToRadioActionPerformed(evt);
             }
         });
@@ -1619,8 +1680,10 @@ public class MainWindow extends javax.swing.JFrame
         jcheckboxRadioPolling.setText("Enable polling");
         jcheckboxRadioPolling.setEnabled(false);
         jcheckboxRadioPolling.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jcheckboxRadioPolling.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jcheckboxRadioPolling.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jcheckboxRadioPollingItemStateChanged(evt);
             }
         });
@@ -1667,8 +1730,10 @@ public class MainWindow extends javax.swing.JFrame
         jpanelKeyerConnection.setLayout(new java.awt.GridBagLayout());
 
         jtogglebuttonConnectToKeyer.setText("Connect");
-        jtogglebuttonConnectToKeyer.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jtogglebuttonConnectToKeyer.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jtogglebuttonConnectToKeyerActionPerformed(evt);
             }
         });
@@ -1706,11 +1771,14 @@ public class MainWindow extends javax.swing.JFrame
         jtextfieldCallsign.setBorder(javax.swing.BorderFactory.createTitledBorder("Callsign"));
         jtextfieldCallsign.setMinimumSize(new java.awt.Dimension(0, 80));
         jtextfieldCallsign.setPreferredSize(new java.awt.Dimension(30, 58));
-        jtextfieldCallsign.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
+        jtextfieldCallsign.addKeyListener(new java.awt.event.KeyAdapter()
+        {
+            public void keyReleased(java.awt.event.KeyEvent evt)
+            {
                 jtextfieldCallsignKeyReleased(evt);
             }
-            public void keyTyped(java.awt.event.KeyEvent evt) {
+            public void keyTyped(java.awt.event.KeyEvent evt)
+            {
                 jtextfieldCallsignKeyTyped(evt);
             }
         });
@@ -1728,8 +1796,10 @@ public class MainWindow extends javax.swing.JFrame
         jtextfieldRcv.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         jtextfieldRcv.setBorder(javax.swing.BorderFactory.createTitledBorder("Rcv"));
         jtextfieldRcv.setMinimumSize(new java.awt.Dimension(0, 80));
-        jtextfieldRcv.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
+        jtextfieldRcv.addKeyListener(new java.awt.event.KeyAdapter()
+        {
+            public void keyTyped(java.awt.event.KeyEvent evt)
+            {
                 jtextfieldRcvKeyTyped(evt);
             }
         });
@@ -1751,8 +1821,10 @@ public class MainWindow extends javax.swing.JFrame
         jradiobuttonCQ.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         jradiobuttonCQ.setText("CQ");
         jradiobuttonCQ.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jradiobuttonCQ.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+        jradiobuttonCQ.addItemListener(new java.awt.event.ItemListener()
+        {
+            public void itemStateChanged(java.awt.event.ItemEvent evt)
+            {
                 jradiobuttonCQItemStateChanged(evt);
             }
         });
@@ -1825,8 +1897,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton1.setText("F1 CQ");
         jButton1.setFocusable(false);
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton1.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton1ActionPerformed(evt);
             }
         });
@@ -1835,8 +1909,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton2.setText("F2 Exch");
         jButton2.setFocusable(false);
         jButton2.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton2.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton2ActionPerformed(evt);
             }
         });
@@ -1845,8 +1921,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton3.setText("F3 Tu");
         jButton3.setFocusable(false);
         jButton3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton3.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton3ActionPerformed(evt);
             }
         });
@@ -1855,8 +1933,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton4.setText("F4 "+settings.getMyCallsign());
         jButton4.setFocusable(false);
         jButton4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton4.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton4ActionPerformed(evt);
             }
         });
@@ -1865,8 +1945,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton5.setText("F5 His Call");
         jButton5.setFocusable(false);
         jButton5.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton5.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton5ActionPerformed(evt);
             }
         });
@@ -1875,8 +1957,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton6.setText("F6 Agn");
         jButton6.setFocusable(false);
         jButton6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton6.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton6ActionPerformed(evt);
             }
         });
@@ -1885,8 +1969,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton7.setText("F7 ?");
         jButton7.setFocusable(false);
         jButton7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton7.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton7ActionPerformed(evt);
             }
         });
@@ -1895,8 +1981,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton8.setText("F8 Dupe");
         jButton8.setFocusable(false);
         jButton8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton8.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton8.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton8ActionPerformed(evt);
             }
         });
@@ -1905,8 +1993,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton9.setText("F9 Spare");
         jButton9.setFocusable(false);
         jButton9.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton9.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton9.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton9ActionPerformed(evt);
             }
         });
@@ -1917,8 +2007,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton10.setEnabled(false);
         jButton10.setFocusable(false);
         jButton10.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton10.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton10.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton10ActionPerformed(evt);
             }
         });
@@ -1927,8 +2019,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton11.setText("F11 Spot");
         jButton11.setFocusable(false);
         jButton11.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton11.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton11.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton11ActionPerformed(evt);
             }
         });
@@ -1937,8 +2031,10 @@ public class MainWindow extends javax.swing.JFrame
         jButton12.setText("F12 Wipe");
         jButton12.setFocusable(false);
         jButton12.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton12.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton12.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jButton12ActionPerformed(evt);
             }
         });
@@ -1996,7 +2092,7 @@ public class MainWindow extends javax.swing.JFrame
         intframeEntryWindow.getContentPane().add(jPanel2, gridBagConstraints);
 
         jDesktopPane1.add(intframeEntryWindow);
-        intframeEntryWindow.setBounds(280, 20, 453, 256);
+        intframeEntryWindow.setBounds(280, 20, 453, 247);
 
         intframeMisc.setIconifiable(true);
         intframeMisc.setResizable(true);
@@ -2010,8 +2106,10 @@ public class MainWindow extends javax.swing.JFrame
         jpanelCqSettings.setLayout(new java.awt.GridBagLayout());
 
         jbuttonJumpToCqFreq.setText("Jump to CQ freq");
-        jbuttonJumpToCqFreq.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jbuttonJumpToCqFreq.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jbuttonJumpToCqFreqActionPerformed(evt);
             }
         });
@@ -2026,8 +2124,10 @@ public class MainWindow extends javax.swing.JFrame
         jpanelCqSettings.add(jbuttonJumpToCqFreq, gridBagConstraints);
 
         jcheckboxF1jumpsToCq.setText("F1 jumps to CQ freq");
-        jcheckboxF1jumpsToCq.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+        jcheckboxF1jumpsToCq.addChangeListener(new javax.swing.event.ChangeListener()
+        {
+            public void stateChanged(javax.swing.event.ChangeEvent evt)
+            {
                 jcheckboxF1jumpsToCqStateChanged(evt);
             }
         });
@@ -2055,8 +2155,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jbuttonSetCqFreq.setText("Set CQ freq (Ctrl+F1)");
         jbuttonSetCqFreq.setEnabled(false);
-        jbuttonSetCqFreq.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jbuttonSetCqFreq.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jbuttonSetCqFreqActionPerformed(evt);
             }
         });
@@ -2113,8 +2215,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jbuttonKeyerUP.setText("UP");
         jbuttonKeyerUP.setToolTipText("Also the PAGE_UP key");
-        jbuttonKeyerUP.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jbuttonKeyerUP.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jbuttonKeyerUPActionPerformed(evt);
             }
         });
@@ -2122,8 +2226,10 @@ public class MainWindow extends javax.swing.JFrame
 
         jbuttonKeyerDown.setText("DOWN");
         jbuttonKeyerDown.setToolTipText("Also the PAGE_DOWN key");
-        jbuttonKeyerDown.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jbuttonKeyerDown.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jbuttonKeyerDownActionPerformed(evt);
             }
         });
@@ -2158,16 +2264,20 @@ public class MainWindow extends javax.swing.JFrame
         jMenu1.setText("File");
 
         jmenuGenerateCabrillo.setText("Generate Cabrillo File");
-        jmenuGenerateCabrillo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jmenuGenerateCabrillo.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jmenuGenerateCabrilloActionPerformed(evt);
             }
         });
         jMenu1.add(jmenuGenerateCabrillo);
 
         jMenuItem7.setText("Generate Adif File");
-        jMenuItem7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItem7.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItem7ActionPerformed(evt);
             }
         });
@@ -2178,16 +2288,20 @@ public class MainWindow extends javax.swing.JFrame
         jMenu2.setText("Tools");
 
         jmenuSettings.setText("Settings");
-        jmenuSettings.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jmenuSettings.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jmenuSettingsActionPerformed(evt);
             }
         });
         jMenu2.add(jmenuSettings);
 
         jmenuFonts.setText("Fonts");
-        jmenuFonts.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jmenuFonts.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jmenuFontsActionPerformed(evt);
             }
         });
@@ -2198,32 +2312,40 @@ public class MainWindow extends javax.swing.JFrame
         jmenuWindows.setText("Windows");
 
         jMenuItem1.setText("Entry window");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItem1ActionPerformed(evt);
             }
         });
         jmenuWindows.add(jMenuItem1);
 
         jMenuItem2.setText("Time to next QSO");
-        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItem2ActionPerformed(evt);
             }
         });
         jmenuWindows.add(jMenuItem2);
 
         jMenuItem3.setText("Bandmap");
-        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItem3ActionPerformed(evt);
             }
         });
         jmenuWindows.add(jMenuItem3);
 
         jMenuItem4.setText("Radio/Keyer connection");
-        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItem4ActionPerformed(evt);
             }
         });
@@ -2231,16 +2353,20 @@ public class MainWindow extends javax.swing.JFrame
 
         jMenuItem5.setText("Misc");
         jMenuItem5.setToolTipText("");
-        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItem5ActionPerformed(evt);
             }
         });
         jmenuWindows.add(jMenuItem5);
 
         jMenuItem6.setText("Log");
-        jMenuItem6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItem6.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItem6ActionPerformed(evt);
             }
         });
@@ -2252,16 +2378,20 @@ public class MainWindow extends javax.swing.JFrame
 
         jMenuItemHelp.setText("Help");
         jMenuItemHelp.setToolTipText("");
-        jMenuItemHelp.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItemHelp.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItemHelpActionPerformed(evt);
             }
         });
         jMenu3.add(jMenuItemHelp);
 
         jMenuItemAbout.setText("About");
-        jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jMenuItemAbout.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
                 jMenuItemAboutActionPerformed(evt);
             }
         });
@@ -3398,7 +3528,7 @@ public class MainWindow extends javax.swing.JFrame
   {
     String statusText = "";
 
-    Qso qso = log.getLastQso(callsign);
+    Qso qso = log.getLatestQso(callsign, getMode());
 
     // Unknown callsign - OK to work
     if (qso == null)
@@ -3639,7 +3769,7 @@ public class MainWindow extends javax.swing.JFrame
     //--------------------------------
     // Contest rules
     //--------------------------------
-    // Repeat period in seconds
+    // Repeat period in mins
     jtextfieldQsoRepeatPeriod.setText(Integer.toString(settings.getQsoRepeatPeriod()));
     // Exchange rule
     jTextFieldContestExchange.setText(settings.getContestExchange());
@@ -3817,7 +3947,8 @@ public class MainWindow extends javax.swing.JFrame
     text = text.replaceAll("\\{mycall\\}", settings.getMyCallsign()); // Substitute {mycall} with my callsign
     text = text + " ";
     sendCw(text); // Send to keyer
-   
+    //playCqWav();
+    
     // Select the CQ radio button
     jradiobuttonCQ.setSelected(true);
     
@@ -3969,6 +4100,27 @@ public class MainWindow extends javax.swing.JFrame
     }
     jLabelStatus.setText(msg);
   }
+  
+  
+  //ToDo: finish implementation of playing .wav files
+//  void playCqWav()
+//    {
+//        if (getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
+//        {
+//            try
+//            {
+//                Clip clip = AudioSystem.getClip();
+//                AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("cq.wav"));
+//                clip.open(inputStream);
+//                clip.start();
+//            } catch (Exception e)
+//            {
+//                System.err.println(e.getMessage());
+//            }
+//
+//      }
+//      jLabelStatus.setText("Playing cq.wav");
+//  }
   
   
   class LocalRadioControllerListener implements RadioController.RadioControllerListener
