@@ -105,6 +105,8 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
                 return listTimeToNextQso.get(rowIndex).getType(); // CQ or S&P
             case 4:
                 long secsLeft = log.getSecondsLeft(listTimeToNextQso.get(rowIndex), appSettings.getQsoRepeatPeriod());
+                if(secsLeft<-3599)
+                    secsLeft = -3599;
                 return TimeUtils.getTimeLeftFormatted(secsLeft);
 
             default:

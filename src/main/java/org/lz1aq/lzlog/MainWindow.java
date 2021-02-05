@@ -4097,8 +4097,9 @@ public class MainWindow extends javax.swing.JFrame
     if(getMode() == RadioModes.CW || getMode() == RadioModes.CWR)
     {
       keyer.sendCw(msg);
+      jLabelStatus.setText(msg);
     }
-    jLabelStatus.setText(msg);
+    
   }
   
   
