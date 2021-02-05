@@ -183,6 +183,8 @@ public class WinKeyer implements Keyer
     @Override
     public void usePtt(Ptt ptt)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // PTT is not used by Winkeyer.
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 }

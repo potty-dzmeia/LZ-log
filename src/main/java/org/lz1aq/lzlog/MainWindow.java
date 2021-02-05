@@ -55,11 +55,10 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-import jssc.SerialPort;
 import jssc.SerialPortList;
-import org.lz1aq.keyer.DtrRtsKeyer;
 import org.lz1aq.keyer.Keyer;
 import org.lz1aq.keyer.KeyerFactory;
+import org.lz1aq.keyer.VoiceKeyer;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.LogDatabase;
 import org.lz1aq.log.LogTableModel;
@@ -96,6 +95,7 @@ public class MainWindow extends javax.swing.JFrame
   private final ApplicationSettings     settings;
   private final RadioController         radioController;
   private Keyer                         keyer; 
+  private VoiceKeyer                    voiceKeyer;
   private Ptt                           ptt;
   private int                           cqFrequency =3500000;
   private int                           keyerSpeed = 28;
@@ -263,6 +263,8 @@ public class MainWindow extends javax.swing.JFrame
     //
     timerContinuousCq = new Timer(6000, timerContinuousCqListener);
     timerContinuousCq.setRepeats(false);
+    
+    voiceKeyer = new VoiceKeyer();
   }
 
   
@@ -3130,16 +3132,18 @@ public class MainWindow extends javax.swing.JFrame
 
   private void jComboBoxKeyerTypeItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jComboBoxKeyerTypeItemStateChanged
   {//GEN-HEADEREND:event_jComboBoxKeyerTypeItemStateChanged
-    String selected = jComboBoxKeyerType.getSelectedItem().toString();
-    if(selected.compareTo(KeyerTypes.WINKEYER.toString()) == 0)
-    {
-      jComboBoxPttType.setSelectedItem(PttTypes.NONE.toString());
-      jComboBoxPttType.setEnabled(false);
-    }
-    else
-    {
-      jComboBoxPttType.setEnabled(true);
-    }
+
+      
+//    String selected = jComboBoxKeyerType.getSelectedItem().toString();
+//    if(selected.compareTo(KeyerTypes.WINKEYER.toString()) == 0)
+//    {
+//      jComboBoxPttType.setSelectedItem(PttTypes.NONE.toString());
+//      jComboBoxPttType.setEnabled(false);
+//    }
+//    else
+//    {
+//      jComboBoxPttType.setEnabled(true);
+//    }
   }//GEN-LAST:event_jComboBoxKeyerTypeItemStateChanged
   
   
@@ -3244,8 +3248,8 @@ public class MainWindow extends javax.swing.JFrame
   {
     if(settings.getKeyerType() == KeyerTypes.WINKEYER)
     {
-      JOptionPane.showMessageDialog(null, "PTT is not supported when using WinKeyer.", "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
+      JOptionPane.showMessageDialog(null, "PTT will not work when sending CW with WinKeyer. To toggle your transceiver, use the pin provided by the WinKeyer.", "For your information...", JOptionPane.INFORMATION_MESSAGE);
+      //return false;
     }
     
     
@@ -3258,6 +3262,7 @@ public class MainWindow extends javax.swing.JFrame
       ptt.init();
       
       keyer.usePtt(ptt); 
+      voiceKeyer.usePtt(ptt);
     }
     catch(Exception ex)
     {
@@ -3277,6 +3282,9 @@ public class MainWindow extends javax.swing.JFrame
       serialportShare.releasePort(ptt.getCommport());
     }
     ptt = null;
+    
+    keyer.usePtt(null); 
+    voiceKeyer.usePtt(null);
   }
       
   
@@ -3717,9 +3725,9 @@ public class MainWindow extends javax.swing.JFrame
     //--------------------------------
     // Type
     jComboBoxPttType.setSelectedItem(settings.getPttType().toString());
-    // Disable editing if Winkey is selected
-    if(settings.getKeyerType() == KeyerTypes.WINKEYER)
-      jComboBoxPttType.setEnabled(false);
+//    // Disable editing if Winkey is selected
+//    if(settings.getKeyerType() == KeyerTypes.WINKEYER)
+//      jComboBoxPttType.setEnabled(false);
      // Commport
     if(((DefaultComboBoxModel) jComboBoxPttCommport.getModel()).getIndexOf(settings.getPttCommportName()) < 0)
     {
@@ -3947,7 +3955,7 @@ public class MainWindow extends javax.swing.JFrame
     text = text.replaceAll("\\{mycall\\}", settings.getMyCallsign()); // Substitute {mycall} with my callsign
     text = text + " ";
     sendCw(text); // Send to keyer
-    //playCqWav();
+    playCqWav();
     
     // Select the CQ radio button
     jradiobuttonCQ.setSelected(true);
@@ -3962,11 +3970,19 @@ public class MainWindow extends javax.swing.JFrame
       }
       catch(NumberFormatException numberFormatException)
       {
-        period +=3000; // default length if crap is entered fro the user
+        period +=3000; // default length if crap is entered by the user
       }
   
       
-      period += MorseCode.getDurationOfMessage(text, keyerSpeed);
+      if(getMode()== RadioModes.CW || getMode()== RadioModes.CWR)
+      {
+          period += MorseCode.getDurationOfMessage(text, keyerSpeed); 
+      }
+      else if(getMode()== RadioModes.LSB || getMode()== RadioModes.USB)
+      {  
+          period += VoiceKeyer.getLengthInSeconds(new File("cq.wav"));
+      }
+      
               
       if(timerContinuousCq.isRunning())
       {
@@ -4073,6 +4089,7 @@ public class MainWindow extends javax.swing.JFrame
   private void pressedEsc()
   {
     keyer.stopSendingCw();
+    voiceKeyer.stopVoice();
     if(timerContinuousCq.isRunning())
       timerContinuousCq.stop();
   }
@@ -4103,25 +4120,14 @@ public class MainWindow extends javax.swing.JFrame
   }
   
   
-  //ToDo: finish implementation of playing .wav files
-//  void playCqWav()
-//    {
-//        if (getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
-//        {
-//            try
-//            {
-//                Clip clip = AudioSystem.getClip();
-//                AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("cq.wav"));
-//                clip.open(inputStream);
-//                clip.start();
-//            } catch (Exception e)
-//            {
-//                System.err.println(e.getMessage());
-//            }
-//
-//      }
-//      jLabelStatus.setText("Playing cq.wav");
-//  }
+  void playCqWav()
+  {
+      if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
+      {
+        voiceKeyer.sendVoice(new File("cq.wav"));
+        jLabelStatus.setText("Playing cq.wav file.");
+      }
+  }
   
   
   class LocalRadioControllerListener implements RadioController.RadioControllerListener

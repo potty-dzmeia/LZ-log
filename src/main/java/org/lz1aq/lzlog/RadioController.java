@@ -669,13 +669,13 @@ public class RadioController
     @Override
     public void usePtt(Ptt ptt)
     {
-      throw new UnsupportedOperationException("Not supported yet."); 
+        logger.log(Level.INFO, "PTT not supported yet when using Radio Keyer");
     }
     
     @Override
     public SerialPort getCommport()
     {
-      throw new UnsupportedOperationException("Not supported yet."); 
+      return null; 
     }
   }
   
