@@ -329,25 +329,6 @@ public class Log
         return qsoList.get(qsoList.size() - 1);
     }
 
-    /**
-     * Return the last S&P (search and pounce) Qso that we had with this station
-     *
-     * @param callsign station callsign
-     * @return Qso object. Null if no SP qso was found
-     */
-    public synchronized Qso getLastSpQso(String callsign)
-    {
-        //find last Qso with this station
-        for (int i = qsoList.size() - 1; i >= 0; i--)
-        {
-            if (callsign.equalsIgnoreCase(qsoList.get(i).getHisCallsign()) && qsoList.get(i).isSP())
-            {
-                return qsoList.get(i);
-            }
-        }
-
-        return null;
-    }
 
     /**
      * Returns time left till the next possible contact
@@ -429,28 +410,5 @@ public class Log
         }
 
         return list;
-    }
-
-    /**
-     * Returns any list of the last SP contacts for each unique callsign
-     *
-     * @return
-     */
-    public synchronized ArrayList<Qso> getLastSpContacts()
-    {
-        ArrayList<Qso> qsos = new ArrayList<>(0);
-        ArrayList<String> callsigns = getUniqueCallsigns();
-        Qso qso;
-
-        for (String call : callsigns) // ToDo: get each SP contact with a station for Band and mode
-        {
-            qso = getLastSpQso(call);
-            if (qso != null)
-            {
-                qsos.add(qso);
-            }
-        }
-
-        return qsos;
     }
 }

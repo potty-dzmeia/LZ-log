@@ -41,7 +41,7 @@ public class KeyerFactory
       case RTS:
         return new DtrRtsKeyer(serialPort, DtrRtsKeyer.CONTROL_PIN.RTS);
       case WINKEYER:
-        return new WinKeyer2(serialPort);
+        return new WinKeyer(serialPort);
       default:
         throw new Exception("Unknown Keyer type: "+type.toString());
     }

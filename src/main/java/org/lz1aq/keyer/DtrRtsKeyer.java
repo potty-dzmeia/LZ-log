@@ -31,9 +31,6 @@ package org.lz1aq.keyer;
 // $t: (to) other station's callsign
 // $?: whatever's in the main entry field (presumably a partial callsign) followed by "?"
 // NB:  The property "keyer.cw.useCutZerosInQTCs" is actually consumed by QTCLine
-
-
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -43,395 +40,325 @@ import jssc.SerialPortException;
 import org.lz1aq.ptt.Ptt;
 import org.lz1aq.utils.MorseCode;
 
-
 /**
  * Class for transmitting Morse code over the serial port DTR or RTS pins
+ *
  * @author potty
  */
-public class DtrRtsKeyer implements Keyer 
-{  
-  /** One of the two ways generating CW - through the DRT or the RTS pin*/
-  public static enum CONTROL_PIN{DTR, RTS};
-  
-  private final String serialPortName;
-  private boolean isSharingCommPort; // If the keyer must use an already open com port (sharing a com port is useful when people have the same cable for controlling the radio and the keyer)
-  private SerialPort   serialPort = null;
-  private CONTROL_PIN  control_pin = CONTROL_PIN.DTR;
-  private Ptt ptt = null;
-  
-  private static final int QUEUE_SIZE = 30;   // Max number of texts that queueWithTexts can hold
-  private final BlockingQueue<String>  queueWithTexts = new LinkedBlockingQueue<>(QUEUE_SIZE); 
-  private Thread threadKeyer = new Thread(new TransmitThread(), "Keyer thread");  // Thread responsible for transmitting the messages 
-  
-  private static final double dashDotRatio = 3.0;
-  private static final double markSpaceRatio = 1.0;
-  private static final double charSpaceRatio = 3.0;
-  private static final double wordSpaceRatio = 9.0;
-  private double dotTime = 0.05; // Determines the speed with which CW will be send (dottime is in seconds)
-  private long dotMillis = (long) (dotTime * 1000);
-  private long dashMillis = (long) (dotTime * dashDotRatio * 1000);
-  private long markSpaceMillis = (long) (dotTime * markSpaceRatio * 1000);
-  private long charSpaceMillis = (long) (dotTime * charSpaceRatio * 1000);
-  private long wordSpaceMillis = (long) (dotTime * wordSpaceRatio * 1000);
+public class DtrRtsKeyer implements Keyer
+{
 
-  private static final Logger logger = Logger.getLogger(DtrRtsKeyer.class.getName());
-
-  
-  /**
-   * Connect to the keyer by opening a new com port
-   * @param portName
-   * @param pin 
-   */
-  public DtrRtsKeyer(String portName, CONTROL_PIN pin) 
-  {
-    this.serialPortName = portName;
-    this.control_pin = pin;
-    this.isSharingCommPort = false;
-  }
-  
-  /**
-   * Connect to the Keyer by using an already open com port
-   * @param serialPort
-   * @param pin 
-   * @throws java.lang.Exception 
-   */
-  public DtrRtsKeyer(SerialPort serialPort, CONTROL_PIN pin) throws Exception 
-  {
-    if(serialPort==null || !serialPort.isOpened())
-    {
-      throw new Exception("Keyer trying to share use Commport" + serialPort.getPortName() + ", but it is still not open.");
-    }
-    
-    this.serialPort     = serialPort;
-    this.serialPortName = serialPort.getPortName();
-    isSharingCommPort   = true;
-    control_pin         = pin;
-    
-    
-  }
-
-  
-  @Override
-  public void init() throws Exception
-  {
-    
-    if(threadKeyer.getState() != Thread.State.NEW)
-    {
-      throw new Exception("For some reason the DTR thread is already running.");
-    }
-
-    // Open new com port (not shared with the radio)
-    if(isSharingCommPort == false)
-    {
-      serialPort = new SerialPort(serialPortName);
-      try
-      {
-        serialPort.openPort();
-      }
-      catch(SerialPortException ex)
-      {
-        serialPort = null;
-        throw new Exception("Couldn't open com port: "+serialPortName);
-      }
-    
-
-      try
-      {
-        // key up
-        setControlPin(false);
-      }
-      catch(SerialPortException ex)
-      {
-        try
-        {
-          serialPort.closePort();
-        }
-        catch(SerialPortException ex1)
-        {
-          logger.log(Level.SEVERE, null, ex1);
-        }
-        serialPort = null;
-        throw new Exception("Couldn't manipulate the DTR for comm port: "+serialPortName);
-      }
-    }
-    // Shared com port
-    else
-    {
-      try
-      {
-        // key up
-        setControlPin(false);
-      }
-      catch(SerialPortException ex)
-      {
-        throw new Exception("Couldn't manipulate the DTR for comm port: "+serialPortName);
-      }
-      
-    }
-  }
-  
-  
-  /**
-   * Disconnect the keyer from the comport and also kill the threadKeyer responsible for sending CW
-   */
-  @Override
-  public void terminate()
-  {
-    // Close the port if not shared
-    if(isSharingCommPort == false)
-    {
-      threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
-      while(threadKeyer.isAlive()); // wait till the threadKeyer is closed
-
-      try
-      {
-        serialPort.closePort();
-      }
-      catch(SerialPortException ex)
-      {
-        logger.log(Level.SEVERE, null, ex);
-      }
-      serialPort = null;
-    }
-    // Com port is shared - do not close com port
-    else
-    {
-      threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
-      while(threadKeyer.isAlive()); // wait till the threadKeyer is closed   
-    }
-  }
- 
-  
-  @Override
-  public void usePtt(Ptt ptt)
-  {
-    this.ptt = ptt;
-  }
-  
-  
-  /**
-   * Adds message to be send to the local queue
-   * @param text 
-   */
-  @Override
-  public void sendCw(String text)
-  {  
-    if(queueWithTexts.offer(text)== false)
-    {
-      logger.warning("Max queue sized reached!");
-      return;
-    }
-    
-    if(threadKeyer.getState() == Thread.State.NEW)
-    {
-      threadKeyer.start();
-    }
-    else if(threadKeyer.getState() == Thread.State.TERMINATED)
-    {
-      threadKeyer = new Thread(new TransmitThread(), "DTR thread");
-      threadKeyer.start();
-    }
-  }
-  
-  
-  /**
-   * Interrupt CW sending
-   */
-  @Override
-  public void stopSendingCw()
-  {
-    if(threadKeyer == null)
-    {
-      return;
-    }
-    
-    queueWithTexts.clear();
-    if(threadKeyer.isAlive())
-    {
-      threadKeyer.interrupt();
-    }
-  }
-  
-  
-  /**
-   *  Set WPM Speed
-   * @param wpm  in the range of 5-99 WPM
-   */
-  @Override
-  public void setCwSpeed(int wpm)
-  {
-    if(wpm<10 && wpm>60)
-      return;
-    
-    // Speed (wpm) is 2.4/dottime (per formula in handbook, located by n2mg and other ycccers;
-    // dottime in seconds).  This formula includes both
-    // the dot and the following space, so the actual dot time is half this value.
-    // Note that this is *independent* of other factors, like the various ratios.
-    dotTime = 1.2 / (double) wpm;
-    dotMillis = (long) (dotTime * 1000);
-    dashMillis = (long) (dotTime * dashDotRatio * 1000);
-    markSpaceMillis = (long) (dotTime * markSpaceRatio * 1000);
-    charSpaceMillis = (long) (dotTime * charSpaceRatio * 1000);
-    wordSpaceMillis = (long) (dotTime * wordSpaceRatio * 1000);
-  }
-  
-  
-  /**
-   * Set the control pin (DTR or RTS)
-   * @param state
-   * @throws SerialPortException 
-   */
-  private void setControlPin(boolean state) throws SerialPortException
-  {
-    if(control_pin == CONTROL_PIN.DTR)
-    {
-      serialPort.setDTR(state);
-    }
-    else
-    {
-      serialPort.setRTS(state);
-    }
-  }
-  
-  
-  private class TransmitThread extends Thread 
-  {
-    @Override
-    public void run() 
-    {  
-      this.setPriority(Thread.MAX_PRIORITY -1); // highest prio needed so that the CW is not choppy
-      
-      while(true)
-      { 
-        try
-        {
-          try
-          {
-            transmitText(queueWithTexts.take()); // Send it over the serial
-          }
-          catch(InterruptedException ex)
-          {
-            logger.info("CW transmit interrupted.");
-            try
-            {
-              setControlPin(false); // key up
-            }catch(SerialPortException exx)
-            {
-              logger.log(Level.SEVERE, "Error while trying to manipulate the com port");
-              break;
-            } 
-            break;
-          }
-        }catch(SerialPortException ex)
-        {
-          logger.log(Level.SEVERE, "Error while trying to manipulate the com port");
-        }
-      }
-      
-      if(ptt!=null)
-        ptt.off(); 
-    }
-  
-    
     /**
-     * Sends the text over the serial
-     * @param text  Message to be send
-     * @throws InterruptedException 
-     * @throws SerialPortException 
+     * One of the two ways generating CW - through the DRT or the RTS pin
      */
-    private void transmitText(String text) throws InterruptedException, SerialPortException
+    public static enum CONTROL_PIN
     {
-      if(ptt!=null)
-        ptt.on();
-      
-      // 'all but the last' logic preserves the ratios between the different spaces by avoiding playing two spaces in a row.
-      for(int i = 0; i < text.length(); i++)
-      {
-        Character c = text.charAt(i);
-        if(c.equals(' '))
+        DTR, RTS
+    };
+
+    private SerialPort serialPort = null;
+    private CONTROL_PIN control_pin = CONTROL_PIN.DTR;
+    private Ptt ptt = null;
+
+    private static final int QUEUE_SIZE = 30;   // Max number of texts that queueWithTexts can hold
+    private final BlockingQueue<String> queueWithTexts = new LinkedBlockingQueue<>(QUEUE_SIZE);
+    private Thread threadKeyer = new Thread(new TransmitThread(), "Keyer thread");  // Thread responsible for transmitting the messages 
+
+    private static final double DASH_DOT_RATIO = 3.0;
+    private static final double MARK_SPACE_RATIO = 1.0;
+    private static final double CHAR_SPACE_RATIO = 3.0;
+    private static final double WORD_SPACE_RATIO = 9.0;
+    private double dotTime = 0.05; // Determines the speed with which CW will be send (dottime is in seconds)
+    private long dotMillis = (long) (dotTime * 1000);
+    private long dashMillis = (long) (dotTime * DASH_DOT_RATIO * 1000);
+    private long markSpaceMillis = (long) (dotTime * MARK_SPACE_RATIO * 1000);
+    private long charSpaceMillis = (long) (dotTime * CHAR_SPACE_RATIO * 1000);
+    private long wordSpaceMillis = (long) (dotTime * WORD_SPACE_RATIO * 1000);
+
+    private static final Logger LOGGER = Logger.getLogger(DtrRtsKeyer.class.getName());
+
+    /**
+     * Connect to the Keyer by using an already open com port
+     *
+     * @param serialPort
+     * @param pin
+     * @throws java.lang.Exception
+     */
+    public DtrRtsKeyer(SerialPort serialPort, CONTROL_PIN pin) throws Exception
+    {
+        if (serialPort == null)
         {
-          playWordSpace();
+            throw new Exception("Null serialPort passed");
         }
-        else
+        if (!serialPort.isOpened())
         {
-          String dotsndashes = MorseCode.getCode(c); // c must be an Object to be a hashkey
-          if(dotsndashes == null) 
-          {
-            if(ptt!=null)
-              ptt.off();
-            return; // not a valid character - stop transmitting
-          } 
-          
-          for(int j = 0; j < dotsndashes.length(); j++)
-          {
-            char ch = dotsndashes.charAt(j);
-            if(ch == MorseCode.DOT)
-            {
-              playDot();
-            }
-            if(ch == MorseCode.DASH)
-            {
-              playDash();
-            }
-            if(!(j == dotsndashes.length() - 1))
-            {
-              playMarkSpace(); // all but the last mark
-            }
-          }
-          if((i + 1 < text.length()) && text.charAt(i + 1) != ' ')
-          {
-            playCharSpace();  // lookahead for word space
-          }
+            throw new Exception("CommPort" + serialPort.getPortName() + " is not open!");
         }
-      }
-      
-      if(ptt!=null)
-        ptt.off();
-    }
-    
-    
-    // port != null only useful for testing w/o a real port.  Normally, shouldn't
-    // even get here.
-    private void playDot() throws SerialPortException, InterruptedException 
-    {
-      setControlPin(true);
-      sleep(dotMillis);  
-      setControlPin(false);
-    }
-    
 
-    private void playDash() throws SerialPortException, InterruptedException
-    {
-      setControlPin(true);
-      sleep(dashMillis);  
-      setControlPin(false);
-    }
-    
-
-    private void playMarkSpace() throws InterruptedException
-    {
-      sleep(markSpaceMillis); 
+        this.serialPort = serialPort;
+        control_pin = pin;
     }
 
-    
-    private void playCharSpace() throws InterruptedException
-    {   
-      sleep(charSpaceMillis);
-    }
-    
-
-    private void playWordSpace() throws InterruptedException
+    @Override
+    public void init() throws Exception
     {
-      sleep(wordSpaceMillis);
+
+        if (threadKeyer.getState() != Thread.State.NEW)
+        {
+            throw new Exception("For some reason the DTR thread is already running.");
+        }
+
+        try
+        {
+            // key up
+            setControlPin(false);
+        } catch (SerialPortException ex)
+        {
+            throw new Exception("Couldn't manipulate the CW Pin for comm port: " + serialPort.getPortName());
+        }
+
     }
-  }
-  
-  
-  @Override
-  public SerialPort getCommport()
-  {
-    return serialPort;
-  }
-  
+
+    /**
+     * Disconnect the keyer from the comport and also kill the threadKeyer
+     * responsible for sending CW
+     */
+    @Override
+    public void terminate()
+    {
+        threadKeyer.interrupt();      // Stop the threadKeyer that is actually sending the morse
+        while (threadKeyer.isAlive()) // wait till the threadKeyer is closed   
+        {}
+    }
+
+    @Override
+    public void usePtt(Ptt ptt)
+    {
+        this.ptt = ptt;
+    }
+
+    /**
+     * Adds message to be send to the local queue
+     *
+     * @param text
+     */
+    @Override
+    public void sendCw(String text)
+    {
+        if (queueWithTexts.offer(text) == false)
+        {
+            LOGGER.warning("Max queue sized reached!");
+            return;
+        }
+
+        if (threadKeyer.getState() == Thread.State.NEW)
+        {
+            threadKeyer.start();
+        } else if (threadKeyer.getState() == Thread.State.TERMINATED)
+        {
+            threadKeyer = new Thread(new TransmitThread(), "DTR thread");
+            threadKeyer.start();
+        }
+    }
+
+    /**
+     * Interrupt CW sending
+     */
+    @Override
+    public void stopSendingCw()
+    {
+        if (threadKeyer == null)
+        {
+            return;
+        }
+
+        queueWithTexts.clear();
+        if (threadKeyer.isAlive())
+        {
+            threadKeyer.interrupt();
+        }
+    }
+
+    /**
+     * Set WPM Speed
+     *
+     * @param wpm in the range of 5-99 WPM
+     */
+    @Override
+    public void setCwSpeed(int wpm)
+    {
+        if (wpm < 10 && wpm > 60)
+        {
+            return;
+        }
+
+        // Speed (wpm) is 2.4/dottime (per formula in handbook, located by n2mg and other ycccers;
+        // dottime in seconds).  This formula includes both
+        // the dot and the following space, so the actual dot time is half this value.
+        // Note that this is *independent* of other factors, like the various ratios.
+        dotTime = 1.2 / (double) wpm;
+        dotMillis = (long) (dotTime * 1000);
+        dashMillis = (long) (dotTime * DASH_DOT_RATIO * 1000);
+        markSpaceMillis = (long) (dotTime * MARK_SPACE_RATIO * 1000);
+        charSpaceMillis = (long) (dotTime * CHAR_SPACE_RATIO * 1000);
+        wordSpaceMillis = (long) (dotTime * WORD_SPACE_RATIO * 1000);
+    }
+
+    /**
+     * Set the control pin (DTR or RTS)
+     *
+     * @param state
+     * @throws SerialPortException
+     */
+    private void setControlPin(boolean state) throws SerialPortException
+    {
+        if (control_pin == CONTROL_PIN.DTR)
+        {
+            serialPort.setDTR(state);
+        } else
+        {
+            serialPort.setRTS(state);
+        }
+    }
+
+    private class TransmitThread extends Thread
+    {
+
+        @Override
+        public void run()
+        {
+            this.setPriority(Thread.MAX_PRIORITY - 1); // highest prio needed so that the CW is not choppy
+
+            while (true)
+            {
+                try
+                {
+                    try
+                    {
+                        transmitText(queueWithTexts.take()); // Send it over the serial
+                    } catch (InterruptedException ex)
+                    {
+                        LOGGER.info("CW transmit interrupted.");
+                        try
+                        {
+                            setControlPin(false); // key up
+                        } catch (SerialPortException exx)
+                        {
+                            LOGGER.log(Level.SEVERE, "Error while trying to manipulate the com port");
+                            break;
+                        }
+                        break;
+                    }
+                } catch (SerialPortException ex)
+                {
+                    LOGGER.log(Level.SEVERE, "Error while trying to manipulate the com port");
+                }
+            }
+
+            if (ptt != null)
+            {
+                ptt.off();
+            }
+        }
+
+        /**
+         * Sends the text over the serial
+         *
+         * @param text Message to be send
+         * @throws InterruptedException
+         * @throws SerialPortException
+         */
+        private void transmitText(String text) throws InterruptedException, SerialPortException
+        {
+            if (ptt != null)
+            {
+                ptt.on();
+            }
+
+            // 'all but the last' logic preserves the ratios between the different spaces by avoiding playing two spaces in a row.
+            for (int i = 0; i < text.length(); i++)
+            {
+                Character c = text.charAt(i);
+                if (c.equals(' '))
+                {
+                    playWordSpace();
+                } else
+                {
+                    String dotsndashes = MorseCode.getCode(c); // c must be an Object to be a hashkey
+                    if (dotsndashes == null)
+                    {
+                        if (ptt != null)
+                        {
+                            ptt.off();
+                        }
+                        return; // not a valid character - stop transmitting
+                    }
+
+                    for (int j = 0; j < dotsndashes.length(); j++)
+                    {
+                        char ch = dotsndashes.charAt(j);
+                        if (ch == MorseCode.DOT)
+                        {
+                            playDot();
+                        }
+                        if (ch == MorseCode.DASH)
+                        {
+                            playDash();
+                        }
+                        if (!(j == dotsndashes.length() - 1))
+                        {
+                            playMarkSpace(); // all but the last mark
+                        }
+                    }
+                    if ((i + 1 < text.length()) && text.charAt(i + 1) != ' ')
+                    {
+                        playCharSpace();  // lookahead for word space
+                    }
+                }
+            }
+
+            if (ptt != null)
+            {
+                ptt.off();
+            }
+        }
+
+        // port != null only useful for testing w/o a real port.  Normally, shouldn't
+        // even get here.
+        private void playDot() throws SerialPortException, InterruptedException
+        {
+            setControlPin(true);
+            sleep(dotMillis);
+            setControlPin(false);
+        }
+
+        private void playDash() throws SerialPortException, InterruptedException
+        {
+            setControlPin(true);
+            sleep(dashMillis);
+            setControlPin(false);
+        }
+
+        private void playMarkSpace() throws InterruptedException
+        {
+            sleep(markSpaceMillis);
+        }
+
+        private void playCharSpace() throws InterruptedException
+        {
+            sleep(charSpaceMillis);
+        }
+
+        private void playWordSpace() throws InterruptedException
+        {
+            sleep(wordSpaceMillis);
+        }
+    }
+
+    @Override
+    public SerialPort getCommport()
+    {
+        return serialPort;
+    }
+
 }
-

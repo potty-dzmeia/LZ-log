@@ -19,6 +19,7 @@
 // ***************************************************************************
 package org.lz1aq.keyer;
 
+import java.io.File;
 import jssc.SerialPort;
 import org.lz1aq.ptt.Ptt;
 
@@ -61,5 +62,5 @@ public interface Keyer
    */
   public void setCwSpeed(int wpm);
   
-  public SerialPort getCommport();
+  public SerialPort getCommport();  
 }

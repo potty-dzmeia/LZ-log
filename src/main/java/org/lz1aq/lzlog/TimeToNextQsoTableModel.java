@@ -42,25 +42,20 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
     private final static int NUMBER_OF_COLUMNS = 5;
     private static final Logger logger = Logger.getLogger(TimeToNextQsoTableModel.class.getName());
     
-    
-    /**
-     * Reference to the Log
-     */
     private final Log log;
-    
-    /**
-     * This will hold all the unique callsign/mode that have been worked
-     */
     private final CopyOnWriteArrayList<Qso> listTimeToNextQso;
     private final ApplicationSettings appSettings;
+    private final TimeToNextQsoTableModel.LocalLogListener logListener;
 
+    
     public TimeToNextQsoTableModel(Log log, ApplicationSettings appsettings)
     {
         this.log = log;
         this.appSettings = appsettings;
 
         listTimeToNextQso = new CopyOnWriteArrayList<>();
-        this.log.addEventListener(new TimeToNextQsoTableModel.LocalLogListener());
+        logListener = new TimeToNextQsoTableModel.LocalLogListener();
+        this.log.addEventListener(logListener);
     }
 
     @Override
@@ -174,6 +169,12 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
         }
         this.fireTableDataChanged();
     }
+    
+    
+    public synchronized void init()
+    {
+        logListener.eventInit();
+    }
 
     
     /**
@@ -199,18 +200,23 @@ public class TimeToNextQsoTableModel extends AbstractTableModel
      */
     private void sort()
     {
-        Collections.sort(listTimeToNextQso, new Comparator<Qso>() {
-        @Override
-        public int compare(Qso qso1, Qso qso2)
+        Collections.sort(listTimeToNextQso, new Comparator<Qso>()
         {
-            if(qso1.getElapsedSeconds() > qso2.getElapsedSeconds())
-                return -1;
-            else if(qso1.getElapsedSeconds() == qso2.getElapsedSeconds())
-                return 0;
-            else
-                return 1;
-        }
-    });
+            @Override
+            public int compare(Qso qso1, Qso qso2)
+            {
+                if (qso1.getElapsedSeconds() > qso2.getElapsedSeconds())
+                {
+                    return -1;
+                } else if (qso1.getElapsedSeconds() == qso2.getElapsedSeconds())
+                {
+                    return 0;
+                } else
+                {
+                    return 1;
+                }
+            }
+        });
     }
     
     

@@ -41,9 +41,6 @@ import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -86,7 +83,7 @@ import org.lz1aq.utils.TimeUtils;
  */
 public class MainWindow extends javax.swing.JFrame
 {
-  static final String PROGRAM_VERSION = "1.8";
+  static final String PROGRAM_VERSION = "1.9";
   static final String PROGRAM_NAME    = "LZ-Log";
   static final String PROGRAM_ABOUT   = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
           
@@ -127,7 +124,7 @@ public class MainWindow extends javax.swing.JFrame
     public void actionPerformed(ActionEvent evt)
     {
       jtablemodelIncomingQso.refresh();
-      jtablemodelBandmap.refresh(settings, getBandmapStartFreq());
+      jtablemodelBandmap.refresh(getBandmapStartFreq());
     }
   };
 
@@ -1442,8 +1439,8 @@ public class MainWindow extends javax.swing.JFrame
         jPanel8.add(jcomboboxRowCount, gridBagConstraints);
 
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel13.setText("Step:");
-        jLabel13.setToolTipText("Step in Hz");
+        jLabel13.setText("Step [Hz]:");
+        jLabel13.setToolTipText("Resolution in Hz");
         jLabel13.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -1560,7 +1557,7 @@ public class MainWindow extends javax.swing.JFrame
         intframeBandmap.getContentPane().add(jPanel8, gridBagConstraints);
 
         jDesktopPane1.add(intframeBandmap);
-        intframeBandmap.setBounds(500, 520, 488, 459);
+        intframeBandmap.setBounds(500, 520, 511, 459);
 
         intframeLog.setIconifiable(true);
         intframeLog.setResizable(true);
@@ -3064,7 +3061,7 @@ public class MainWindow extends javax.swing.JFrame
       settings.setShowBandmapFreqColumns(false);
     }
 
-    jtablemodelBandmap.refresh(settings, getBandmapStartFreq());
+    jtablemodelBandmap.refresh(getBandmapStartFreq());
   }//GEN-LAST:event_jCheckBoxShowFreqItemStateChanged
 
   private void jCheckBoxAutoBandmapStartFreqItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_jCheckBoxAutoBandmapStartFreqItemStateChanged
@@ -3579,6 +3576,9 @@ public class MainWindow extends javax.swing.JFrame
     jlabelCallsignStatus.setText("NEW");
     // Set focus to callsign field
     jtextfieldCallsign.requestFocusInWindow();
+    
+    
+    jtablemodelIncomingQso.init(); 
   }
   
   
