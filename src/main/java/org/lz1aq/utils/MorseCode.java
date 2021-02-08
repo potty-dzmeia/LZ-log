@@ -203,7 +203,7 @@ public class MorseCode
   
   static public boolean isValidCharacter(char ch)
   {
-    return morse.containsKey(new Character(ch));
+    return morse.containsKey(ch);
   }
 
   

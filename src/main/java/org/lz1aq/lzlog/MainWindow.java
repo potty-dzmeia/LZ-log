@@ -61,12 +61,12 @@ import org.lz1aq.keyer.KeyerFactory;
 import org.lz1aq.keyer.VoiceKeyer;
 import org.lz1aq.log.Log;
 import org.lz1aq.log.LogDatabase;
+import org.lz1aq.log.LogListener;
 import org.lz1aq.log.LogTableModel;
 import org.lz1aq.log.Qso;
 import org.lz1aq.ptt.DtrRtsPtt;
 import org.lz1aq.ptt.Ptt;
 import org.lz1aq.ptt.PttTypes;
-import org.lz1aq.radio.Radio;
 import org.lz1aq.utils.FontChooser;
 import org.lz1aq.utils.Misc;
 import org.lz1aq.radio.RadioModes;
@@ -83,7 +83,7 @@ import org.lz1aq.utils.TimeUtils;
 public class MainWindow extends javax.swing.JFrame
 {
 
-    static final String PROGRAM_VERSION = "1.9";
+    static final String PROGRAM_VERSION = "1.91";
     static final String PROGRAM_NAME = "LZ-Log";
     static final String PROGRAM_ABOUT = "LZ-log is a program designed for Bulgarian hamradio contests including the lzhfqrp. \nIt is written in Java+Python and the source code is available at https://github.com/potty-dzmeia/LZ-log \n\n73 de LZ1ABC/Chav";
 
@@ -115,8 +115,8 @@ public class MainWindow extends javax.swing.JFrame
     private DocumentFilter qsoRepeatPeriodFilter = new DigitsOnlyFilter();
     private DocumentFilter dontShowAfterFilter = new DigitsOnlyFilter();
 
-    private static final Logger logger = Logger.getLogger(Radio.class.getName());
-
+    private static final Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
+    
     private final ActionListener timer1secListener = new ActionListener()
     {
         @Override
@@ -158,6 +158,8 @@ public class MainWindow extends javax.swing.JFrame
 
     public MainWindow()
     {
+        LOGGER.setLevel(Level.WARNING);
+        
         determineWorkingDir();
 
         // Create directory for logs if not existing
@@ -186,9 +188,34 @@ public class MainWindow extends javax.swing.JFrame
             log = new Log(new LogDatabase(logDbFile), example);
         } catch(Exception ex)
         {
-            logger.log(Level.SEVERE, "Couldn't open the log database!", ex);
+            LOGGER.log(Level.SEVERE, "Couldn't open the log database!", ex);
         }
 
+        log.addEventListener(new LogListener()
+        {
+            @Override
+            public void eventInit()
+            {
+            }
+
+            @Override
+            public void eventQsoAdded(Qso qso)
+            { 
+            }
+
+            @Override
+            public void eventQsoRemoved(Qso qso)
+            {
+                initEntryFields(); // We need to update the Snt field in case we deleted the last contact
+            }
+
+            @Override
+            public void eventQsoModified(Qso qso)
+            {
+                initEntryFields(); // We need to update the Snt field in case we deleted the last contact
+            }
+        });
+        
         // Init TableModels
         jtablemodelLog = new LogTableModel(log);
         jtablemodelLog.setInvisible(4); // Hide myCall
@@ -2466,7 +2493,8 @@ public class MainWindow extends javax.swing.JFrame
                   {
                       jtextfieldRcv.requestFocusInWindow();
                   }
-              } else
+              }
+              else
               {
                   jtextfieldRcv.requestFocusInWindow();
               }
@@ -2491,8 +2519,8 @@ public class MainWindow extends javax.swing.JFrame
       {
           selection = jtableLog.convertRowIndexToModel(selection);
           jtablemodelLog.removeRow(selection);
-          initEntryFields(); // We need to update the Snt field in case we deleted the last contact
-      } else
+      }
+      else
       {
           JOptionPane.showMessageDialog(null, "Pease select entry!");
       }
@@ -2529,7 +2557,8 @@ public class MainWindow extends javax.swing.JFrame
           jcomboboxMode.setEnabled(false);
           jcheckboxRadioPolling.setEnabled(true);
           jtextfieldPollingTime.setEditable(true);
-      } else
+      }
+      else
       {
           jtogglebuttonConnectToRadio.setSelected(false);
           jcomboboxBand.setEnabled(true);
@@ -2705,7 +2734,8 @@ public class MainWindow extends javax.swing.JFrame
                   if(settings.isEmsEnabled() && jradiobuttonCQ.isSelected())
                   {
                       pressedF3();
-                  } else if(settings.isEmsEnabled() && jradiobuttonSP.isSelected())
+                  }
+                  else if(settings.isEmsEnabled() && jradiobuttonSP.isSelected())
                   {
                       pressedF2();
                   }
@@ -2733,7 +2763,8 @@ public class MainWindow extends javax.swing.JFrame
       if(jcheckboxF1jumpsToCq.isSelected())
       {
           jbuttonSetCqFreq.setEnabled(true);
-      } else
+      }
+      else
       {
           jbuttonSetCqFreq.setEnabled(false);
       }
@@ -2881,7 +2912,8 @@ public class MainWindow extends javax.swing.JFrame
           }
           radioController.setAutomaticInfo(false); // polling is started - we don't need the auto info from the radio
           timerRadioPolling.start();
-      } else
+      }
+      else
       {
           if(timerRadioPolling != null)
           {
@@ -2904,12 +2936,12 @@ public class MainWindow extends javax.swing.JFrame
               int freq = jtablemodelBandmap.cellToFreq(row, col);
               radioController.setFrequency(freq);
               initEntryFields();
-              logger.log(Level.INFO, "new freq set -----------");
           } catch(Exception ex)
           {
               Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
           }
-      } else
+      }
+      else
       {
           Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, "Invalid row or col");
       }
@@ -2975,7 +3007,8 @@ public class MainWindow extends javax.swing.JFrame
           }
 
           jtogglebuttonConnectToKeyer.setSelected(true);
-      } else
+      }
+      else
       {
           disconnectKeyer();
           disconnectPtt();
@@ -3008,7 +3041,8 @@ public class MainWindow extends javax.swing.JFrame
       if(checkboxSettingsQuickMode.isSelected())
       {
           textfieldSettingsDefaultPrefix.setEnabled(true);
-      } else
+      }
+      else
       {
           textfieldSettingsDefaultPrefix.setEnabled(false);
       }
@@ -3046,7 +3080,8 @@ public class MainWindow extends javax.swing.JFrame
       if(jCheckBoxShowFreq.isSelected())
       {
           settings.setShowBandmapFreqColumns(true);
-      } else
+      }
+      else
       {
           settings.setShowBandmapFreqColumns(false);
       }
@@ -3059,7 +3094,8 @@ public class MainWindow extends javax.swing.JFrame
       if(jCheckBoxAutoBandmapStartFreq.isSelected())
       {
           settings.setBandmapAutoFreq(true);
-      } else
+      }
+      else
       {
           settings.setBandmapAutoFreq(false);
       }
@@ -3169,7 +3205,8 @@ public class MainWindow extends javax.swing.JFrame
             {
                 pressedF1(); // If callsign field is empty - send CQ
                 return false; // do not move focus to Snt field
-            } else
+            }
+            else
             {
                 pressedF5(); // Send his callsign
                 pressedF2(); // and Snt serial number
@@ -3332,7 +3369,7 @@ public class MainWindow extends javax.swing.JFrame
             }
         } catch(Exception exc)
         {
-            logger.log(Level.SEVERE, "Coudln't start file chooser", exc);
+            LOGGER.log(Level.SEVERE, "Coudln't start file chooser", exc);
             return false;
         }
 
@@ -3418,7 +3455,8 @@ public class MainWindow extends javax.swing.JFrame
         if(jradiobuttonSP.isSelected())
         {
             return Qso.TYPE_OF_WORK_SP;
-        } else
+        }
+        else
         {
             return Qso.TYPE_OF_WORK_CQ;
         }
@@ -3515,20 +3553,22 @@ public class MainWindow extends javax.swing.JFrame
         if(qso == null)
         {
             statusText = "NEW";
-        } else
+        }
+        else
         {
             // DUPE
-            if(log.getSecondsLeft(qso, settings.getQsoRepeatPeriod()) > 0)
+            if(Misc.getSecondsLeft(qso.getElapsedSeconds(), settings.getQsoRepeatPeriod()) > 0)
             {
                 // Print DUPE
                 statusText = statusText.concat("DUPE   ");
 
                 //Print the time left till next possible contact
                 statusText = statusText.concat("time left "
-                        + TimeUtils.getTimeLeftFormatted(log.getSecondsLeft(qso, settings.getQsoRepeatPeriod())));
+                        + TimeUtils.getTimeLeftFormatted(Misc.getSecondsLeft(qso.getElapsedSeconds(), settings.getQsoRepeatPeriod())));
                 // Make it red
                 statusText = "<html><font color=red>" + statusText + "</font></html>";
-            } else
+            }
+            else
             {
                 statusText = "OK";
             }
@@ -3546,7 +3586,8 @@ public class MainWindow extends javax.swing.JFrame
         if(settings.isQuickCallsignModeEnabled())
         {
             jtextfieldCallsign.setText(settings.getDefaultPrefix());
-        } else
+        }
+        else
         {
             jtextfieldCallsign.setText("");
         }
@@ -3672,7 +3713,8 @@ public class MainWindow extends javax.swing.JFrame
         if(settings.isRadioCommportDtrOn())
         {
             jRadioButtonRadioDtrOn.setSelected(true);
-        } else
+        }
+        else
         {
             jRadioButtonRadioDtrOff.setSelected(true);
         }
@@ -3680,7 +3722,8 @@ public class MainWindow extends javax.swing.JFrame
         if(settings.isRadioCommportRtsOn())
         {
             jRadioButtonRadioRtsOn.setSelected(true);
-        } else
+        }
+        else
         {
             jRadioButtonRadioRtsOff.setSelected(true);
         }
@@ -3958,7 +4001,8 @@ public class MainWindow extends javax.swing.JFrame
             if(getMode() == RadioModes.CW || getMode() == RadioModes.CWR)
             {
                 period += MorseCode.getDurationOfMessage(text, keyerSpeed);
-            } else if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
+            }
+            else if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
             {
                 period += VoiceKeyer.getLengthInSeconds(new File("cq.wav"));
             }
@@ -3984,8 +4028,9 @@ public class MainWindow extends javax.swing.JFrame
             // If jtextfieldCallsign is empty we should get exchange from last QSO
             if(isCallsignFieldEmpty() && log.getSize() > 0)
             {
-                exchange = log.getLastQso().getSnt();
-            } else
+                exchange = log.get(log.getSize()-1).getSnt();
+            }
+            else
             {
                 exchange = jtextfieldSnt.getText();
             }
@@ -4121,19 +4166,24 @@ public class MainWindow extends javax.swing.JFrame
                     if(Misc.freqToBand(freq).equals("160"))
                     {
                         setBandmapStartFreq(1800000);
-                    } else if(Misc.freqToBand(freq).equals("80"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("80"))
                     {
                         setBandmapStartFreq(3500000);
-                    } else if(Misc.freqToBand(freq).equals("40"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("40"))
                     {
                         setBandmapStartFreq(7000000);
-                    } else if(Misc.freqToBand(freq).equals("20"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("20"))
                     {
                         setBandmapStartFreq(14000000);
-                    } else if(Misc.freqToBand(freq).equals("15"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("15"))
                     {
                         setBandmapStartFreq(21000000);
-                    } else if(Misc.freqToBand(freq).equals("10"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("10"))
                     {
                         setBandmapStartFreq(28000000);
                     }
@@ -4144,19 +4194,24 @@ public class MainWindow extends javax.swing.JFrame
                     if(Misc.freqToBand(freq).equals("160"))
                     {
                         setBandmapStartFreq(1800000);
-                    } else if(Misc.freqToBand(freq).equals("80"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("80"))
                     {
-                        setBandmapStartFreq(3600000);
-                    } else if(Misc.freqToBand(freq).equals("40"))
+                        setBandmapStartFreq(3700000);
+                    }
+                    else if(Misc.freqToBand(freq).equals("40"))
                     {
                         setBandmapStartFreq(7060000);
-                    } else if(Misc.freqToBand(freq).equals("20"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("20"))
                     {
                         setBandmapStartFreq(14100000);
-                    } else if(Misc.freqToBand(freq).equals("15"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("15"))
                     {
                         setBandmapStartFreq(21150000);
-                    } else if(Misc.freqToBand(freq).equals("10"))
+                    }
+                    else if(Misc.freqToBand(freq).equals("10"))
                     {
                         setBandmapStartFreq(28400000);
                     }
@@ -4383,7 +4438,8 @@ public class MainWindow extends javax.swing.JFrame
                         cqFrequency = getFreq();
                         jlabelCqFreq.setText(Misc.formatFrequency(Integer.toString(cqFrequency)));
                         evt.consume();
-                    } else
+                    }
+                    else
                     {
                         pressedF1();
                         evt.consume();
@@ -4504,7 +4560,8 @@ public class MainWindow extends javax.swing.JFrame
             if(jtablemodelIncomingQso.containsExpiredCallsign(row, column))
             {
                 setForeground(Color.BLUE);
-            } else
+            }
+            else
             {
                 setForeground(Color.black);
             }
@@ -4543,7 +4600,8 @@ public class MainWindow extends javax.swing.JFrame
             else if(jtablemodelBandmap.isCurrentFreqInThisCell(row, column, cqFrequency))
             {
                 setBackground(Color.GREEN);
-            } else
+            }
+            else
             {
                 setBackground(Color.white);
                 setForeground(Color.black);

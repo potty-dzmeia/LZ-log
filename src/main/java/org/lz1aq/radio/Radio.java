@@ -471,7 +471,7 @@ public class Radio
     @Override
     public void eventNotsupported(NotsupportedEvent e)
     {
-      LOGGER.log(Level.WARNING, "The following transaction couldn't be decoded: " + e.getData());
+      LOGGER.log(Level.INFO, "The following transaction couldn't be decoded: " + e.getData());
     }
   }
           
@@ -485,7 +485,7 @@ public class Radio
   {
     if(trans.length == 0)
     {
-      LOGGER.log(Level.WARNING, "I_EncodedTransaction[] is empty"); //, Misc.getStack()
+      LOGGER.log(Level.WARNING, "I_EncodedTransaction[] is empty"); 
       return;
     }
     if(!isConnected()) 

@@ -63,7 +63,7 @@ public class RadioController
   private final Keyer   keyer = new RadioKeyer();
   
   
-  private static final Logger logger = Logger.getLogger(Radio.class.getName());
+  private static final Logger logger = Logger.getLogger(RadioController.class.getName());
   
   
   /**

@@ -44,7 +44,7 @@ public class LogTableModel extends AbstractTableModel
   @Override
   public int getRowCount()
   {
-    return log.getRowCount();
+    return log.getSize();
   }
 
   @Override
@@ -81,13 +81,13 @@ public class LogTableModel extends AbstractTableModel
   public void removeRow(int i)
   {
     log.remove(i);
-    this.fireTableRowsInserted(log.getRowCount()-1, log.getRowCount()-1);
+    this.fireTableRowsInserted(log.getSize()-1, log.getSize()-1);
   }
   
   public void addRow(Qso qso)
   {
     log.add(qso);
-    this.fireTableRowsInserted(log.getRowCount()-1, log.getRowCount()-1);
+    this.fireTableRowsInserted(log.getSize()-1, log.getSize()-1);
   }
   
   /**

@@ -1,18 +1,11 @@
 High priority:
-- remove all uneeded functions from Log class
-- Make sure that editing the log wont break TimeToNextQso functionality
-- 
+- Add ability to set bandmap start freq for different modes and bands (e.g. 3.700 instead of 3.600)
 - freq columns in bandmap are not resized when we remove the frequency option
-
 - Check the install directory and open warning pop-up informing the user what directories are allowed.
 - send CW morse code character by character ( this will allow to edit the callsign while sending is in progress)
 - Add all the SerialPort settings inside the Java app
-- Add ability to set bandmap start freq for different modes and bands (e.g. 3.700 instead of 3.600)
-- Remember the CQ frequency mode.
 - Update help (in Bulgarian?)
-- last S&P qso per band and mode should be visible on the bandmap
 - add validation for the Log Window (now is possible to add invalid data); when correcting callsign in the log the call is written with small letters (similar for mode which causes exception)
-- there should be an option for entering worked frequency for people that do not use CAT
 - show qso rate
 - show hints when hovering over controls
 - all user settings and preferences should be saved - quitting the program (crash) should not delete the bandmap and all the other important settings
@@ -22,18 +15,14 @@ High priority:
 - bandmap - add reset button
 - input filter for the F messages
 - bandmap - when hovering over the cell it should show the current freq
-
-
-Low priority:
 - delete callsign when moving away from freq and enter into bandmap
-- enter frequency in callsign
-- note za wsqka vruzka 
 - remember the size of the columns in the tables
-- alt+k = 
-- first part of sent serial number is not updated (e.g. when changing the serial number from the table)
-- the keys for adding spot and deleting a field should not be so close (i.e. f11 and f12)
 
-Solved:
+
+Recently Solved:
+- implemented VoiceKeyer. If there is a "cq.wav" in the main dir of the program. The file will be played and PTT manipulated when F1 is pressed while on LSB or USB. 
+- second part of sent serial number is not updated (e.g. when changing the RCV serial number from the table)
+- last S&P qso per band and mode should be visible on the bandmap
+- Bandmap start moved from 3.6MHz to 3.7MHz
 - Mix mode (SSB and CW) is now supported. The 30min rule is now applied per callsign and mode (not like before only for callsign regardless of the mode).
 - In settings the repeat period of the contest is now in Minutes and not in Seconds.
-- 

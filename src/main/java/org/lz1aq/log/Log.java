@@ -22,6 +22,7 @@ package org.lz1aq.log;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.lz1aq.radio.RadioModes;
+import org.lz1aq.utils.Misc;
 
 /**
  * This class is a container for Qso objects.
@@ -36,7 +37,7 @@ public class Log
 
     private final LogDatabase db;         // Interface to a db4o database, stand-alone or client/server. 
     private final ArrayList<Qso> qsoList; // Log is also mirrored in RAM
-    private final Qso exampleQso;
+    private final Qso templateQso;
 
     private final CopyOnWriteArrayList<LogListener> logListeners;
 
@@ -44,15 +45,14 @@ public class Log
      *
      *
      * @param db interface to an already opened database
-     * @param exampleQso - here we must input an example Qso from which the log
-     * will determine the column count and their names.
+     * @param template
      */
-    public Log(LogDatabase db, Qso exampleQso)
+    public Log(LogDatabase db, Qso template)
     {
         this.db = db;
         qsoList = new ArrayList<>(db.getAll()); // Load Qsos from the database
 
-        this.exampleQso = exampleQso;
+        this.templateQso = template;
 
         logListeners = new CopyOnWriteArrayList<>();
     }
@@ -136,16 +136,7 @@ public class Log
         return qsoList.get(index);
     }
 
-    /**
-     * Row count is equivalent to the count of QSO object contained in the Log.
-     *
-     * @return Returns the amount of QSO objects contained in the Log.
-     */
-    public synchronized int getRowCount()
-    {
-        return qsoList.size();
-    }
-
+  
     public synchronized int getSize()
     {
         return qsoList.size();
@@ -165,7 +156,7 @@ public class Log
      */
     public synchronized int getColumnCount()
     {
-        return exampleQso.getParamsCount();
+        return templateQso.getParamsCount();
     }
 
     /**
@@ -177,7 +168,7 @@ public class Log
      */
     public synchronized String getColumnName(int col)
     {
-        return exampleQso.getParamName(col);
+        return templateQso.getParamName(col);
     }
 
     /**
@@ -234,34 +225,7 @@ public class Log
         return qsoList.size();
     }
 
-    /**
-     * Returns the serial number that we must send for the next Qso
-     *
-     * @return string of the type 010 020. First part is the serial number of
-     * the Qso. Second part is the first three figures of received report during
-     * previous Qso. Report for the first Qso is 001 000.
-     */
-    public synchronized String getNextSentReport()
-    {
-        // If the log is empty send "001000"
-        if (getRowCount() == 0)
-        {
-            return "001000";
-        }
-        // Else send serial number + first three digits of received report during previous Qso
-
-        Qso qso = qsoList.get(qsoList.size() - 1);
-
-        String part1 = qso.getSnt().substring(0, 3);
-        int mySerial = Integer.parseInt(part1);
-        mySerial += 1;
-        part1 = String.format("%03d", mySerial);
-
-        String part2 = qso.getRcv().substring(0, 3);
-        return part1 + part2;
-
-    }
-
+  
     /**
      * Will return the first word in Rcv from the last QSO. If there are no QSOs
      * in the log it will return "000".
@@ -271,7 +235,7 @@ public class Log
     public synchronized String getFirstPartOfLastRcv()
     {
         // If the log is empty send "000"
-        if (getRowCount() == 0)
+        if (getSize() == 0)
         {
             return "000";
         }
@@ -318,54 +282,7 @@ public class Log
 
         return null;
     }
-     
-
-    public synchronized Qso getLastQso()
-    {
-        if (qsoList.isEmpty())
-        {
-            return null;
-        }
-        return qsoList.get(qsoList.size() - 1);
-    }
-
-
-    /**
-     * Returns time left till the next possible contact
-     *
-     * @param qso
-     * @param allowedQsoRepeatPeriod - the repeat period for another qso with
-     * the same station
-     * @return
-     */
-    public synchronized long getSecondsLeft(Qso qso, int allowedQsoRepeatPeriod)
-    {
-        return allowedQsoRepeatPeriod*60 - qso.getElapsedSeconds();
-    }
-
-    /**
-     * Checks if it is OK to work the station
-     *
-     * @param callsign
-     * @param allowedQsoRepeatPeriod - the repeat period for another QSO with
-     * the same station (in min)
-     * @return true if the required time has not elapsed
-     */
-//    public boolean isDupe(String callsign, int allowedQsoRepeatPeriod)
-//    {
-//        Qso qso = getLastQso(callsign);
-//
-//        // If there is no previous contact with this station
-//        if (qso == null)
-//        {
-//            return false;
-//        }
-//
-//        //Prvious contact was found...
-//        long secondsLeft = getSecondsLeft(qso, allowedQsoRepeatPeriod*60);
-//
-//        return secondsLeft > 0;
-//    }
+    
 
     /**
      * Checks if it is OK to work the station
@@ -387,28 +304,8 @@ public class Log
         }
 
         //Previous contact was found...
-        long secondsLeft = getSecondsLeft(qso, allowedQsoRepeatPeriod);
+        long secondsLeft = Misc.getSecondsLeft(qso.getElapsedSeconds(), allowedQsoRepeatPeriod);
 
         return secondsLeft > 0;
-    }
-
-    /**
-     * Returns a list of all unique callsigns in the log
-     *
-     * @return - array of callsign strings
-     */
-    public synchronized ArrayList<String> getUniqueCallsigns()
-    {
-        ArrayList<String> list = new ArrayList<>(0);
-
-        for (Qso qso : qsoList)
-        {
-            if (!list.contains(qso.getHisCallsign()))
-            {
-                list.add(qso.getHisCallsign());
-            }
-        }
-
-        return list;
     }
 }

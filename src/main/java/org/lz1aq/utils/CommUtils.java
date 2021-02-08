@@ -19,8 +19,6 @@
 // ***************************************************************************
 package org.lz1aq.utils;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import jssc.SerialPort;
 import jssc.SerialPortException;

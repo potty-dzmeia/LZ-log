@@ -72,6 +72,8 @@ public final class ApplicationSettings
     
   public static final int FUNCTION_KEYS_COUNT = 12; // The number of function keys
   
+  private static final Logger LOGGER = Logger.getLogger(ApplicationSettings.class.getName());
+  
   public enum FrameIndex
   {
     JFRAME(0),        
@@ -142,6 +144,8 @@ public final class ApplicationSettings
    */
   public ApplicationSettings()
   {
+    LOGGER.setLevel(Level.WARNING);
+      
     this.prop = new Properties();
     framesDimensions  = new Rectangle[FrameIndex.values().length];
     fonts             = new Font[FontIndex.values().length];
@@ -632,7 +636,7 @@ public final class ApplicationSettings
     }
     catch (IOException ex)
     {
-      Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, ex);
+      LOGGER.log(Level.SEVERE, null, ex);
       System.exit(0);
     }
   }
@@ -829,7 +833,7 @@ public final class ApplicationSettings
     }
     catch (Exception ex)
     {
-      Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, ex);
+      LOGGER.log(Level.INFO, null, ex);
       SetAllSettingsToDefault();
     }
 
@@ -1023,7 +1027,7 @@ public final class ApplicationSettings
         break;
         
       default:
-        Logger.getLogger(ApplicationSettings.class.getName()).log(Level.SEVERE, null, "Property has no default settings");
+        LOGGER.log(Level.SEVERE, null, "Property has no default settings");
         break;
     }
   }
