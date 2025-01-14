@@ -10,3 +10,4 @@
 *.db4o
 settings.properties
 nbactions.xml
+/nbproject/

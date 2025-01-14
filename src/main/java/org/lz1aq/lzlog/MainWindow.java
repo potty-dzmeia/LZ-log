@@ -3981,7 +3981,7 @@ public class MainWindow extends javax.swing.JFrame
         text = text.replaceAll("\\{mycall\\}", settings.getMyCallsign()); // Substitute {mycall} with my callsign
         text = text + " ";
         sendCw(text); // Send to keyer
-        playCqWav();
+        playVoiceKeyer(VoiceKeyer.Keys.F1);
 
         // Select the CQ radio button
         jradiobuttonCQ.setSelected(true);
@@ -4004,7 +4004,7 @@ public class MainWindow extends javax.swing.JFrame
             }
             else if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
             {
-                period += VoiceKeyer.getLengthInSeconds(new File("cq.wav"));
+                period += VoiceKeyer.getF1LengthInSeconds();
             }
 
             if(timerContinuousCq.isRunning())
@@ -4056,11 +4056,13 @@ public class MainWindow extends javax.swing.JFrame
     private void pressedF3()
     {
         sendCw(settings.getFunctionKeyMessage(2) + " ");
+        playVoiceKeyer(VoiceKeyer.Keys.F3);
     }
 
     private void pressedF4()
     {
         sendCw(settings.getMyCallsign() + " ");
+        playVoiceKeyer(VoiceKeyer.Keys.F4);
     }
 
     private void pressedF5()
@@ -4145,14 +4147,15 @@ public class MainWindow extends javax.swing.JFrame
 
     }
 
-    void playCqWav()
+    void playVoiceKeyer(VoiceKeyer.Keys key)
     {
         if(getMode() == RadioModes.LSB || getMode() == RadioModes.USB)
         {
-            voiceKeyer.sendVoice(new File("cq.wav"));
-            jLabelStatus.setText("Playing cq.wav file.");
+            voiceKeyer.play(key);
+            jLabelStatus.setText("Playing file:"+key.getFileName());
         }
     }
+    
 
     class LocalRadioControllerListener implements RadioController.RadioControllerListener
     {

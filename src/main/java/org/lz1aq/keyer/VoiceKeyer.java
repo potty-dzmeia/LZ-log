@@ -35,36 +35,45 @@ import org.lz1aq.ptt.Ptt;
  *
  * @author Admin
  */
-public class VoiceKeyer
-{
+public class VoiceKeyer {
+
+    public static enum Keys {
+        F1("f1.wav"),
+        F3("f3.wav"),
+        F4("f4.wav");
+
+        private final String fileName;
+
+        Keys(String fileName) {
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+    };
 
     private Clip clip;
     private Ptt ptt = null;
 
     private static final Logger LOGGER = Logger.getLogger(VoiceKeyer.class.getName());
 
-    public VoiceKeyer()
-    {
-        try
-        {
+    public VoiceKeyer() {
+        try {
             clip = AudioSystem.getClip();
             clip.addLineListener(new LocalLineListener());
-        } catch (LineUnavailableException ex)
-        {
+        } catch (LineUnavailableException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
 
     }
-    
-    static public int getLengthInSeconds(File file)
-    {
+
+    static public int getF1LengthInSeconds() {
+        File file = new File("f1.wav");
         AudioInputStream audioInputStream;
-        try
-        {
+        try {
             audioInputStream = AudioSystem.getAudioInputStream(file);
-        } 
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Logger.getLogger(VoiceKeyer.class.getName()).log(Level.SEVERE, null, ex);
             return 3000;
         }
@@ -84,66 +93,53 @@ public class VoiceKeyer
      *
      * @param ptt
      */
-    public void usePtt(Ptt ptt)
-    {
+    public void usePtt(Ptt ptt) {
         this.ptt = ptt;
     }
 
-    public boolean sendVoice(File file)
-    {
-        if (clip.isOpen())
-        {
+
+    /*
+    * Supports Signed 16bit PCM (other formats not guaranteed).
+    */
+    public boolean play(VoiceKeyer.Keys key) {
+        File file = new File(key.getFileName());
+        if (clip.isOpen()) {
             // Still executing the last call - do nothing
             return false;
         }
 
-        try
-        {
+        try {
             AudioInputStream inputStream = AudioSystem.getAudioInputStream(file);
             clip.open(inputStream);
             clip.start();
             return true;
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.getMessage());
             return false;
         }
     }
 
-    public void stopVoice()
-    {
-        if (clip.isRunning())
-        {
+    public void stopVoice() {
+        if (clip.isRunning()) {
             clip.stop();
         }
     }
 
-    public class LocalLineListener implements LineListener
-    {
+    public class LocalLineListener implements LineListener {
 
         @Override
-        public void update(LineEvent event)
-        {
-            if (event.getType() == LineEvent.Type.OPEN)
-            {
-                if (ptt != null)
-                {
+        public void update(LineEvent event) {
+            if (event.getType() == LineEvent.Type.OPEN) {
+                if (ptt != null) {
                     ptt.on();
-                }
-                else
-                {
+                } else {
                     LOGGER.log(Level.WARNING, "PTT not connected.");
                 }
-                
-            } 
-            else if (event.getType() == LineEvent.Type.STOP)
-            {
-                if (ptt != null)
-                {
+
+            } else if (event.getType() == LineEvent.Type.STOP) {
+                if (ptt != null) {
                     ptt.off();
-                }
-                else
-                {
+                } else {
                     LOGGER.log(Level.WARNING, "PTT not connected.");
                 }
                 clip.close();
